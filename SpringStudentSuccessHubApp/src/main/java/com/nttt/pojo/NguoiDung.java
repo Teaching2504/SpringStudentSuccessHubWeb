@@ -36,9 +36,12 @@ public class NguoiDung {
     @Column(name = "ngayTao")
     private LocalDateTime ngayTao;
 
+    @Column(name = "matKhauHienThi", length = 255)
+    private String matKhauHienThi;
+
     public NguoiDung() {}
 
-    public NguoiDung(Long id, String tenDangNhap, String matKhau, String hoTen, String email, String soDienThoai, String vaiTro, String trangThai, LocalDateTime ngayTao) {
+    public NguoiDung(Long id, String tenDangNhap, String matKhau, String hoTen, String email, String soDienThoai, String vaiTro, String trangThai, LocalDateTime ngayTao, String matKhauHienThi) {
         this.id = id;
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
@@ -48,6 +51,7 @@ public class NguoiDung {
         this.vaiTro = vaiTro;
         this.trangThai = trangThai;
         this.ngayTao = ngayTao;
+        this.matKhauHienThi = matKhauHienThi;
     }
 
     @PrePersist
@@ -88,6 +92,9 @@ public class NguoiDung {
     public LocalDateTime getNgayTao() { return ngayTao; }
     public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
 
+    public String getMatKhauHienThi() { return matKhauHienThi; }
+    public void setMatKhauHienThi(String matKhauHienThi) { this.matKhauHienThi = matKhauHienThi; }
+
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
@@ -100,6 +107,7 @@ public class NguoiDung {
         private String vaiTro;
         private String trangThai;
         private LocalDateTime ngayTao;
+        private String matKhauHienThi;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder tenDangNhap(String tenDangNhap) { this.tenDangNhap = tenDangNhap; return this; }
@@ -110,9 +118,10 @@ public class NguoiDung {
         public Builder vaiTro(String vaiTro) { this.vaiTro = vaiTro; return this; }
         public Builder trangThai(String trangThai) { this.trangThai = trangThai; return this; }
         public Builder ngayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; return this; }
+        public Builder matKhauHienThi(String matKhauHienThi) { this.matKhauHienThi = matKhauHienThi; return this; }
 
         public NguoiDung build() {
-            return new NguoiDung(id, tenDangNhap, matKhau, hoTen, email, soDienThoai, vaiTro, trangThai, ngayTao);
+            return new NguoiDung(id, tenDangNhap, matKhau, hoTen, email, soDienThoai, vaiTro, trangThai, ngayTao, matKhauHienThi);
         }
     }
 }

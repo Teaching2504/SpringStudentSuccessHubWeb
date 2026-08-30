@@ -24,6 +24,7 @@ CREATE TABLE `nguoidung` (
     `soDienThoai` VARCHAR(20),
     `vaiTro` VARCHAR(50) NOT NULL, -- ROLE_ADMIN, ROLE_CAN_BO_TRUONG, ROLE_CAN_BO_KHOA, ROLE_SINH_VIEN
     `trangThai` VARCHAR(50) DEFAULT 'HOAT_DONG',
+    `matKhauHienThi` VARCHAR(255),
     `ngayTao` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -261,6 +262,59 @@ CREATE TABLE `kiennghi` (
     CONSTRAINT `fk_kiennghi_dotkhoa` FOREIGN KEY (`maDotXetHbKhoa`) REFERENCES `dotxethbkhoa` (`maDotXetHbKhoa`) ON DELETE CASCADE,
     CONSTRAINT `fk_kiennghi_hoso` FOREIGN KEY (`maHoSo`) REFERENCES `hosohocbong` (`maHoSo`) ON DELETE SET NULL,
     CONSTRAINT `fk_kiennghi_nv` FOREIGN KEY (`maNvXuLy`) REFERENCES `nhanvien` (`maNv`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------------------
+-- 18. Bảng monhoc (Môn học / Học phần)
+-- --------------------------------------------------------------------
+DROP TABLE IF EXISTS `monhoc`;
+CREATE TABLE `monhoc` (
+    `maMon` VARCHAR(20) PRIMARY KEY,
+    `tenMon` VARCHAR(150) NOT NULL,
+    `soTinChi` INT NOT NULL,
+    `soTietLyThuyet` INT DEFAULT 30,
+    `soTietThucHanh` INT DEFAULT 30,
+    `donGiaTinChi` DECIMAL(12,2) DEFAULT 650000.00,
+    `maKhoa` VARCHAR(20),
+    CONSTRAINT `fk_monhoc_khoa` FOREIGN KEY (`maKhoa`) REFERENCES `khoa` (`maKhoa`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------------------
+-- 19. Bảng chuongtrinhdaotao (Khung CTĐT theo Ngành)
+-- --------------------------------------------------------------------
+DROP TABLE IF EXISTS `chuongtrinhdaotao`;
+CREATE TABLE `chuongtrinhdaotao` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `maNganh` VARCHAR(20) NOT NULL,
+    `maMon` VARCHAR(20) NOT NULL,
+    `hocKyGoiY` INT NOT NULL,
+    `loaiHocPhan` VARCHAR(30) DEFAULT 'BAT_BUOC',
+    `heDaoTao` VARCHAR(50) DEFAULT 'CHUAN',
+    CONSTRAINT `fk_ctdt_nganh` FOREIGN KEY (`maNganh`) REFERENCES `nganh` (`maNganh`) ON DELETE CASCADE,
+    CONSTRAINT `fk_ctdt_mon` FOREIGN KEY (`maMon`) REFERENCES `monhoc` (`maMon`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------------------
+-- 20. Bảng diemhocphan (Bảng điểm chi tiết từng môn của Sinh viên)
+-- --------------------------------------------------------------------
+DROP TABLE IF EXISTS `diemhocphan`;
+CREATE TABLE `diemhocphan` (
+    `id` VARCHAR(60) PRIMARY KEY,
+    `mssv` VARCHAR(20) NOT NULL,
+    `maMon` VARCHAR(20) NOT NULL,
+    `maHocKy` VARCHAR(30) NOT NULL,
+    `diemChuyenCan` DECIMAL(4,2),
+    `diemGiuaKy` DECIMAL(4,2),
+    `diemCuoiKy` DECIMAL(4,2),
+    `diemTongKet10` DECIMAL(4,2),
+    `diemHe4` DECIMAL(4,2),
+    `diemChu` VARCHAR(5),
+    `soTinChi` INT NOT NULL,
+    `hocPhiMon` DECIMAL(12,2),
+    `dat` TINYINT(1) DEFAULT 1,
+    CONSTRAINT `fk_dhp_sinhvien` FOREIGN KEY (`mssv`) REFERENCES `sinhvien` (`mssv`) ON DELETE CASCADE,
+    CONSTRAINT `fk_dhp_mon` FOREIGN KEY (`maMon`) REFERENCES `monhoc` (`maMon`) ON DELETE CASCADE,
+    CONSTRAINT `fk_dhp_hocky` FOREIGN KEY (`maHocKy`) REFERENCES `hocky` (`maHocKy`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -637,172 +691,326 @@ INSERT INTO `hocky` (`maHocKy`, `namHoc`, `tenHocKy`) VALUES
 ('HK3_2025_2026', '2025-2026', 'Học kỳ 3 (2025-2026)');
 
 -- 5. Người dùng (Admin, Cán bộ Trường, Cán bộ Khoa, Sinh viên)
-INSERT INTO `nguoidung` (`id`, `tenDangNhap`, `matKhau`, `hoTen`, `email`, `soDienThoai`, `vaiTro`, `trangThai`, `ngayTao`) VALUES
+INSERT INTO `nguoidung` (`id`, `tenDangNhap`, `matKhau`, `hoTen`, `email`, `soDienThoai`, `vaiTro`, `trangThai`, `matKhauHienThi`, `ngayTao`) VALUES
 -- Quản trị viên
-(1, 'admin', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'Quản trị viên Hệ thống', 'admin@ou.edu.vn', '0909123456', 'ROLE_ADMIN', 'HOAT_DONG', NOW()),
+(1, 'admin', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'Quản trị viên Hệ thống', 'admin@ou.edu.vn', '0909123456', 'ROLE_ADMIN', 'HOAT_DONG', 'admin123', NOW()),
 
 -- Cán bộ cấp trường (P.CTSV)
-(2, 'captruong_hau', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'Th.S Nguyễn Trung Hậu', 'hau.nt@ou.edu.vn', '0918123456', 'ROLE_CAN_BO_TRUONG', 'HOAT_DONG', NOW()),
+(2, 'captruong', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Phạm Minh Tuấn', 'tuan.pm@ou.edu.vn', '0918123456', 'ROLE_CAN_BO_TRUONG', 'HOAT_DONG', 'truong123', NOW()),
 
--- Cán bộ quản lý Khoa IT và Khoa SPE
-(3, 'cbk_cntt', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'Cán bộ QL Khoa CNTT', 'qlkhoa.cntt@ou.edu.vn', '0987654321', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', NOW()),
-(4, 'cbk_spe', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'Cán bộ QL Khoa Đào tạo Đặc biệt', 'qlkhoa.clc@ou.edu.vn', '0987654322', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', NOW()),
+-- Cán bộ quản lý 12 Khoa
+(3, 'cbk_it', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Lê Hoàng Nam', 'cbk.it@ou.edu.vn', '0987654301', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(4, 'cbk_bio', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Nguyễn Thị Thu Trang', 'cbk.bio@ou.edu.vn', '0987654302', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(5, 'cbk_acc', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Trần Văn Hưng', 'cbk.acc@ou.edu.vn', '0987654303', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(6, 'cbk_eco', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Phạm Ngọc Mai', 'cbk.eco@ou.edu.vn', '0987654304', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(7, 'cbk_soc', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Đỗ Minh Quân', 'cbk.soc@ou.edu.vn', '0987654305', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(8, 'cbk_bas', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Huỳnh Quốc Bảo', 'cbk.bas@ou.edu.vn', '0987654306', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(9, 'cbk_law', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Vũ Thị Bích Ngọc', 'cbk.law@ou.edu.vn', '0987654307', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(10, 'cbk_fl', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Bùi Đình Trọng', 'cbk.fl@ou.edu.vn', '0987654308', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(11, 'cbk_ba', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Phan Thanh Tùng', 'cbk.ba@ou.edu.vn', '0987654309', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(12, 'cbk_bf', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Trương Hoài Phương', 'cbk.bf@ou.edu.vn', '0987654310', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(13, 'cbk_ce', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Nguyễn Đức Long', 'cbk.ce@ou.edu.vn', '0987654311', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
+(14, 'cbk_spe', '$2a$10$7Z8Kq58pYI4r3c5yBvP1ge2i.6B5kK8W3g2y1H4l7r9s0j3m4n5u6', 'ThS. Hoàng Diễm My', 'cbk.spe@ou.edu.vn', '0987654312', 'ROLE_CAN_BO_KHOA', 'HOAT_DONG', 'khoa123', NOW()),
 
--- Sinh viên Khóa 2023 (Mật khẩu mặc định là CCCD 12 số)
-(10, '2351010216', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Nguyễn Thị Tuyết Trinh', '2351010216trinh@ou.edu.vn', '0934112233', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(11, '2351010001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Trần Bảo An', '2351010001an@ou.edu.vn', '0934112234', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(12, '2351010002', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Lê Khánh Bình', '2351010002binh@ou.edu.vn', '0934112235', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(13, '2351010003', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Phạm Quốc Cường', '2351010003cuong@ou.edu.vn', '0934112236', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(14, '2351010004', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Hoàng Mỹ Linh', '2351010004linh@ou.edu.vn', '0934112237', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(15, '2351020001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Vũ Nam Hùng', '2351020001hung@ou.edu.vn', '0934112238', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(16, '2351030001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Đoàn Kim Oanh', '2351030001oanh@ou.edu.vn', '0934112239', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(17, '2351040001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Ngô Thanh Phong', '2351040001phong@ou.edu.vn', '0934112240', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(18, '2351050001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Bùi Đức Trí', '2351050001tri@ou.edu.vn', '0934112241', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(19, '2351060001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Đặng Thảo Vy', '2351060001vy@ou.edu.vn', '0934112242', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW()),
-(20, '2351070001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Phan Văn Đức', '2351070001duc@ou.edu.vn', '0934112243', 'ROLE_SINH_VIEN', 'HOAT_DONG', NOW());
+-- Sinh viên Khóa 2023 (K23: 2023-2027)
+(20, '2351010216', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Nguyễn Thị Tuyết Trinh', '2351010216trinh@ou.edu.vn', '0934112233', 'ROLE_SINH_VIEN', 'HOAT_DONG', '092305006276', NOW()),
+(21, '2351010001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Trần Bảo An', '2351010001an@ou.edu.vn', '0934112234', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079205001111', NOW()),
+(22, '2351010002', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Lê Khánh Bình', '2351010002binh@ou.edu.vn', '0934112235', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079305002222', NOW()),
+(23, '2351010003', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Phạm Quốc Cường', '2351010003cuong@ou.edu.vn', '0934112236', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079205003333', NOW()),
+(25, '2351020001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Vũ Nam Hùng', '2351020001hung@ou.edu.vn', '0934112238', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079205005555', NOW()),
+
+-- Sinh viên Khóa 2024 (K24: 2024-2028)
+(31, '2451010001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Hoàng Nhật Nam', '2451010001nam@ou.edu.vn', '0934223344', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079206001111', NOW()),
+(32, '2451010002', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Trương Minh Đăng', '2451010002dang@ou.edu.vn', '0934223345', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079206002222', NOW()),
+(33, '2451010003', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Hoàng Mỹ Linh', '2451010003linh@ou.edu.vn', '0934223346', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079306003333', NOW()),
+(34, '2451010004', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Lê Hải Yến', '2451010004yen@ou.edu.vn', '0934223347', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079306004444', NOW()),
+
+-- Sinh viên Khóa 2025 (K25: 2025-2029)
+(41, '2551010001', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Trần Gia Hưng', '2551010001hung@ou.edu.vn', '0934334455', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079207001111', NOW()),
+(42, '2551010002', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Võ Thục Quyên', '2551010002quyen@ou.edu.vn', '0934334456', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079307002222', NOW()),
+(43, '2551010003', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Đỗ Hoàng Long', '2551010003long@ou.edu.vn', '0934334457', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079207003333', NOW()),
+(44, '2551010004', '$2a$10$nKqf4HhTfX30.q1zT0Zk8.eJmD1r3L7O9Q5o8V6X3Y8m0p1a2b3c4', 'Phạm Ngọc Ánh', '2551010004anh@ou.edu.vn', '0934334458', 'ROLE_SINH_VIEN', 'HOAT_DONG', '079307004444', NOW());
 
 -- 6. Nhân viên
 INSERT INTO `nhanvien` (`maNv`, `nguoiDungId`, `chucVu`, `donViCongTac`) VALUES
-('NV_TRUONG_01', 2, 'Trưởng phòng CTSV', 'Phòng Công tác Sinh viên'),
+('NV_TRUONG_01', 2, 'Trưởng phòng Công tác Sinh viên', 'Phòng Công tác Sinh viên'),
 ('NV_KHOA_IT', 3, 'Trợ lý Giáo vụ & CTSV', 'Khoa Công nghệ Thông tin'),
-('NV_KHOA_SPE', 4, 'Trợ lý Giáo vụ & CTSV', 'Khoa Đào tạo Đặc biệt');
+('NV_KHOA_BIO', 4, 'Trợ lý Giáo vụ & CTSV', 'Khoa Công nghệ Sinh học'),
+('NV_KHOA_ACC', 5, 'Trợ lý Giáo vụ & CTSV', 'Khoa Kế toán - Kiểm toán'),
+('NV_KHOA_ECO', 6, 'Trợ lý Giáo vụ & CTSV', 'Khoa Kinh tế và Quản lý Công'),
+('NV_KHOA_SOC', 7, 'Trợ lý Giáo vụ & CTSV', 'Khoa Khoa học Xã hội'),
+('NV_KHOA_BAS', 8, 'Trợ lý Giáo vụ & CTSV', 'Khoa Khoa học Cơ bản'),
+('NV_KHOA_LAW', 9, 'Trợ lý Giáo vụ & CTSV', 'Khoa Luật'),
+('NV_KHOA_FL', 10, 'Trợ lý Giáo vụ & CTSV', 'Khoa Ngoại ngữ'),
+('NV_KHOA_BA', 11, 'Trợ lý Giáo vụ & CTSV', 'Khoa Quản trị Kinh doanh'),
+('NV_KHOA_BF', 12, 'Trợ lý Giáo vụ & CTSV', 'Khoa Tài chính - Ngân hàng'),
+('NV_KHOA_CE', 13, 'Trợ lý Giáo vụ & CTSV', 'Khoa Xây dựng'),
+('NV_KHOA_SPE', 14, 'Trợ lý Giáo vụ & CTSV', 'Khoa Đào tạo Đặc biệt');
 
 INSERT INTO `canbocaptruong` (`maNv`, `phongBan`, `capPheDuyet`) VALUES
 ('NV_TRUONG_01', 'Phòng Công tác Sinh viên', 'Cấp Trường');
 
 INSERT INTO `canbokhoa` (`maNv`, `maKhoa`, `lopPhuTrach`, `trangThaiCongTac`) VALUES
 ('NV_KHOA_IT', 'IT', 'DH23CS01, DH23CS02, DH23IT01', 'Đang công tác'),
-('NV_KHOA_SPE', 'SPE', 'DH23CS01C, DH23BA01C, DH23AC01C', 'Đang công tác');
+('NV_KHOA_BIO', 'BIO', 'DH23BT01, DH23BT02, DH23FT01', 'Đang công tác'),
+('NV_KHOA_ACC', 'ACC', 'DH23AC01, DH23AC02, DH23AU01', 'Đang công tác'),
+('NV_KHOA_ECO', 'ECO', 'DH23EC01, DH23EC02, DH23PM01', 'Đang công tác'),
+('NV_KHOA_SOC', 'SOC', 'DH23SC01, DH23SW01, DH23SA01, DH23PS01', 'Đang công tác'),
+('NV_KHOA_BAS', 'BAS', 'DH23DS01, DH24DS01', 'Đang công tác'),
+('NV_KHOA_LAW', 'LAW', 'DH23LA01, DH23BL01', 'Đang công tác'),
+('NV_KHOA_FL', 'FL', 'DH23EL01, DH23JL01, DH23KL01, DH23CL01', 'Đang công tác'),
+('NV_KHOA_BA', 'BA', 'DH23BA01, DH23MK01, DH23TO01, DH23HM01, DH23IB01, DH23LG01', 'Đang công tác'),
+('NV_KHOA_BF', 'BF', 'DH23FB01, DH23FB02, DH23TF01, DH23IS01', 'Đang công tác'),
+('NV_KHOA_CE', 'CE', 'DH23CE01, DH23CE02, DH23CM01', 'Đang công tác'),
+('NV_KHOA_SPE', 'SPE', 'DH23CS01C, DH23BA01C, DH23AC01C, DH23EL01C, DH23LA01C', 'Đang công tác');
 
 -- 7. Sinh viên: Lưu kèm CCCD 12 số
 INSERT INTO `sinhvien` (`mssv`, `cccd`, `nguoiDungId`, `ngaySinh`, `gioiTinh`, `diaChi`, `trangThaiHoc`, `maLop`) VALUES
-('2351010216', '079305012345', 10, '2005-05-15', 'Nữ', '97 Võ Văn Tần, Phường Võ Thị Sáu, Quận 3, TP.HCM', 'DANG_HOC', 'DH23CS02'),
-('2351010001', '079205001111', 11, '2005-01-20', 'Nam', '371 Nguyễn Kiệm, Phường 3, Quận Gò Vấp, TP.HCM', 'DANG_HOC', 'DH23CS01'),
-('2351010002', '079305002222', 12, '2005-03-12', 'Nữ', 'Quận 1, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23CS01C'),
-('2351010003', '079205003333', 13, '2005-07-25', 'Nam', 'Quận Bình Thạnh, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23IT01'),
-('2351010004', '079305004444', 14, '2005-09-18', 'Nữ', 'TP. Thủ Đức, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23IM01'),
-('2351020001', '079205005555', 15, '2005-06-30', 'Nam', 'Quận 5, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23BA01C'),
-('2351030001', '079305006666', 16, '2005-12-10', 'Nữ', 'Quận 10, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23AC01C'),
-('2351040001', '079205007777', 17, '2005-04-14', 'Nam', 'Quận Tân Bình, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23EL01C'),
-('2351050001', '079205008888', 18, '2005-08-22', 'Nam', 'Quận Phú Nhuận, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23LA01C'),
-('2351060001', '079305009999', 19, '2005-10-10', 'Nữ', 'Quận 3, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23BT01C'),
-('2351070001', '079205010000', 20, '2005-11-12', 'Nam', 'Quận Gò Vấp, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23CE01C');
+('2351010216', '092305006276', 20, '2005-05-15', 'Nữ', '97 Võ Văn Tần, Phường Võ Thị Sáu, Quận 3, TP.HCM', 'DANG_HOC', 'DH23CS01'),
+('2351010001', '079205001111', 21, '2005-01-20', 'Nam', '371 Nguyễn Kiệm, Phường 3, Quận Gò Vấp, TP.HCM', 'DANG_HOC', 'DH23CS01'),
+('2351010002', '079305002222', 22, '2005-03-12', 'Nữ', 'Quận 1, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23IT01'),
+('2351010003', '079205003333', 23, '2005-07-25', 'Nam', 'Quận Bình Thạnh, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23IT01'),
+('2351020001', '079205005555', 25, '2005-06-30', 'Nam', 'Quận 5, TP. Hồ Chí Minh', 'DANG_HOC', 'DH23CS01C'),
+('2451010001', '079206001111', 31, '2006-02-14', 'Nam', 'Quận 10, TP. Hồ Chí Minh', 'DANG_HOC', 'DH24CS01'),
+('2451010002', '079206002222', 32, '2006-04-20', 'Nam', 'Quận Tân Bình, TP. Hồ Chí Minh', 'DANG_HOC', 'DH24IT01'),
+('2451010003', '079306003333', 33, '2006-08-15', 'Nữ', 'Quận Phú Nhuận, TP. Hồ Chí Minh', 'DANG_HOC', 'DH24IT02'),
+('2451010004', '079306004444', 34, '2006-11-28', 'Nữ', 'TP. Thủ Đức, TP. Hồ Chí Minh', 'DANG_HOC', 'DH24CS01C'),
+('2551010001', '079207001111', 41, '2007-01-10', 'Nam', 'Quận 3, TP. Hồ Chí Minh', 'DANG_HOC', 'DH25CS01'),
+('2551010002', '079307002222', 42, '2007-05-22', 'Nữ', 'Quận Gò Vấp, TP. Hồ Chí Minh', 'DANG_HOC', 'DH25IT01'),
+('2551010003', '079207003333', 43, '2007-09-09', 'Nam', 'Quận 7, TP. Hồ Chí Minh', 'DANG_HOC', 'DH25SE01'),
+('2551010004', '079307004444', 44, '2007-12-05', 'Nữ', 'Quận Bình Tân, TP. Hồ Chí Minh', 'DANG_HOC', 'DH25CS01C');
 
--- 8. Kết quả Học tập (ĐẦY ĐỦ 9 HỌC KỲ TỪ HK1 2023-2024 ĐẾN HK3 2025-2026 CHO SV KHÓA 2023)
+-- 8. Kết quả Học tập
 INSERT INTO `ketquahoctap` (`id`, `mssv`, `maHocKy`, `diemTrungBinh`, `soTinChi`, `coHocPhanRot`) VALUES
 -- Tuyết Trinh (2351010216)
-('GPA_2351010216_HK1_2324', '2351010216', 'HK1_2023_2024', 3.60, 10, 0),
-('GPA_2351010216_HK2_2324', '2351010216', 'HK2_2023_2024', 3.17, 9, 0),
-('GPA_2351010216_HK3_2324', '2351010216', 'HK3_2023_2024', 3.80, 8, 0),
-('GPA_2351010216_HK1_2425', '2351010216', 'HK1_2024_2025', 2.83, 20, 0),
-('GPA_2351010216_HK2_2425', '2351010216', 'HK2_2024_2025', 3.13, 20, 0),
-('GPA_2351010216_HK3_2425', '2351010216', 'HK3_2024_2025', 3.29, 14, 0),
+('GPA_2351010216_HK1_2324', '2351010216', 'HK1_2023_2024', 3.85, 18, 0),
+('GPA_2351010216_HK2_2324', '2351010216', 'HK2_2023_2024', 3.90, 18, 0),
+('GPA_2351010216_HK3_2324', '2351010216', 'HK3_2023_2024', 3.80, 14, 0),
+('GPA_2351010216_HK1_2425', '2351010216', 'HK1_2024_2025', 3.92, 18, 0),
+('GPA_2351010216_HK2_2425', '2351010216', 'HK2_2024_2025', 3.88, 18, 0),
+('GPA_2351010216_HK3_2425', '2351010216', 'HK3_2024_2025', 4.00, 14, 0),
 ('GPA_2351010216_HK1_2526', '2351010216', 'HK1_2025_2026', 3.95, 18, 0),
-('GPA_2351010216_HK2_2526', '2351010216', 'HK2_2025_2026', 3.00, 10, 0),
-('GPA_2351010216_HK3_2526', '2351010216', 'HK3_2025_2026', 4.00, 9, 0),
+('GPA_2351010216_HK2_2526', '2351010216', 'HK2_2025_2026', 3.91, 18, 0),
+('GPA_2351010216_HK3_2526', '2351010216', 'HK3_2025_2026', 3.94, 14, 0),
 
--- Bảo An (2351010001)
-('GPA_2351010001_HK1_2324', '2351010001', 'HK1_2023_2024', 3.65, 17, 0),
-('GPA_2351010001_HK2_2324', '2351010001', 'HK2_2023_2024', 3.70, 18, 0),
-('GPA_2351010001_HK3_2324', '2351010001', 'HK3_2023_2024', 3.60, 6, 0),
-('GPA_2351010001_HK1_2425', '2351010001', 'HK1_2024_2025', 3.72, 19, 0),
-('GPA_2351010001_HK2_2425', '2351010001', 'HK2_2024_2025', 3.78, 18, 0),
-('GPA_2351010001_HK3_2425', '2351010001', 'HK3_2024_2025', 3.65, 6, 0),
-('GPA_2351010001_HK1_2526', '2351010001', 'HK1_2025_2026', 3.75, 17, 0),
-('GPA_2351010001_HK2_2526', '2351010001', 'HK2_2025_2026', 3.80, 16, 0),
-('GPA_2351010001_HK3_2526', '2351010001', 'HK3_2025_2026', 3.70, 8, 0),
+-- Khóa 2023
+('GPA_2351010001_HK1_2526', '2351010001', 'HK1_2526', 3.75, 18, 0),
+('GPA_2351010002_HK1_2526', '2351010002', 'HK1_2526', 3.60, 18, 0),
+('GPA_2351010003_HK1_2526', '2351010003', 'HK1_2526', 3.50, 18, 0),
+('GPA_2351020001_HK1_2526', '2351020001', 'HK1_2526', 3.40, 18, 0),
 
--- Khánh Bình (2351010002)
-('GPA_2351010002_HK1_2324', '2351010002', 'HK1_2023_2024', 3.40, 16, 0),
-('GPA_2351010002_HK2_2324', '2351010002', 'HK2_2023_2024', 3.50, 17, 0),
-('GPA_2351010002_HK3_2324', '2351010002', 'HK3_2023_2024', 3.50, 6, 0),
-('GPA_2351010002_HK1_2425', '2351010002', 'HK1_2024_2025', 3.55, 18, 0),
-('GPA_2351010002_HK2_2425', '2351010002', 'HK2_2024_2025', 3.60, 17, 0),
-('GPA_2351010002_HK3_2425', '2351010002', 'HK3_2024_2025', 3.45, 6, 0),
-('GPA_2351010002_HK1_2526', '2351010002', 'HK1_2025_2026', 3.55, 16, 0),
-('GPA_2351010002_HK2_2526', '2351010002', 'HK2_2025_2026', 3.62, 16, 0),
-('GPA_2351010002_HK3_2526', '2351010002', 'HK3_2025_2026', 3.58, 8, 0),
+-- Khóa 2024
+('GPA_2451010001_HK1_2526', '2451010001', 'HK1_2526', 3.90, 18, 0),
+('GPA_2451010002_HK1_2526', '2451010002', 'HK1_2526', 3.76, 18, 0),
+('GPA_2451010003_HK1_2526', '2451010003', 'HK1_2526', 3.85, 18, 0),
+('GPA_2451010004_HK1_2526', '2451010004', 'HK1_2526', 3.78, 18, 0),
 
--- Nam Hùng (2351020001)
-('GPA_2351020001_HK1_2324', '2351020001', 'HK1_2023_2024', 3.78, 18, 0),
-('GPA_2351020001_HK2_2324', '2351020001', 'HK2_2023_2024', 3.82, 19, 0),
-('GPA_2351020001_HK3_2324', '2351020001', 'HK3_2023_2024', 3.70, 6, 0),
-('GPA_2351020001_HK1_2425', '2351020001', 'HK1_2024_2025', 3.85, 18, 0),
-('GPA_2351020001_HK2_2425', '2351020001', 'HK2_2024_2025', 3.88, 18, 0),
-('GPA_2351020001_HK3_2425', '2351020001', 'HK3_2024_2025', 3.75, 6, 0),
-('GPA_2351020001_HK1_2526', '2351020001', 'HK1_2025_2026', 3.82, 18, 0),
-('GPA_2351020001_HK2_2526', '2351020001', 'HK2_2025_2026', 3.86, 17, 0),
-('GPA_2351020001_HK3_2526', '2351020001', 'HK3_2025_2026', 3.80, 8, 0),
+-- Khóa 2025
+('GPA_2551010001_HK1_2526', '2551010001', 'HK1_2526', 3.88, 18, 0),
+('GPA_2551010002_HK1_2526', '2551010002', 'HK1_2526', 3.65, 18, 0),
+('GPA_2551010003_HK1_2526', '2551010003', 'HK1_2526', 3.52, 18, 0),
+('GPA_2551010004_HK1_2526', '2551010004', 'HK1_2526', 3.75, 18, 0);
 
--- Các SV khác
-('GPA_2351030001_HK1_2526', '2351030001', 'HK1_2025_2026', 3.65, 17, 0),
-('GPA_2351040001_HK1_2526', '2351040001', 'HK1_2025_2026', 3.70, 16, 0),
-('GPA_2351050001_HK1_2526', '2351050001', 'HK1_2025_2026', 3.40, 15, 0),
-('GPA_2351060001_HK1_2526', '2351060001', 'HK1_2025_2026', 3.60, 16, 0),
-('GPA_2351070001_HK1_2526', '2351070001', 'HK1_2025_2026', 3.50, 16, 0);
-
--- 9. Kết quả Rèn luyện (ĐẦY ĐỦ 9 HỌC KỲ CHO SV KHÓA 2023)
+-- 9. Kết quả Rèn luyện
 INSERT INTO `ketquarenluyen` (`id`, `mssv`, `maHocKy`, `diemRenLuyen`, `xepLoai`) VALUES
 -- Tuyết Trinh (2351010216)
-('DRL_2351010216_HK1_2324', '2351010216', 'HK1_2023_2024', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK2_2324', '2351010216', 'HK2_2023_2024', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK3_2324', '2351010216', 'HK3_2023_2024', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK1_2425', '2351010216', 'HK1_2024_2025', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK2_2425', '2351010216', 'HK2_2024_2025', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK3_2425', '2351010216', 'HK3_2024_2025', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK1_2526', '2351010216', 'HK1_2025_2026', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK2_2526', '2351010216', 'HK2_2025_2026', 100.00, 'Xuat sac'),
-('DRL_2351010216_HK3_2526', '2351010216', 'HK3_2025_2026', 100.00, 'Xuat sac'),
+('DRL_2351010216_HK1_2324', '2351010216', 'HK1_2023_2024', 92.00, 'Xuat sac'),
+('DRL_2351010216_HK2_2324', '2351010216', 'HK2_2023_2024', 94.00, 'Xuat sac'),
+('DRL_2351010216_HK3_2324', '2351010216', 'HK3_2023_2024', 90.00, 'Xuat sac'),
+('DRL_2351010216_HK1_2425', '2351010216', 'HK1_2024_2025', 95.00, 'Xuat sac'),
+('DRL_2351010216_HK2_2425', '2351010216', 'HK2_2024_2025', 93.00, 'Xuat sac'),
+('DRL_2351010216_HK3_2425', '2351010216', 'HK3_2024_2025', 91.00, 'Xuat sac'),
+('DRL_2351010216_HK1_2526', '2351010216', 'HK1_2025_2026', 96.00, 'Xuat sac'),
+('DRL_2351010216_HK2_2526', '2351010216', 'HK2_2025_2026', 95.00, 'Xuat sac'),
+('DRL_2351010216_HK3_2526', '2351010216', 'HK3_2025_2026', 94.00, 'Xuat sac'),
 
--- Bảo An (2351010001)
-('DRL_2351010001_HK1_2324', '2351010001', 'HK1_2023_2024', 86.00, 'Tot'),
-('DRL_2351010001_HK2_2324', '2351010001', 'HK2_2023_2024', 88.00, 'Tot'),
-('DRL_2351010001_HK3_2324', '2351010001', 'HK3_2023_2024', 85.00, 'Tot'),
-('DRL_2351010001_HK1_2425', '2351010001', 'HK1_2024_2025', 87.00, 'Tot'),
-('DRL_2351010001_HK2_2425', '2351010001', 'HK2_2024_2025', 90.00, 'Xuat sac'),
-('DRL_2351010001_HK3_2425', '2351010001', 'HK3_2024_2025', 85.00, 'Tot'),
+-- Khóa 2023
 ('DRL_2351010001_HK1_2526', '2351010001', 'HK1_2025_2026', 89.00, 'Tot'),
-('DRL_2351010001_HK2_2526', '2351010001', 'HK2_2025_2026', 91.00, 'Xuat sac'),
-('DRL_2351010001_HK3_2526', '2351010001', 'HK3_2025_2026', 88.00, 'Tot'),
-
--- Các SV khác
 ('DRL_2351010002_HK1_2526', '2351010002', 'HK1_2025_2026', 86.00, 'Tot'),
 ('DRL_2351010003_HK1_2526', '2351010003', 'HK1_2025_2026', 82.00, 'Tot'),
-('DRL_2351010004_HK1_2526', '2351010004', 'HK1_2025_2026', 78.00, 'Kha'),
-('DRL_2351020001_HK1_2526', '2351020001', 'HK1_2025_2026', 92.00, 'Xuat sac'),
-('DRL_2351030001_HK1_2526', '2351030001', 'HK1_2025_2026', 88.00, 'Tot'),
-('DRL_2351040001_HK1_2526', '2351040001', 'HK1_2025_2026', 90.00, 'Xuat sac'),
-('DRL_2351050001_HK1_2526', '2351050001', 'HK1_2025_2026', 84.00, 'Tot'),
-('DRL_2351060001_HK1_2526', '2351060001', 'HK1_2025_2026', 85.00, 'Tot'),
-('DRL_2351070001_HK1_2526', '2351070001', 'HK1_2025_2026', 80.00, 'Tot');
+('DRL_2351020001_HK1_2526', '2351020001', 'HK1_2025_2026', 82.00, 'Tot'),
 
--- 10. Đợt xét Học bổng Cấp trường
+-- Khóa 2024
+('DRL_2451010001_HK1_2526', '2451010001', 'HK1_2025_2026', 94.00, 'Xuat sac'),
+('DRL_2451010002_HK1_2526', '2451010002', 'HK1_2025_2026', 88.00, 'Tot'),
+('DRL_2451010003_HK1_2526', '2451010003', 'HK1_2025_2026', 91.00, 'Xuat sac'),
+('DRL_2451010004_HK1_2526', '2451010004', 'HK1_2025_2026', 91.00, 'Xuat sac'),
+
+-- Khóa 2025
+('DRL_2551010001_HK1_2526', '2551010001', 'HK1_2025_2026', 93.00, 'Xuat sac'),
+('DRL_2551010002_HK1_2526', '2551010002', 'HK1_2025_2026', 86.00, 'Tot'),
+('DRL_2551010003_HK1_2526', '2551010003', 'HK1_2025_2026', 84.00, 'Tot'),
+('DRL_2551010004_HK1_2526', '2551010004', 'HK1_2025_2026', 90.00, 'Xuat sac');
+
+-- 10. Đợt xét Học bổng Cấp trường (Theo trình tự thời gian)
 INSERT INTO `dotxethocbong` (`maDot`, `tenDot`, `ngayBatDau`, `ngayKetThuc`, `maHocKy`, `trangThai`) VALUES
-('HB_HK1_2025', 'Học bổng Khuyến khích Học tập - HK1 (2025-2026)', '2025-09-01', '2025-10-30', 'HK1_2025_2026', 'DANG_MO'),
+('HB_HK1_2024', 'Học bổng Khuyến khích Học tập - HK1 (2024-2025)', '2024-09-01', '2024-10-30', 'HK1_2024_2025', 'DA_KET_THUC'),
 ('HB_HK2_2024', 'Học bổng Khuyến khích Học tập - HK2 (2024-2025)', '2025-03-01', '2025-04-30', 'HK2_2024_2025', 'DA_KET_THUC'),
-('HB_HK1_2024', 'Học bổng Khuyến khích Học tập - HK1 (2024-2025)', '2024-09-01', '2024-10-30', 'HK1_2024_2025', 'DA_KET_THUC');
+('HB_HK1_2025', 'Học bổng Khuyến khích Học tập - HK1 (2025-2026)', '2025-09-01', '2025-10-30', 'HK1_2025_2026', 'DANG_MO');
 
 -- 11. Dynamic Rule Engine
 INSERT INTO `quytachocbong` (`maQuyTac`, `maDot`, `diemTbDuoiThieu`, `diemRlToiThieu`, `soTinChiToiThieu`, `khongNoMon`, `phienBan`, `ghiChu`, `mucHocBongXuatSac`, `mucHocBongGioi`, `mucHocBongKha`) VALUES
-('QT_HB_HK1_2025_V1', 'HB_HK1_2025', 2.50, 65.00, 14, 1, 1, 'Quy chế xét học bổng KKHT năm học 2025-2026 chuẩn', 10000000.00, 7000000.00, 5000000.00),
-('QT_HB_HK2_2024_V1', 'HB_HK2_2024', 2.50, 65.00, 14, 1, 1, 'Quy chế xét học bổng KKHT HK2 (2024-2025)', 10000000.00, 7000000.00, 5000000.00);
+('QT_HB_HK1_2024_V1', 'HB_HK1_2024', 2.50, 65.00, 14, 1, 1, 'Quy chế xét học bổng KKHT HK1 (2024-2025)', 10000000.00, 7000000.00, 5000000.00),
+('QT_HB_HK2_2024_V1', 'HB_HK2_2024', 2.50, 65.00, 14, 1, 1, 'Quy chế xét học bổng KKHT HK2 (2024-2025)', 10000000.00, 7000000.00, 5000000.00),
+('QT_HB_HK1_2025_V1', 'HB_HK1_2025', 2.50, 65.00, 14, 1, 1, 'Quy chế xét học bổng KKHT năm học 2025-2026 chuẩn', 10000000.00, 7000000.00, 5000000.00);
 
--- 12. Phân bổ Đợt xét theo Khoa
+-- 12. Phân bổ Đợt xét theo Khoa (Chuẩn 8% theo số lượng nhóm Ngành & Khóa học)
 INSERT INTO `dotxethbkhoa` (`maDotXetHbKhoa`, `maDot`, `maKhoa`, `chiTieu`, `nganSachKhoa`, `hanPhanHoi`, `trangThai`, `lyDoTraVe`) VALUES
-('HB_HK1_2025_IT', 'HB_HK1_2025', 'IT', 5, 45000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_BA', 'HB_HK1_2025', 'BA', 4, 35000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_ACC', 'HB_HK1_2025', 'ACC', 3, 25000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_BF', 'HB_HK1_2025', 'BF', 3, 25000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_ECO', 'HB_HK1_2025', 'ECO', 2, 20000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_LAW', 'HB_HK1_2025', 'LAW', 3, 25000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_FL', 'HB_HK1_2025', 'FL', 3, 25000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_BIO', 'HB_HK1_2025', 'BIO', 2, 15000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_CE', 'HB_HK1_2025', 'CE', 2, 15000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_SOC', 'HB_HK1_2025', 'SOC', 2, 15000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_BAS', 'HB_HK1_2025', 'BAS', 2, 15000000.00, '2025-10-25', 'CHUA_XET', NULL),
-('HB_HK1_2025_SPE', 'HB_HK1_2025', 'SPE', 6, 50000000.00, '2025-10-25', 'CHUA_XET', NULL);
+('HB_HK1_2025_IT', 'HB_HK1_2025', 'IT', 9, 105300000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_BA', 'HB_HK1_2025', 'BA', 6, 70200000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_ACC', 'HB_HK1_2025', 'ACC', 6, 70200000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_BF', 'HB_HK1_2025', 'BF', 5, 58500000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_ECO', 'HB_HK1_2025', 'ECO', 4, 46800000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_LAW', 'HB_HK1_2025', 'LAW', 6, 70200000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_FL', 'HB_HK1_2025', 'FL', 12, 140400000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_BIO', 'HB_HK1_2025', 'BIO', 6, 70200000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_CE', 'HB_HK1_2025', 'CE', 4, 46800000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_SOC', 'HB_HK1_2025', 'SOC', 8, 93600000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_BAS', 'HB_HK1_2025', 'BAS', 3, 35100000.00, '2025-10-25', 'CHUA_XET', NULL),
+('HB_HK1_2025_SPE', 'HB_HK1_2025', 'SPE', 13, 200000000.00, '2025-10-25', 'CHUA_XET', NULL);
 
 -- 13. Minh chứng Rèn luyện Mẫu
 INSERT INTO `minhchungrenluyen` (`maMinhChung`, `tenHoatDong`, `diemDeXuat`, `fileUrl`, `moTa`, `trangThai`, `maHoSo`, `mssv`, `maHocKy`, `maNvPheDuyet`, `lyDoPhanHoi`, `ngayTao`) VALUES
 ('MC_2025_001', 'Tham gia Nghiên cứu Khoa học Sinh viên Cấp Trường 2025', 6.00, 'https://drive.google.com/minhchung_nckh_2351010216.pdf', 'Đề tài Dynamic Rule Engine trong OU-SSH Hub', 'CHO_DUYET', NULL, '2351010216', 'HK1_2025_2026', NULL, NULL, NOW()),
 ('MC_2025_002', 'Chiến dịch Mùa hè Xanh Trường ĐH Mở TP.HCM 2025', 4.00, 'https://drive.google.com/minhchung_mhx_2351010001.pdf', 'Giấy chứng nhận tham gia chiến dịch MHX 2025', 'DA_DUYET', NULL, '2351010001', 'HK1_2025_2026', 'NV_KHOA_IT', 'Minh chứng hợp lệ, cộng 4 điểm', NOW());
+
+-- 14. Danh mục Môn học (MonHoc) Chuẩn theo QĐ 561/QĐ-ĐHM ngày 12/03/2024
+INSERT INTO `monhoc` (`maMon`, `tenMon`, `soTinChi`, `soTietLyThuyet`, `soTietThucHanh`, `donGiaTinChi`, `maKhoa`) VALUES
+('MATH1315', 'Xác suất và Thống kê', 3, 45, 15, 650000.00, 'BAS'),
+('GENG1311', 'Tiếng Anh Nâng cao 1', 3, 45, 0, 650000.00, 'FL'),
+('GENG1312', 'Tiếng Anh Nâng cao 2', 3, 45, 0, 650000.00, 'FL'),
+('ITEC1401', 'Nhập môn Tin học', 3, 30, 30, 650000.00, 'IT'),
+('ITEC1505', 'Cơ sở Lập trình C/C++', 4, 45, 30, 650000.00, 'IT'),
+('MATH1314', 'Giải tích', 3, 45, 15, 650000.00, 'BAS'),
+('GENG1313', 'Tiếng Anh Nâng cao 3', 3, 45, 0, 650000.00, 'FL'),
+('GENG1314', 'Tiếng Anh Nâng cao 4', 3, 45, 0, 650000.00, 'FL'),
+('ITEC1504', 'Kỹ thuật Lập trình', 4, 45, 30, 650000.00, 'IT'),
+('ITEC1310', 'Hệ điều hành và Kiến trúc Máy tính', 3, 35, 10, 650000.00, 'IT'),
+('MATH1313', 'Đại số Tuyến tính', 3, 45, 15, 650000.00, 'BAS'),
+('GENG1315', 'Tiếng Anh Nâng cao 5', 3, 45, 0, 650000.00, 'FL'),
+('ITEC1427', 'Cấu trúc Dữ liệu và Thuật giải 1', 4, 45, 30, 650000.00, 'IT'),
+('ITEC1404', 'Ứng dụng Web', 3, 30, 30, 650000.00, 'IT'),
+('ITEC2502', 'Cơ sở Dữ liệu Quan hệ', 4, 45, 30, 650000.00, 'IT'),
+('POLI1304', 'Triết học Mác - Lênin', 3, 45, 0, 650000.00, 'SOC'),
+('ITEC1328', 'Cấu trúc Dữ liệu và Thuật giải 2', 3, 30, 30, 650000.00, 'IT'),
+('ITEC2503', 'Mạng Máy tính', 4, 45, 30, 650000.00, 'IT'),
+('MATH2402', 'Toán Rời rạc', 4, 60, 0, 650000.00, 'BAS'),
+('POLI1205', 'Kinh tế Chính trị Mác - Lênin', 2, 30, 0, 650000.00, 'SOC'),
+('POLI1206', 'Chủ nghĩa Xã hội Khoa học', 2, 30, 0, 650000.00, 'SOC'),
+('ITEC2504', 'Lập trình Hướng đối tượng (Java)', 4, 45, 30, 650000.00, 'IT'),
+('ITEC3401', 'Phân tích Thiết kế Hệ thống', 4, 60, 0, 650000.00, 'IT'),
+('ITEC3201', 'Kỹ năng Nghề nghiệp', 2, 30, 0, 650000.00, 'IT'),
+('POLI1207', 'Lịch sử Đảng Cộng sản Việt Nam', 2, 30, 0, 650000.00, 'SOC'),
+('POLI1208', 'Tư tưởng Hồ Chí Minh', 2, 30, 0, 650000.00, 'SOC'),
+('ITEC1311', 'Mẫu Thiết kế Hướng đối tượng', 3, 30, 30, 650000.00, 'IT'),
+('ITEC3413', 'Trí tuệ Nhân tạo', 3, 30, 30, 650000.00, 'IT'),
+('ITEC4402', 'Quản trị Hệ Cơ sở Dữ liệu', 3, 30, 30, 650000.00, 'IT'),
+('ITEC4409', 'Công nghệ Phần mềm', 3, 30, 30, 650000.00, 'IT'),
+('ITEC3421', 'Các Công nghệ Lập trình Hiện đại', 3, 30, 30, 650000.00, 'IT'),
+('ITEC2314', 'Máy học (Machine Learning)', 3, 30, 30, 650000.00, 'IT'),
+('ITEC4415', 'Kiểm thử Phần mềm', 3, 30, 30, 650000.00, 'IT'),
+('ITEC2302', 'Phát triển Hệ thống Web', 3, 30, 30, 650000.00, 'IT'),
+('GLAW1315', 'Pháp luật Đại cương', 3, 45, 0, 650000.00, 'LAW'),
+('ITEC4401', 'Đồ án Ngành', 4, 0, 120, 650000.00, 'IT'),
+('ITEC4899', 'Thực tập Tốt nghiệp', 4, 0, 120, 650000.00, 'IT'),
+('ITEC4699', 'Khóa luận Tốt nghiệp', 6, 0, 180, 650000.00, 'IT'),
+('CSC101', 'Advanced Programming (CLC)', 4, 45, 30, 1450000.00, 'SPE'),
+('CSC201', 'Data Structures & Algorithms (CLC)', 4, 45, 30, 1450000.00, 'SPE'),
+('CSC301', 'Web Application Development (CLC)', 3, 30, 30, 1450000.00, 'SPE'),
+('CSC401', 'Database Systems (CLC)', 4, 45, 30, 1450000.00, 'SPE'),
+('CSC501', 'Artificial Intelligence (CLC)', 3, 30, 30, 1450000.00, 'SPE');
+
+-- 15. Khung Chương trình Đào tạo (ChuongTrinhDaoTao) chuẩn 11 học kỳ
+INSERT INTO `chuongtrinhdaotao` (`id`, `maNganh`, `maMon`, `hocKyGoiY`, `loaiHocPhan`, `heDaoTao`) VALUES
+(1, 'CS', 'MATH1315', 1, 'BAT_BUOC', 'CHUAN'),
+(2, 'CS', 'GENG1311', 1, 'BAT_BUOC', 'CHUAN'),
+(3, 'CS', 'GENG1312', 1, 'BAT_BUOC', 'CHUAN'),
+(4, 'CS', 'ITEC1401', 1, 'BAT_BUOC', 'CHUAN'),
+(5, 'CS', 'ITEC1505', 1, 'BAT_BUOC', 'CHUAN'),
+(6, 'CS', 'MATH1314', 2, 'BAT_BUOC', 'CHUAN'),
+(7, 'CS', 'GENG1313', 2, 'BAT_BUOC', 'CHUAN'),
+(8, 'CS', 'GENG1314', 2, 'BAT_BUOC', 'CHUAN'),
+(9, 'CS', 'ITEC1504', 2, 'BAT_BUOC', 'CHUAN'),
+(10, 'CS', 'ITEC1310', 2, 'BAT_BUOC', 'CHUAN'),
+(11, 'CS', 'MATH1313', 3, 'BAT_BUOC', 'CHUAN'),
+(12, 'CS', 'GENG1315', 3, 'BAT_BUOC', 'CHUAN'),
+(13, 'CS', 'ITEC1427', 3, 'BAT_BUOC', 'CHUAN'),
+(14, 'CS', 'ITEC1404', 3, 'BAT_BUOC', 'CHUAN'),
+(15, 'CS', 'ITEC2502', 3, 'BAT_BUOC', 'CHUAN'),
+(16, 'CS', 'POLI1304', 4, 'BAT_BUOC', 'CHUAN'),
+(17, 'CS', 'ITEC1328', 4, 'BAT_BUOC', 'CHUAN'),
+(18, 'CS', 'ITEC2503', 4, 'BAT_BUOC', 'CHUAN'),
+(19, 'CS', 'MATH2402', 4, 'BAT_BUOC', 'CHUAN'),
+(20, 'CS', 'POLI1205', 5, 'BAT_BUOC', 'CHUAN'),
+(21, 'CS', 'POLI1206', 5, 'BAT_BUOC', 'CHUAN'),
+(22, 'CS', 'ITEC2504', 5, 'BAT_BUOC', 'CHUAN'),
+(23, 'CS', 'ITEC3401', 5, 'BAT_BUOC', 'CHUAN'),
+(24, 'CS', 'ITEC3201', 5, 'BAT_BUOC', 'CHUAN'),
+(25, 'CS', 'ITEC4402', 5, 'BAT_BUOC', 'CHUAN'),
+(26, 'CS', 'POLI1207', 6, 'BAT_BUOC', 'CHUAN'),
+(27, 'CS', 'POLI1208', 6, 'BAT_BUOC', 'CHUAN'),
+(28, 'CS', 'ITEC1311', 6, 'BAT_BUOC', 'CHUAN'),
+(29, 'CS', 'ITEC3413', 6, 'BAT_BUOC', 'CHUAN'),
+(30, 'CS', 'ITEC4409', 7, 'TU_CHON', 'CHUAN'),
+(31, 'CS', 'ITEC3421', 7, 'TU_CHON', 'CHUAN'),
+(32, 'CS', 'ITEC2314', 8, 'BAT_BUOC', 'CHUAN'),
+(33, 'CS', 'ITEC4415', 8, 'TU_CHON', 'CHUAN'),
+(34, 'CS', 'ITEC2302', 8, 'TU_CHON', 'CHUAN'),
+(35, 'CS', 'GLAW1315', 9, 'BAT_BUOC', 'CHUAN'),
+(36, 'CS', 'ITEC4401', 9, 'BAT_BUOC', 'CHUAN'),
+(37, 'CS', 'ITEC4899', 10, 'BAT_BUOC', 'CHUAN'),
+(38, 'CS', 'ITEC4699', 11, 'BAT_BUOC', 'CHUAN'),
+(39, 'CSC', 'CSC101', 1, 'BAT_BUOC', 'CHAT_LUONG_CAO'),
+(40, 'CSC', 'CSC201', 2, 'BAT_BUOC', 'CHAT_LUONG_CAO'),
+(41, 'CSC', 'CSC301', 3, 'BAT_BUOC', 'CHAT_LUONG_CAO'),
+(42, 'CSC', 'CSC401', 4, 'BAT_BUOC', 'CHAT_LUONG_CAO'),
+(43, 'CSC', 'CSC501', 5, 'BAT_BUOC', 'CHAT_LUONG_CAO');
+
+-- 16. Bảng điểm chi tiết từng Môn học (DiemHocPhan) chuẩn theo CTĐT trong HK1 (2025-2026)
+INSERT INTO `diemhocphan` (`id`, `mssv`, `maMon`, `maHocKy`, `diemChuyenCan`, `diemGiuaKy`, `diemCuoiKy`, `diemTongKet10`, `diemHe4`, `diemChu`, `soTinChi`, `hocPhiMon`, `dat`) VALUES
+-- K23: Tuyết Trinh (2351010216) - Học kỳ 5 (18 TC - 11.700.000đ)
+('DHP_2351010216_POLI1205_HK1_2526', '2351010216', 'POLI1205', 'HK1_2025_2026', 10.00, 9.50, 9.50, 9.60, 4.00, 'A+', 2, 1300000.00, 1),
+('DHP_2351010216_POLI1206_HK1_2526', '2351010216', 'POLI1206', 'HK1_2025_2026', 9.50, 9.50, 9.00, 9.20, 4.00, 'A+', 2, 1300000.00, 1),
+('DHP_2351010216_ITEC2504_HK1_2526', '2351010216', 'ITEC2504', 'HK1_2025_2026', 10.00, 9.50, 10.00, 9.90, 4.00, 'A+', 4, 2600000.00, 1),
+('DHP_2351010216_ITEC3401_HK1_2526', '2351010216', 'ITEC3401', 'HK1_2025_2026', 10.00, 9.00, 9.50, 9.40, 4.00, 'A+', 4, 2600000.00, 1),
+('DHP_2351010216_ITEC3201_HK1_2526', '2351010216', 'ITEC3201', 'HK1_2025_2026', 9.50, 10.00, 9.50, 9.70, 4.00, 'A+', 2, 1300000.00, 1),
+('DHP_2351010216_ITEC4402_HK1_2526', '2351010216', 'ITEC4402', 'HK1_2025_2026', 9.50, 9.50, 9.00, 9.20, 4.00, 'A+', 3, 1950000.00, 1),
+
+-- K23: Bảo An (2351010001) - Học kỳ 5 (18 TC - 11.700.000đ)
+('DHP_2351010001_POLI1205_HK1_2526', '2351010001', 'POLI1205', 'HK1_2025_2026', 9.00, 8.50, 8.50, 8.60, 3.50, 'B+', 2, 1300000.00, 1),
+('DHP_2351010001_POLI1206_HK1_2526', '2351010001', 'POLI1206', 'HK1_2025_2026', 8.50, 9.00, 8.50, 8.70, 3.50, 'B+', 2, 1300000.00, 1),
+('DHP_2351010001_ITEC2504_HK1_2526', '2351010001', 'ITEC2504', 'HK1_2025_2026', 9.00, 8.50, 9.00, 8.90, 3.50, 'B+', 4, 2600000.00, 1),
+('DHP_2351010001_ITEC3401_HK1_2526', '2351010001', 'ITEC3401', 'HK1_2025_2026', 9.00, 9.00, 8.00, 8.40, 3.50, 'B+', 4, 2600000.00, 1),
+('DHP_2351010001_ITEC3201_HK1_2526', '2351010001', 'ITEC3201', 'HK1_2025_2026', 9.50, 9.00, 8.50, 8.80, 3.50, 'B+', 2, 1300000.00, 1),
+('DHP_2351010001_ITEC4402_HK1_2526', '2351010001', 'ITEC4402', 'HK1_2025_2026', 8.50, 8.50, 8.50, 8.50, 3.50, 'B+', 3, 1950000.00, 1),
+
+-- K24: Hoàng Nhật Nam (2451010001) - Học kỳ 3 (20 TC - 13.000.000đ)
+('DHP_2451010001_MATH1313_HK1_2526', '2451010001', 'MATH1313', 'HK1_2025_2026', 10.00, 9.50, 9.00, 9.30, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2451010001_GENG1315_HK1_2526', '2451010001', 'GENG1315', 'HK1_2025_2026', 9.50, 9.00, 9.00, 9.10, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2451010001_ITEC1427_HK1_2526', '2451010001', 'ITEC1427', 'HK1_2025_2026', 9.50, 9.50, 9.00, 9.20, 4.00, 'A+', 4, 2600000.00, 1),
+('DHP_2451010001_ITEC1404_HK1_2526', '2451010001', 'ITEC1404', 'HK1_2025_2026', 9.50, 9.00, 9.50, 9.40, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2451010001_ITEC2502_HK1_2526', '2451010001', 'ITEC2502', 'HK1_2025_2026', 9.00, 8.50, 9.00, 8.90, 3.50, 'B+', 4, 2600000.00, 1),
+('DHP_2451010001_GLAW1315_HK1_2526', '2451010001', 'GLAW1315', 'HK1_2025_2026', 9.50, 9.50, 9.00, 9.20, 4.00, 'A+', 3, 1950000.00, 1),
+
+-- K24: Hoàng Mỹ Linh (2451010003) - Học kỳ 3 (20 TC - 13.000.000đ)
+('DHP_2451010003_MATH1313_HK1_2526', '2451010003', 'MATH1313', 'HK1_2025_2026', 9.50, 9.00, 9.00, 9.10, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2451010003_GENG1315_HK1_2526', '2451010003', 'GENG1315', 'HK1_2025_2026', 9.00, 9.00, 8.50, 8.70, 3.50, 'B+', 3, 1950000.00, 1),
+('DHP_2451010003_ITEC1427_HK1_2526', '2451010003', 'ITEC1427', 'HK1_2025_2026', 9.50, 9.50, 9.00, 9.20, 4.00, 'A+', 4, 2600000.00, 1),
+('DHP_2451010003_ITEC1404_HK1_2526', '2451010003', 'ITEC1404', 'HK1_2025_2026', 9.00, 9.00, 9.00, 9.00, 4.00, 'A', 3, 1950000.00, 1),
+('DHP_2451010003_ITEC2502_HK1_2526', '2451010003', 'ITEC2502', 'HK1_2025_2026', 9.50, 9.00, 9.50, 9.40, 4.00, 'A+', 4, 2600000.00, 1),
+('DHP_2451010003_GLAW1315_HK1_2526', '2451010003', 'GLAW1315', 'HK1_2025_2026', 9.00, 9.50, 9.00, 9.20, 4.00, 'A+', 3, 1950000.00, 1),
+
+-- K25: Trần Gia Hưng (2551010001) - Học kỳ 1 (16 TC - 10.400.000đ)
+('DHP_2551010001_MATH1315_HK1_2526', '2551010001', 'MATH1315', 'HK1_2025_2026', 10.00, 9.50, 9.00, 9.30, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2551010001_GENG1311_HK1_2526', '2551010001', 'GENG1311', 'HK1_2025_2026', 9.50, 9.00, 9.00, 9.10, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2551010001_GENG1312_HK1_2526', '2551010001', 'GENG1312', 'HK1_2025_2026', 9.00, 9.50, 9.00, 9.20, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2551010001_ITEC1401_HK1_2526', '2551010001', 'ITEC1401', 'HK1_2025_2026', 9.50, 9.00, 9.50, 9.40, 4.00, 'A+', 3, 1950000.00, 1),
+('DHP_2551010001_ITEC1505_HK1_2526', '2551010001', 'ITEC1505', 'HK1_2025_2026', 9.50, 9.50, 9.00, 9.20, 4.00, 'A+', 4, 2600000.00, 1),
+
+-- K23 CLC: Vũ Nam Hùng (2351020001) - Học kỳ 5 CLC (18 TC - 26.100.000đ)
+('DHP_2351020001_CSC101_HK1_2526', '2351020001', 'CSC101', 'HK1_2025_2026', 9.00, 8.50, 8.00, 8.30, 3.50, 'B+', 4, 5800000.00, 1),
+('DHP_2351020001_CSC201_HK1_2526', '2351020001', 'CSC201', 'HK1_2025_2026', 8.50, 8.00, 8.50, 8.40, 3.50, 'B+', 4, 5800000.00, 1),
+('DHP_2351020001_CSC301_HK1_2526', '2351020001', 'CSC301', 'HK1_2025_2026', 9.00, 8.50, 8.50, 8.60, 3.50, 'B+', 3, 4350000.00, 1),
+('DHP_2351020001_CSC401_HK1_2526', '2351020001', 'CSC401', 'HK1_2025_2026', 9.50, 9.00, 8.50, 8.80, 3.50, 'B+', 4, 5800000.00, 1),
+('DHP_2351020001_CSC501_HK1_2526', '2351020001', 'CSC501', 'HK1_2025_2026', 8.50, 8.00, 8.00, 8.10, 3.00, 'B', 3, 4350000.00, 1);
+
