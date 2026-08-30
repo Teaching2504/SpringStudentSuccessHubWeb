@@ -1,0 +1,12 @@
+package com.nttt.repositories;
+
+import com.nttt.pojo.HocKy;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface HocKyRepository extends JpaRepository<HocKy, String> {
+    List<HocKy> findByNamHoc(String namHoc);
+}
