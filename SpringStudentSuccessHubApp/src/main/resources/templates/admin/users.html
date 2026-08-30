@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Tài khoản - OU-SSH Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: system-ui, sans-serif; }
+        .sidebar-link { color: #475569; padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 500; margin-bottom: 0.25rem; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #1e3a8a; color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{layout/navbar :: navbar}"></div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
+                <a th:href="@{/web/admin/dashboard}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-pie"></i> Tổng quan
+                </a>
+                <a th:href="@{/web/admin/students}" class="sidebar-link">
+                    <i class="fa-solid fa-user-graduate"></i> Quản lý Sinh viên
+                </a>
+                <a th:href="@{/web/admin/categories}" class="sidebar-link">
+                    <i class="fa-solid fa-folder-tree"></i> Danh mục Đào tạo
+                </a>
+                <a th:href="@{/web/admin/users}" class="sidebar-link active">
+                    <i class="fa-solid fa-users-gear"></i> Tài khoản Người dùng
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Quản lý Tài khoản Người dùng</h3>
+                    <p class="text-muted small mb-0">Quản trị danh sách người dùng, cấp quyền hệ thống, thiết lập & tự động đồng bộ mật khẩu bảo mật BCrypt</p>
+                </div>
+                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="fa-solid fa-user-plus me-1"></i> Thêm tài khoản mới
+                </button>
+            </div>
+
+            <!-- Users Table -->
+            <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Họ và Tên</th>
+                            <th>Email / SĐT</th>
+                            <th>Vai trò (Phân quyền)</th>
+                            <th>Mật khẩu khởi tạo</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-3">Thao tác & Mật khẩu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="u : ${users}">
+                            <td class="font-monospace" th:text="${u.id}">1</td>
+                            <td class="fw-bold text-primary font-monospace" th:text="${u.tenDangNhap}">admin</td>
+                            <td class="fw-semibold text-dark" th:text="${u.hoTen}">Quản trị viên</td>
+                            <td class="text-muted">
+                                <div th:text="${u.email != null ? u.email : '-'}">admin@ou.edu.vn</div>
+                                <small class="text-muted" th:text="${u.soDienThoai}"></small>
+                            </td>
+                            <td>
+                                <span th:if="${u.vaiTro == 'ROLE_ADMIN'}" class="badge bg-dark bg-opacity-10 border text-dark">👑 Quản trị (Admin)</span>
+                                <span th:if="${u.vaiTro == 'ROLE_CAN_BO_TRUONG'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">🏛️ Cấp Trường</span>
+                                <span th:if="${u.vaiTro == 'ROLE_CAN_BO_KHOA'}" class="badge bg-success-subtle text-success border border-success-subtle">🏢 Cấp Khoa</span>
+                                <span th:if="${u.vaiTro == 'ROLE_SINH_VIEN'}" class="badge bg-warning-subtle text-dark border border-warning-subtle">🎓 Sinh viên</span>
+                            </td>
+                            <td>
+                                <span th:text="${u.matKhauHienThi != null ? u.matKhauHienThi : (u.cccd != null ? u.cccd : '123456')}" class="badge bg-light text-dark font-monospace border">123456</span>
+                            </td>
+                            <td>
+                                <span th:if="${u.trangThai == 'HOAT_DONG'}" class="badge bg-success-subtle text-success border border-success-subtle">Đang hoạt động</span>
+                                <span th:if="${u.trangThai == 'BI_KHOA'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">Bị khóa</span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <!-- Reset Password Modal Button -->
+                                <button type="button" class="btn btn-outline-warning btn-sm rounded-pill me-1"
+                                        data-bs-toggle="modal" th:data-bs-target="'#resetPwdModal_' + ${u.id}"
+                                        title="Đặt lại mật khẩu">
+                                    <i class="fa-solid fa-key me-1"></i> Đổi MK
+                                </button>
+                                <!-- Lock Button (When Active) -->
+                                <a th:if="${u.trangThai == 'HOAT_DONG'}"
+                                   th:href="@{'/web/admin/users/' + ${u.id} + '/toggle-status'}"
+                                   th:data-username="${u.tenDangNhap}"
+                                   onclick="return confirm('Bạn có chắc chắn muốn KHÓA tài khoản ' + this.getAttribute('data-username') + ' không? Người dùng sẽ không thể đăng nhập vào hệ thống.');"
+                                   class="btn btn-outline-secondary btn-sm rounded-pill me-1"
+                                   title="Khóa tài khoản">
+                                    <i class="fa-solid fa-lock text-warning"></i>
+                                </a>
+                                <!-- Unlock Button (When Locked) -->
+                                <a th:if="${u.trangThai != 'HOAT_DONG'}"
+                                   th:href="@{'/web/admin/users/' + ${u.id} + '/toggle-status'}"
+                                   th:data-username="${u.tenDangNhap}"
+                                   onclick="return confirm('Bạn có chắc chắn muốn MỞ KHÓA cho tài khoản ' + this.getAttribute('data-username') + ' không?');"
+                                   class="btn btn-outline-success btn-sm rounded-pill me-1"
+                                   title="Mở khóa tài khoản">
+                                    <i class="fa-solid fa-lock-open text-success"></i>
+                                </a>
+                                <!-- Delete -->
+                                <a th:href="@{'/web/admin/users/' + ${u.id} + '/delete'}"
+                                   th:data-username="${u.tenDangNhap}"
+                                   onclick="return confirm('Bạn có chắc chắn muốn XÓA tài khoản ' + this.getAttribute('data-username') + ' này?');"
+                                   class="btn btn-outline-danger btn-sm rounded-pill" title="Xóa tài khoản">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+
+                                <!-- Reset Password Modal for this user -->
+                                <div class="modal fade text-start" th:id="'resetPwdModal_' + ${u.id}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content rounded-4 border-0 shadow">
+                                            <form th:action="@{'/web/admin/users/' + ${u.id} + '/reset-password'}" method="post">
+                                                <div class="modal-header border-bottom-0 pb-0">
+                                                    <h5 class="modal-title fw-bold text-dark">
+                                                        <i class="fa-solid fa-key text-warning me-2"></i>Đặt lại mật khẩu
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body py-3">
+                                                    <div class="p-3 bg-light rounded-3 mb-3 small">
+                                                        <div><strong>Tài khoản:</strong> <span class="text-primary font-monospace fw-bold" th:text="${u.tenDangNhap}"></span></div>
+                                                        <div><strong>Người dùng:</strong> <span th:text="${u.hoTen}"></span></div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold small">Mật khẩu mới</label>
+                                                        <input type="text" class="form-control font-monospace" name="newPassword" value="123456" required>
+                                                        <small class="text-muted">Mật khẩu sẽ được tự động băm BCrypt bảo mật và cập nhật vào hệ thống.</small>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-top-0 pt-0">
+                                                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                                                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-semibold">Xác nhận cập nhật</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/users/add}" method="post">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="fa-solid fa-user-plus text-primary me-2"></i>Thêm tài khoản người dùng mới
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tên đăng nhập / Mã định danh</label>
+                        <input type="text" class="form-control font-monospace" name="tenDangNhap" required placeholder="VD: cbk_cntt, 2351010001, captruong2">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Mật khẩu khởi tạo</label>
+                        <input type="text" class="form-control font-monospace" name="matKhau" value="123456" required>
+                        <small class="text-muted">Mật khẩu sẽ tự động mã hóa BCrypt khi lưu. Người dùng có thể tự đổi mật khẩu sau khi đăng nhập.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Họ và Tên</label>
+                        <input type="text" class="form-control" name="hoTen" required placeholder="VD: Nguyễn Văn A">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Email</label>
+                            <input type="email" class="form-control" name="email" placeholder="user@ou.edu.vn">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Số điện thoại</label>
+                            <input type="text" class="form-control" name="soDienThoai" placeholder="0901234567">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Vai trò hệ thống</label>
+                        <select class="form-select" name="vaiTro" required>
+                            <option value="ROLE_SINH_VIEN">🎓 Sinh viên</option>
+                            <option value="ROLE_CAN_BO_KHOA">🏢 Cán bộ Cấp Khoa</option>
+                            <option value="ROLE_CAN_BO_TRUONG">🏛️ Cán bộ Cấp Trường</option>
+                            <option value="ROLE_ADMIN">👑 Quản trị viên (Admin)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Tạo tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

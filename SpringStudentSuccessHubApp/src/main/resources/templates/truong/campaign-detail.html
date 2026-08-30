@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết Đợt xét Học bổng - OU-SSH Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: system-ui, sans-serif; }
+        .sidebar-link { color: #475569; padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 500; margin-bottom: 0.25rem; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #1e3a8a; color: #ffffff; }
+        .tab-btn { padding: 0.6rem 1.25rem; font-weight: 600; border-radius: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .tab-btn.active-primary { background-color: #1e3a8a; color: #ffffff; }
+        .tab-btn.active-success { background-color: #047857; color: #ffffff; }
+        .tab-btn.inactive { color: #475569; background-color: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{layout/navbar :: navbar}"></div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
+                <a th:href="@{/web/truong/dashboard}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-pie"></i> Tổng quan
+                </a>
+                <a th:href="@{/web/truong/campaigns}" class="sidebar-link active">
+                    <i class="fa-solid fa-award"></i> Quản lý Đợt xét Học bổng
+                </a>
+                <a th:href="@{/web/truong/stats}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-line"></i> Báo cáo & Thống kê
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <a th:href="@{/web/truong/campaigns}" class="btn btn-outline-secondary btn-sm rounded-circle p-2" style="width: 36px; height: 36px;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1" th:text="${campaign.tenDot}">Học bổng Khuyến khích Học tập - HK1 (2025-2026)</h3>
+                        <p class="text-muted small mb-0">Mã đợt: <span class="font-monospace fw-bold text-primary" th:text="${campaign.maDot}">HB_HK1_2025</span> | Trạng thái: <strong th:text="${campaign.trangThai}">DANG_MO</strong></p>
+                    </div>
+                </div>
+                <div>
+                    <form th:action="@{'/web/truong/campaigns/' + ${campaign.maDot} + '/publish'}" method="post" class="d-inline">
+                        <button type="submit" onclick="return confirm('Bạn có chắc muốn công bố chính thức kết quả đợt xét này?')" class="btn btn-success rounded-pill px-4">
+                            <i class="fa-solid fa-bullhorn me-1"></i> Công bố Kết quả Toàn trường
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="d-flex gap-2 border-bottom pb-3 mb-4">
+                <a th:href="@{'/web/truong/campaigns/' + ${campaign.maDot} + '?tab=review'}"
+                   th:classappend="${activeTab == 'review' or activeTab == null ? 'active-primary' : 'inactive'}"
+                   class="tab-btn">
+                    <i class="fa-solid fa-building-columns"></i> Duyệt Hồ sơ & 12 Khoa (<span th:text="${dotKhoasList.size()}">12</span>)
+                </a>
+                <a th:href="@{'/web/truong/campaigns/' + ${campaign.maDot} + '?tab=budget'}"
+                   th:classappend="${activeTab == 'budget' ? 'active-success' : 'inactive'}"
+                   class="tab-btn">
+                    <i class="fa-solid fa-chart-pie"></i> Phân bổ Ngân sách Quỹ 8% (Khoa - Khóa - Ngành)
+                </a>
+            </div>
+
+            <!-- TAB 2: BUDGET 8% ALLOCATION -->
+            <div th:if="${activeTab == 'budget'}">
+                <!-- Summary KPIs -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="bg-white p-3 rounded-4 border shadow-sm">
+                            <div class="d-flex justify-content-between text-muted small fw-semibold text-uppercase">
+                                <span>Sinh viên (Bộ lọc)</span>
+                                <i class="fa-solid fa-users text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark mt-2 mb-0" th:text="${totalStudents + ' SV'}">120 SV</h4>
+                            <span class="text-muted small">Theo K23, K24, K25</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-white p-3 rounded-4 border shadow-sm">
+                            <div class="d-flex justify-content-between text-muted small fw-semibold text-uppercase">
+                                <span>Tổng Thu Học Phí</span>
+                                <i class="fa-solid fa-money-bill-wave text-info"></i>
+                            </div>
+                            <h4 class="fw-bold text-primary mt-2 mb-0" th:text="${#numbers.formatDecimal(totalTuitionSum, 0, 'COMMA', 0, 'POINT') + ' đ'}">1,200,000,000 đ</h4>
+                            <span class="text-muted small">Căn cứ trích lập học bổng</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-white p-3 rounded-4 border border-success border-opacity-50 shadow-sm bg-success bg-opacity-10">
+                            <div class="d-flex justify-content-between text-success small fw-bold text-uppercase">
+                                <span>Quỹ 8% Học Bổng</span>
+                                <i class="fa-solid fa-award text-success"></i>
+                            </div>
+                            <h4 class="fw-bold text-success mt-2 mb-0" th:text="${#numbers.formatDecimal(total8PercentFund, 0, 'COMMA', 0, 'POINT') + ' đ'}">96,000,000 đ</h4>
+                            <span class="text-success small fw-semibold">8% x Tổng học phí</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-white p-3 rounded-4 border border-purple border-opacity-50 shadow-sm bg-light">
+                            <div class="d-flex justify-content-between text-secondary small fw-bold text-uppercase">
+                                <span>Hạn mức 12 Khoa</span>
+                                <i class="fa-solid fa-building text-secondary"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark mt-2 mb-0" th:text="${#numbers.formatDecimal(totalAllocatedFacultyBudget, 0, 'COMMA', 0, 'POINT') + ' đ'}">950,000,000 đ</h4>
+                            <span class="text-muted small">Tổng hạn mức ngân sách</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sync Action Card -->
+                <div class="bg-white p-4 rounded-4 border shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1"><i class="fa-solid fa-bolt text-warning me-2"></i>Cơ chế Tự động Phân bổ Ngân sách 8% theo Khoa, Ngành & Khóa</h5>
+                        <p class="text-muted small mb-0">Học bổng được chia riêng biệt theo từng <strong>Khoa &rarr; Ngành &rarr; Khóa học (K23, K24, K25)</strong> dựa trên 8% tổng số tiền học phí thực tế của nhóm sinh viên đó.</p>
+                    </div>
+                    <form th:action="@{'/web/truong/campaigns/' + ${campaign.maDot} + '/auto-sync-8percent'}" method="post">
+                        <button type="submit" onclick="return confirm('Hệ thống sẽ tự động tính 8% tổng học phí thực tế của từng Khoa (theo Ngành và Khóa) và cập nhật hạn mức cho các Khoa. Xác nhận?')" class="btn btn-success rounded-pill px-4 text-nowrap fw-bold shadow-sm">
+                            <i class="fa-solid fa-bolt me-1"></i> Tự động tính & Phân bổ 8% Ngân sách từ Học phí
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Filter Toolbar for Budget Breakdown -->
+                <div class="bg-white p-3 rounded-4 border shadow-sm mb-4">
+                    <form method="get" class="row g-2 align-items-center">
+                        <input type="hidden" name="tab" value="budget">
+                        <div class="col-md-3">
+                            <input type="text" name="filterSearch" th:value="${filterSearch}" placeholder="Tìm Khoa hoặc Ngành..." class="form-control form-control-sm rounded-3">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="filterKhoa" class="form-select form-select-sm rounded-3">
+                                <option value="ALL">-- Tất cả Khoa --</option>
+                                <option th:each="k : ${khoas}" th:value="${k.maKhoa}" th:text="${k.tenKhoa}" th:selected="${k.maKhoa == filterKhoa}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="filterKhoaHoc" class="form-select form-select-sm rounded-3">
+                                <option value="ALL">-- Tất cả Khóa --</option>
+                                <option th:each="kh : ${uniqueBudgetKhoaHocs}" th:value="${kh}" th:text="${kh}" th:selected="${kh == filterKhoaHoc}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="filterNganh" class="form-select form-select-sm rounded-3">
+                                <option value="ALL">-- Tất cả Ngành --</option>
+                                <option th:each="ng : ${uniqueBudgetNganhs}" th:value="${ng}" th:text="${ng}" th:selected="${ng == filterNganh}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="filterHeDaoTao" class="form-select form-select-sm rounded-3">
+                                <option value="ALL">-- Tất cả Chương trình --</option>
+                                <option value="CHUAN" th:selected="${filterHeDaoTao == 'CHUAN'}">Chuẩn (Đại trà)</option>
+                                <option value="DAC_BIET" th:selected="${filterHeDaoTao == 'DAC_BIET'}">Đặc biệt (CLC)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex gap-1">
+                            <button type="submit" class="btn btn-success btn-sm rounded-3 w-100"><i class="fa-solid fa-filter"></i> Lọc</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Budget Breakdown Table -->
+                <div class="bg-white p-4 rounded-4 border shadow-sm mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-table-list text-success me-2"></i>Bảng Phân rã Quỹ 8% theo Khoa, Ngành & Khóa học</h5>
+                        <span class="text-muted small">Hiển thị <strong th:text="${budgetBreakdown.size()}">0</strong> nhóm (Ngành - Khóa)</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Khoa quản lý</th>
+                                    <th>Ngành đào tạo</th>
+                                    <th>Hệ ĐT</th>
+                                    <th>Khóa học</th>
+                                    <th class="text-center">Số SV</th>
+                                    <th class="text-end">Tổng học phí thu</th>
+                                    <th class="text-end fw-bold text-success">Quỹ 8% học bổng</th>
+                                    <th class="text-center">Suất ước tính</th>
+                                    <th class="text-end">Hạn mức Khoa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${budgetBreakdown.isEmpty()}">
+                                    <td colspan="9" class="text-center text-muted py-4">Không tìm thấy dữ liệu phân bổ theo bộ lọc đã chọn</td>
+                                </tr>
+                                <tr th:each="b : ${budgetBreakdown}">
+                                    <td class="fw-bold text-dark" th:text="${b.tenKhoa}">Khoa Công nghệ Thông tin</td>
+                                    <td class="fw-semibold text-primary" th:text="${b.tenNganh}">Khoa học Máy tính</td>
+                                    <td>
+                                        <span th:if="${b.heDaoTao == 'DAC_BIET' or b.heDaoTao == 'CHAT_LUONG_CAO'}" class="badge bg-purple-subtle text-purple fw-bold">CLC</span>
+                                        <span th:unless="${b.heDaoTao == 'DAC_BIET' or b.heDaoTao == 'CHAT_LUONG_CAO'}" class="badge bg-light text-secondary">Chuẩn</span>
+                                    </td>
+                                    <td class="fw-bold text-dark font-monospace" th:text="${b.khoaHoc}">K23 (2023-2027)</td>
+                                    <td class="text-center fw-bold" th:text="${b.soSinhVienTong}">2</td>
+                                    <td class="text-end fw-semibold text-secondary" th:text="${#numbers.formatDecimal(b.tongHocPhiThu, 0, 'COMMA', 0, 'POINT') + ' đ'}">23,400,000 đ</td>
+                                    <td class="text-end fw-bold text-success bg-success bg-opacity-10" th:text="${#numbers.formatDecimal(b.quyHocBong8PhanTram, 0, 'COMMA', 0, 'POINT') + ' đ'}">1,872,000 đ</td>
+                                    <td class="text-center fw-bold text-primary" th:text="${(b.soSinhVienDatHocBong != null ? b.soSinhVienDatHocBong : 1) + ' suất'}">1 suất</td>
+                                    <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(b.nganSachKhoaHienTai, 0, 'COMMA', 0, 'POINT') + ' đ'}">105,300,000 đ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 1: FACULTY REVIEW & RULE ENGINE -->
+            <div th:unless="${activeTab == 'budget'}">
+                <!-- Dynamic Rule Engine Form -->
+                <div class="bg-white p-4 rounded-4 border shadow-sm mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-sliders text-purple me-2"></i>Cấu hình Dynamic Rule Engine</h5>
+                    <form th:action="@{'/web/truong/campaigns/' + ${campaign.maDot} + '/rules'}" method="post">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">GPA tối thiểu</label>
+                                <input type="number" step="0.01" name="diemTbDuoiThieu" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.diemTbDuoiThieu : 2.5}" class="form-control form-control-sm fw-bold" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">ĐRL tối thiểu</label>
+                                <input type="number" step="0.5" name="diemRlToiThieu" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.diemRlToiThieu : 65}" class="form-control form-control-sm fw-bold" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Tín chỉ tối thiểu</label>
+                                <input type="number" name="soTinChiToiThieu" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.soTinChiToiThieu : 14}" class="form-control form-control-sm fw-bold" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Ràng buộc Nợ môn</label>
+                                <select name="khongNoMon" class="form-select form-select-sm fw-semibold">
+                                    <option value="true" th:selected="${campaign.quyTacHienHanh == null or campaign.quyTacHienHanh.khongNoMon}">Không được rớt môn nào</option>
+                                    <option value="false" th:selected="${campaign.quyTacHienHanh != null and !campaign.quyTacHienHanh.khongNoMon}">Cho phép rớt môn</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mb-3">
+                            <h6 class="small fw-bold text-dark text-uppercase mb-2">Định mức Học bổng (VNĐ)</h6>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="small text-success fw-bold">Xuất sắc</label>
+                                    <input type="number" name="mucHocBongXuatSac" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.mucHocBongXuatSac : 10000000}" class="form-control form-control-sm fw-bold text-success">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="small text-primary fw-bold">Giỏi</label>
+                                    <input type="number" name="mucHocBongGioi" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.mucHocBongGioi : 7000000}" class="form-control form-control-sm fw-bold text-primary">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="small text-warning fw-bold">Khá</label>
+                                    <input type="number" name="mucHocBongKha" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.mucHocBongKha : 5000000}" class="form-control form-control-sm fw-bold text-warning">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <input type="text" name="ghiChu" placeholder="Ghi chú lý do cập nhật phiên bản quy tắc mới..." class="form-control form-control-sm me-3">
+                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 text-nowrap">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thành Phiên bản mới
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Khoa Allocations Table -->
+                <div class="bg-white p-4 rounded-4 border shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-building-columns text-primary me-2"></i>Tình trạng Xét duyệt & Phân bổ 12 Khoa</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Khoa</th>
+                                    <th class="text-center">Chỉ tiêu</th>
+                                    <th>Ngân sách Phân bổ</th>
+                                    <th>Trạng thái Khoa</th>
+                                    <th>Hạn phản hồi</th>
+                                    <th class="text-center">Điều chỉnh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="dk : ${dotKhoasList}">
+                                    <td class="fw-bold text-dark" th:text="${dk.tenKhoa}">Khoa Công nghệ Thông tin</td>
+                                    <td class="text-center fw-bold text-primary" th:text="${dk.chiTieu}">9</td>
+                                    <td class="fw-bold text-success" th:text="${#numbers.formatDecimal(dk.nganSachKhoa, 0, 'COMMA', 0, 'POINT') + ' đ'}">105,300,000 đ</td>
+                                    <td>
+                                        <span th:if="${dk.trangThai == 'CHUA_XET'}" class="badge bg-secondary-subtle text-secondary">Chưa xét</span>
+                                        <span th:if="${dk.trangThai == 'DA_CONG_BO_DU_KIEN'}" class="badge bg-info-subtle text-info">Khoa công bố dự kiến</span>
+                                        <span th:if="${dk.trangThai == 'DA_CHOT_GUI_TRUONG'}" class="badge bg-warning-subtle text-warning">Đã nộp Cấp Trường</span>
+                                        <span th:if="${dk.trangThai == 'DA_PHE_DUYET'}" class="badge bg-success-subtle text-success">Đã phê duyệt</span>
+                                        <span th:if="${dk.trangThai == 'BI_TRA_VE'}" class="badge bg-danger-subtle text-danger">Bị trả về</span>
+                                    </td>
+                                    <td class="text-muted" th:text="${dk.hanPhanHoi}">2025-10-25</td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                                data-bs-toggle="modal" th:data-bs-target="'#modalQuota_' + ${dk.maDotXetHbKhoa}">
+                                            <i class="fa-solid fa-pen-to-square me-1"></i> Sửa Hạn mức
+                                        </button>
+
+                                        <!-- Modal Quota Adjustment -->
+                                        <div class="modal fade text-start" th:id="'modalQuota_' + ${dk.maDotXetHbKhoa}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content rounded-4 border-0 shadow">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold" th:text="'Phân bổ Ngân sách: ' + ${dk.tenKhoa}">Phân bổ Ngân sách</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form th:action="@{'/web/truong/campaigns/' + ${campaign.maDot} + '/quota/' + ${dk.maDotXetHbKhoa}}" method="post">
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-semibold">Chỉ tiêu số suất học bổng</label>
+                                                                <input type="number" name="chiTieu" th:value="${dk.chiTieu}" class="form-control fw-bold" required>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-semibold">Ngân sách Quỹ cấp cho Khoa (VNĐ)</label>
+                                                                <input type="number" name="nganSachKhoa" th:value="${dk.nganSachKhoa}" class="form-control fw-bold text-success" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-primary rounded-pill px-4">Lưu Phân bổ</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

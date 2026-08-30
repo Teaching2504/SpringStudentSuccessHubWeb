@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh mục Đào tạo - OU-SSH Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: system-ui, sans-serif; }
+        .sidebar-link { color: #475569; padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 500; margin-bottom: 0.25rem; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #1e3a8a; color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{layout/navbar :: navbar}"></div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
+                <a th:href="@{/web/admin/dashboard}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-pie"></i> Tổng quan
+                </a>
+                <a th:href="@{/web/admin/students}" class="sidebar-link">
+                    <i class="fa-solid fa-user-graduate"></i> Quản lý Sinh viên
+                </a>
+                <a th:href="@{/web/admin/categories}" class="sidebar-link active">
+                    <i class="fa-solid fa-folder-tree"></i> Danh mục Đào tạo
+                </a>
+                <a th:href="@{/web/admin/users}" class="sidebar-link">
+                    <i class="fa-solid fa-users-gear"></i> Tài khoản Người dùng
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="mb-4">
+                <h3 class="fw-bold text-dark mb-1">Quản lý Danh mục Đào tạo</h3>
+                <p class="text-muted small">Cơ cấu tổ chức Khoa, Ngành học, Lớp sinh hoạt và Niên khóa / Học kỳ</p>
+            </div>
+
+            <!-- Tabs -->
+            <ul class="nav nav-pills mb-4 gap-2">
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4" th:classappend="${activeTab == 'khoa' ? 'active bg-primary' : 'bg-white text-dark border'}" th:href="@{/web/admin/categories?tab=khoa}">
+                        <i class="fa-solid fa-building-columns me-1"></i> Khoa (<span th:text="${khoas.size()}"></span>)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4" th:classappend="${activeTab == 'nganh' ? 'active bg-primary' : 'bg-white text-dark border'}" th:href="@{/web/admin/categories?tab=nganh}">
+                        <i class="fa-solid fa-book me-1"></i> Ngành học (<span th:text="${nganhs.size()}"></span>)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4" th:classappend="${activeTab == 'lop' ? 'active bg-primary' : 'bg-white text-dark border'}" th:href="@{/web/admin/categories?tab=lop}">
+                        <i class="fa-solid fa-users-rectangle me-1"></i> Lớp sinh hoạt (<span th:text="${lops.size()}"></span>)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4" th:classappend="${activeTab == 'hoc-ky' ? 'active bg-primary' : 'bg-white text-dark border'}" th:href="@{/web/admin/categories?tab=hoc-ky}">
+                        <i class="fa-solid fa-calendar-days me-1"></i> Học kỳ / Niên khóa (<span th:text="${hocKys.size()}"></span>)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4" th:classappend="${activeTab == 'mon-hoc' ? 'active bg-primary' : 'bg-white text-dark border'}" th:href="@{/web/admin/categories?tab=mon-hoc}">
+                        <i class="fa-solid fa-graduation-cap me-1"></i> Danh mục Môn học (<span th:text="${monHocs != null ? monHocs.size() : 0}"></span>)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill px-4" th:classappend="${activeTab == 'ctdt' ? 'active bg-primary' : 'bg-white text-dark border'}" th:href="@{/web/admin/categories?tab=ctdt}">
+                        <i class="fa-solid fa-diagram-project me-1"></i> Khung CTĐT Chuẩn (QĐ 561)
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Khoa Table -->
+            <div th:if="${activeTab == 'khoa'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã Khoa (Tiếng Anh)</th>
+                            <th>Tên Khoa</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="k : ${khoas}">
+                            <td class="fw-bold text-primary font-monospace" th:text="${k.maKhoa}">IT</td>
+                            <td class="fw-semibold text-dark" th:text="${k.tenKhoa}">Khoa Công nghệ Thông tin</td>
+                            <td class="text-end">
+                                <a th:href="@{'/web/admin/categories/khoa/delete/' + ${k.maKhoa}}" onclick="return confirm('Bạn có chắc chắn muốn xóa?')" class="btn btn-outline-danger btn-sm">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Nganh Table -->
+            <div th:if="${activeTab == 'nganh'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã Ngành (Mã Lớp)</th>
+                            <th>Tên Ngành Đào tạo</th>
+                            <th>Hệ đào tạo</th>
+                            <th>Trực thuộc Khoa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="n : ${nganhs}">
+                            <td class="fw-bold text-primary font-monospace" th:text="${n.maNganh}">CS</td>
+                            <td class="fw-semibold text-dark" th:text="${n.tenNganh}">Khoa học Máy tính</td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary" th:text="${n.heDaoTao}">CHUAN</span>
+                            </td>
+                            <td th:text="${n.khoa?.tenKhoa}">Khoa CNTT</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Lop Table -->
+            <div th:if="${activeTab == 'lop'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã Lớp</th>
+                            <th>Tên Lớp Sinh Hoạt</th>
+                            <th>Khóa học</th>
+                            <th>Khoa / Ngành</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="l : ${lops}">
+                            <td class="fw-bold text-primary font-monospace" th:text="${l.maLop}">DH23CS01</td>
+                            <td class="fw-semibold text-dark" th:text="${l.tenLop}">ĐH Khoa học Máy tính 2023 - Lớp 01</td>
+                            <td th:text="${l.khoaHoc}">K23 (2023-2027)</td>
+                            <td>
+                                <div class="fw-semibold" th:text="${l.khoa?.tenKhoa}">Khoa CNTT</div>
+                                <small class="text-muted" th:text="${l.nganh?.tenNganh}">Khoa học Máy tính</small>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Hoc Ky Table -->
+            <div th:if="${activeTab == 'hoc-ky'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã Học Kỳ</th>
+                            <th>Tên Học Kỳ</th>
+                            <th>Năm Học</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="h : ${hocKys}">
+                            <td class="fw-bold text-primary font-monospace" th:text="${h.maHocKy}">HK1_2023_2024</td>
+                            <td class="fw-semibold text-dark" th:text="${h.tenHocKy}">Học kỳ 1 (2023-2024)</td>
+                            <td class="badge bg-secondary-subtle text-secondary m-2" th:text="${h.namHoc}">2023-2024</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mon Hoc Table (QĐ 561) -->
+            <div th:if="${activeTab == 'mon-hoc'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <div class="fw-bold text-dark"><i class="fa-solid fa-list-check me-2 text-primary"></i>Danh mục Môn học theo Chương trình đào tạo Quyết định 561/QĐ-ĐHM</div>
+                    <span class="badge bg-primary rounded-pill px-3 py-2" th:text="${monHocs != null ? monHocs.size() + ' Môn học' : '0 Môn'}">40 Môn học</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã Môn</th>
+                                <th>Tên Môn học</th>
+                                <th class="text-center">Số Tín chỉ</th>
+                                <th class="text-center">Lý thuyết</th>
+                                <th class="text-center">Thực hành</th>
+                                <th class="text-end">Đơn giá / 1 TC</th>
+                                <th>Khoa quản lý</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="m : ${monHocs}">
+                                <td class="fw-bold text-primary font-monospace" th:text="${m.maMon}">MATH1315</td>
+                                <td class="fw-semibold text-dark" th:text="${m.tenMon}">Xác suất và Thống kê</td>
+                                <td class="text-center fw-bold" th:text="${m.soTinChi}">3</td>
+                                <td class="text-center" th:text="${m.soTietLyThuyet != null ? m.soTietLyThuyet + ' tiết' : '-'}">45 tiết</td>
+                                <td class="text-center" th:text="${m.soTietThucHanh != null ? m.soTietThucHanh + ' tiết' : '-'}">15 tiết</td>
+                                <td class="text-end font-monospace text-primary fw-semibold" th:text="${#numbers.formatDecimal(m.donGiaTinChi, 0, 'COMMA', 0, 'POINT') + ' đ'}">650.000 đ</td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary" th:text="${m.maKhoa}">BAS</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CTĐT Table (QĐ 561) -->
+            <div th:if="${activeTab == 'ctdt'}" class="space-y-3">
+                <div class="bg-white p-3 rounded-4 border shadow-sm mb-3">
+                    <form th:action="@{/web/admin/categories}" method="get" class="row g-2 align-items-center">
+                        <input type="hidden" name="tab" value="ctdt">
+                        <div class="col-auto fw-bold text-dark">
+                            <i class="fa-solid fa-filter text-primary me-1"></i> Chọn Ngành Đào tạo:
+                        </div>
+                        <div class="col-md-4">
+                            <select name="maNganh" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option th:each="n : ${nganhs}" th:value="${n.maNganh}" th:text="${n.tenNganh + ' (' + n.maNganh + ')'}" th:selected="${n.maNganh == selectedNganh}"></option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <div class="fw-bold text-dark">
+                            <i class="fa-solid fa-graduation-cap me-2 text-primary"></i>Khung Kế hoạch Đào tạo Chuẩn 11 Học kỳ - Quyết định 561/QĐ-ĐHM
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">Học kỳ Gợi ý</th>
+                                    <th>Mã Môn</th>
+                                    <th>Tên Môn học</th>
+                                    <th class="text-center">Tín chỉ</th>
+                                    <th>Loại Học phần</th>
+                                    <th>Hệ Đào tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="c : ${curriculums}">
+                                    <td class="text-center fw-bold text-primary font-monospace" th:text="'Học kỳ ' + ${c.hocKyGoiY}">Học kỳ 1</td>
+                                    <td class="fw-bold text-dark font-monospace" th:text="${c.maMon}">MATH1315</td>
+                                    <td class="fw-semibold text-dark" th:text="${c.tenMon}">Xác suất và Thống kê</td>
+                                    <td class="text-center fw-bold" th:text="${c.soTinChi}">3</td>
+                                    <td>
+                                        <span th:if="${c.loaiHocPhan == 'BAT_BUOC'}" class="badge bg-danger-subtle text-danger">Bắt buộc</span>
+                                        <span th:if="${c.loaiHocPhan != 'BAT_BUOC'}" class="badge bg-info-subtle text-info">Tự chọn</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary" th:text="${c.heDaoTao}">CHUAN</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

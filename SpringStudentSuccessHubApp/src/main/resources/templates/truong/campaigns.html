@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Đợt xét Học bổng - OU-SSH Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: system-ui, sans-serif; }
+        .sidebar-link { color: #475569; padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 500; margin-bottom: 0.25rem; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #1e3a8a; color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{layout/navbar :: navbar}"></div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
+                <a th:href="@{/web/truong/dashboard}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-pie"></i> Tổng quan
+                </a>
+                <a th:href="@{/web/truong/campaigns}" class="sidebar-link active">
+                    <i class="fa-solid fa-award"></i> Quản lý Đợt xét Học bổng
+                </a>
+                <a th:href="@{/web/truong/stats}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-line"></i> Báo cáo & Thống kê
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Quản lý Đợt xét Học bổng & Quy tắc Động</h3>
+                    <p class="text-muted small">Khởi tạo đợt xét, phân bổ hạn ngạch cho các khoa và cấu hình Rule Engine</p>
+                </div>
+                <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createCampModal">
+                    <i class="fa-solid fa-plus me-1"></i> Khởi tạo Đợt xét mới
+                </button>
+            </div>
+
+            <!-- Campaign Cards List -->
+            <div class="row g-3">
+                <div class="col-12" th:each="c : ${campaigns}">
+                    <div class="bg-white p-4 rounded-4 border shadow-sm">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 border-bottom">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h5 class="fw-bold text-dark mb-0" th:text="${c.tenDot}">Học bổng Khuyến khích Học tập - HK1 (2025-2026)</h5>
+                                    <span th:if="${c.trangThai == 'DANG_MO'}" class="badge bg-success-subtle text-success">Đang mở</span>
+                                    <span th:if="${c.trangThai != 'DANG_MO'}" class="badge bg-secondary-subtle text-secondary" th:text="${c.trangThai}">Đã kết thúc</span>
+                                </div>
+                                <p class="text-muted small font-monospace mt-1 mb-0">
+                                    Mã đợt: <span th:text="${c.maDot}">HB_HK1_2025</span> | Học kỳ: <strong th:text="${c.tenHocKy != null ? c.tenHocKy : c.maHocKy}">HK1 (2025-2026)</strong>
+                                </p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{'/web/truong/campaigns/' + ${c.maDot} + '?tab=budget'}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                    <i class="fa-solid fa-chart-pie me-1"></i> Quỹ 8% (Khoa - Khóa - Ngành)
+                                </a>
+                                <a th:href="@{'/web/truong/campaigns/' + ${c.maDot}}" class="btn btn-primary btn-sm rounded-pill px-3">
+                                    <i class="fa-solid fa-sliders me-1"></i> Quy tắc & Duyệt Khoa
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Rules Info Box -->
+                        <div th:if="${c.quyTacHienHanh != null}" class="row g-2 mt-3 text-secondary small bg-light p-3 rounded-3">
+                            <div class="col-sm-3">
+                                <span class="d-block text-muted">Phiên bản Rule:</span>
+                                <strong class="text-primary" th:text="${'Version ' + c.quyTacHienHanh.phienBan}">Version 1</strong>
+                            </div>
+                            <div class="col-sm-3">
+                                <span class="d-block text-muted">GPA tối thiểu:</span>
+                                <strong class="text-dark" th:text="${'GPA >= ' + c.quyTacHienHanh.diemTbDuoiThieu}">GPA >= 2.50</strong>
+                            </div>
+                            <div class="col-sm-3">
+                                <span class="d-block text-muted">ĐRL tối thiểu:</span>
+                                <strong class="text-dark" th:text="${'ĐRL >= ' + c.quyTacHienHanh.diemRlToiThieu}">ĐRL >= 65.0</strong>
+                            </div>
+                            <div class="col-sm-3">
+                                <span class="d-block text-muted">TC tối thiểu / Nợ môn:</span>
+                                <strong class="text-dark" th:text="${c.quyTacHienHanh.soTinChiToiThieu + ' TC | Không nợ môn'}">14 TC</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create Campaign -->
+<div class="modal fade" id="createCampModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Khởi tạo Đợt xét Học bổng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/web/truong/campaigns/add}" method="post">
+                <div class="modal-body space-y-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mã đợt xét</label>
+                        <input type="text" name="maDot" class="form-control form-control-sm" placeholder="VD: HB_HK1_2025" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Tên đợt xét học bổng</label>
+                        <input type="text" name="tenDot" class="form-control form-control-sm" placeholder="VD: Học bổng KKHT HK1 (2025-2026)" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Học kỳ áp dụng</label>
+                        <select name="maHocKy" class="form-select form-select-sm" required>
+                            <option th:each="h : ${hocKys}" th:value="${h.maHocKy}" th:text="${h.tenHocKy}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-sm rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">Tạo đợt xét</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

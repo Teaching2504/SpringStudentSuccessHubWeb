@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Duyệt Minh chứng Rèn luyện - OU-SSH Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: system-ui, sans-serif; }
+        .sidebar-link { color: #475569; padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 500; margin-bottom: 0.25rem; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #1e3a8a; color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{layout/navbar :: navbar}"></div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
+                <a th:href="@{/web/khoa/dashboard}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-pie"></i> Tổng quan Khoa
+                </a>
+                <a th:href="@{/web/khoa/students}" class="sidebar-link">
+                    <i class="fa-solid fa-user-graduate"></i> Sinh viên & Điểm
+                </a>
+                <a th:href="@{/web/khoa/scholarships}" class="sidebar-link">
+                    <i class="fa-solid fa-award"></i> Xét duyệt Học bổng
+                </a>
+                <a th:href="@{/web/khoa/evidence}" class="sidebar-link active">
+                    <i class="fa-solid fa-file-circle-check"></i> Duyệt Minh chứng ĐRL
+                </a>
+                <a th:href="@{/web/khoa/appeals}" class="sidebar-link">
+                    <i class="fa-solid fa-circle-question"></i> Khiếu nại Học bổng
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="mb-4">
+                <h3 class="fw-bold text-dark mb-1">Thẩm định & Duyệt Minh chứng Rèn luyện</h3>
+                <p class="text-muted small">Cán bộ khoa xem xét giấy chứng nhận hoạt động của sinh viên và cộng điểm ĐRL</p>
+            </div>
+
+            <!-- Evidence Table -->
+            <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã MC</th>
+                            <th>Sinh viên</th>
+                            <th>Tên hoạt động / Mô tả</th>
+                            <th class="text-center">Điểm đề xuất</th>
+                            <th>Tệp đính kèm</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${evidenceList.isEmpty()}">
+                            <td colspan="7" class="text-center py-4 text-muted">Hiện tại không có minh chứng nào cần duyệt</td>
+                        </tr>
+                        <tr th:each="mc : ${evidenceList}">
+                            <td class="fw-bold text-primary font-monospace" th:text="${mc.maMinhChung}">MC01</td>
+                            <td>
+                                <div class="fw-semibold text-dark" th:text="${mc.sinhVien?.hoTen}">Nguyễn Thị Tuyết Trinh</div>
+                                <small class="text-muted font-monospace" th:text="${mc.sinhVien?.mssv}">2351010216</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold" th:text="${mc.tenHoatDong}">Cuộc thi Olympic Tin học</div>
+                                <small class="text-muted" th:text="${mc.moTa}">Đạt giải nhì</small>
+                            </td>
+                            <td class="text-center fw-bold text-success" th:text="${'+' + mc.diemDeXuat + ' đ'}">+5 đ</td>
+                            <td>
+                                <a th:if="${mc.fileUrl != null}" th:href="${mc.fileUrl}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-2">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem file
+                                </a>
+                                <span th:if="${mc.fileUrl == null}" class="text-muted">-</span>
+                            </td>
+                            <td>
+                                <span th:if="${mc.trangThai == 'CHO_DUYET'}" class="badge bg-warning-subtle text-warning">Chờ duyệt</span>
+                                <span th:if="${mc.trangThai == 'DA_DUYET'}" class="badge bg-success-subtle text-success">Đã duyệt</span>
+                                <span th:if="${mc.trangThai == 'TU_CHOI'}" class="badge bg-danger-subtle text-danger">Từ chối</span>
+                            </td>
+                            <td class="text-end">
+                                <form th:action="@{'/web/khoa/evidence/' + ${mc.maMinhChung} + '/review'}" method="post" class="d-inline">
+                                    <input type="hidden" name="trangThai" value="DA_DUYET">
+                                    <input type="hidden" name="lyDoPhanHoi" value="Hồ sơ minh chứng hợp lệ.">
+                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 me-1">
+                                        <i class="fa-solid fa-check"></i> Duyệt (+ĐRL)
+                                    </button>
+                                </form>
+                                <form th:action="@{'/web/khoa/evidence/' + ${mc.maMinhChung} + '/review'}" method="post" class="d-inline">
+                                    <input type="hidden" name="trangThai" value="TU_CHOI">
+                                    <input type="hidden" name="lyDoPhanHoi" value="Không đủ minh chứng hợp lệ.">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

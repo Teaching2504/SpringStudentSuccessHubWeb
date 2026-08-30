@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Sinh viên - OU-SSH Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: system-ui, sans-serif; }
+        .sidebar-link { color: #475569; padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 500; margin-bottom: 0.25rem; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #1e3a8a; color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{layout/navbar :: navbar}"></div>
+
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
+                <a th:href="@{/web/admin/dashboard}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-pie"></i> Tổng quan
+                </a>
+                <a th:href="@{/web/admin/students}" class="sidebar-link active">
+                    <i class="fa-solid fa-user-graduate"></i> Quản lý Sinh viên
+                </a>
+                <a th:href="@{/web/admin/categories}" class="sidebar-link">
+                    <i class="fa-solid fa-folder-tree"></i> Danh mục Đào tạo
+                </a>
+                <a th:href="@{/web/admin/users}" class="sidebar-link">
+                    <i class="fa-solid fa-users-gear"></i> Tài khoản Người dùng
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Quản lý Hồ sơ & Kết quả Sinh viên</h3>
+                    <p class="text-muted small">Tra cứu đa tiêu chí, theo dõi điểm GPA/ĐRL, cảnh báo học vụ và đồng bộ Excel</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                        <i class="fa-solid fa-file-excel me-1"></i> Nhập Excel Điểm
+                    </button>
+                    <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                        <i class="fa-solid fa-user-plus me-1"></i> Thêm Sinh viên
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Card -->
+            <div class="bg-white p-3 rounded-4 border shadow-sm mb-4">
+                <form th:action="@{/web/admin/students}" method="get" class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" name="search" th:value="${search}" class="form-control form-control-sm" placeholder="Tìm theo MSSV, Họ tên...">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="maKhoa" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">-- Tất cả Khoa --</option>
+                            <option th:each="k : ${khoas}" th:value="${k.maKhoa}" th:text="${k.tenKhoa}" th:selected="${k.maKhoa == selectedKhoa}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="maLop" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">-- Tất cả Lớp --</option>
+                            <option th:each="l : ${lops}" th:value="${l.maLop}" th:text="${l.tenLop + ' (' + l.maLop + ')'}" th:selected="${l.maLop == selectedLop}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="maHocKy" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option th:each="h : ${hocKys}" th:value="${h.maHocKy}" th:text="${h.tenHocKy}" th:selected="${h.maHocKy == selectedHk}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary btn-sm w-100"><i class="fa-solid fa-filter"></i> Lọc</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>MSSV</th>
+                                <th>Họ và Tên</th>
+                                <th>CCCD</th>
+                                <th>Lớp / Khoa</th>
+                                <th class="text-center">GPA</th>
+                                <th class="text-center">ĐRL</th>
+                                <th class="text-center">Tín chỉ</th>
+                                <th>Cảnh báo Học vụ</th>
+                                <th class="text-end">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="sv : ${students}">
+                                <td class="fw-bold text-primary font-monospace" th:text="${sv.mssv}">2351010216</td>
+                                <td>
+                                    <div class="fw-semibold text-dark" th:text="${sv.hoTen}">Nguyễn Thị Tuyết Trinh</div>
+                                    <small class="text-muted" th:text="${sv.email}">trinh@ou.edu.vn</small>
+                                </td>
+                                <td class="font-monospace" th:text="${sv.cccd != null ? sv.cccd : '-'}">079305012345</td>
+                                <td>
+                                    <div class="fw-bold" th:text="${sv.maLop}">DH23CS01</div>
+                                    <small class="text-muted" th:text="${sv.tenKhoa}">Khoa CNTT</small>
+                                </td>
+                                <td class="text-center fw-bold text-dark" th:text="${sv.diemTrungBinh != null ? sv.diemTrungBinh : '-'}">3.85</td>
+                                <td class="text-center fw-bold text-dark" th:text="${sv.diemRenLuyen != null ? sv.diemRenLuyen : '-'}">95.0</td>
+                                <td class="text-center" th:text="${sv.soTinChi != null ? sv.soTinChi : '-'}">18</td>
+                                <td>
+                                    <span th:if="${sv.canhBao != 'Bình thường'}" class="badge bg-danger-subtle text-danger border border-danger-subtle" th:text="${sv.canhBao}">Cảnh báo</span>
+                                    <span th:if="${sv.canhBao == 'Bình thường'}" class="badge bg-success-subtle text-success">Bình thường</span>
+                                </td>
+                                <td class="text-end">
+                                    <a th:href="@{'/web/admin/students/delete/' + ${sv.mssv}}" onclick="return confirm('Bạn có chắc chắn muốn xóa sinh viên này?')" class="btn btn-outline-danger btn-sm">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Student -->
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Thêm hồ sơ sinh viên mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/web/admin/students/add}" method="post">
+                <div class="modal-body space-y-3">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">MSSV</label>
+                            <input type="text" name="mssv" class="form-control form-control-sm" placeholder="VD: 2351010216" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Số CCCD (Mật khẩu mặc định)</label>
+                            <input type="text" name="cccd" class="form-control form-control-sm" placeholder="12 số CCCD" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Họ và Tên</label>
+                        <input type="text" name="hoTen" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Email</label>
+                            <input type="email" name="email" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Số điện thoại</label>
+                            <input type="text" name="soDienThoai" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Lớp sinh hoạt</label>
+                            <select name="maLop" class="form-select form-select-sm" required>
+                                <option th:each="l : ${lops}" th:value="${l.maLop}" th:text="${l.tenLop + ' (' + l.maLop + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Giới tính</label>
+                            <select name="gioiTinh" class="form-select form-select-sm">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-sm rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">Lưu sinh viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Import Excel -->
+<div class="modal fade" id="importExcelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Nhập Sinh viên & Điểm từ file Excel (.xlsx)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/web/admin/students/import-excel}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Học kỳ áp dụng</label>
+                        <select name="maHocKy" class="form-select form-select-sm">
+                            <option th:each="h : ${hocKys}" th:value="${h.maHocKy}" th:text="${h.tenHocKy}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Chọn file Excel (.xlsx)</label>
+                        <input type="file" name="file" accept=".xlsx, .xls" class="form-control form-control-sm" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-sm rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-4">Tiến hành Nhập</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
