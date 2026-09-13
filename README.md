@@ -88,9 +88,9 @@ Hệ thống được thiết kế bám sát chặt chẽ theo **Quy chế Học
 
 ---
 
-## 🚀 5. Hướng Dẫn Cài Đặt & Khởi Chạy
+## 🚀 5. Hướng Dẫn Cài Đặt & Chạy
 
-### Bước 1: Khởi chạy Backend Spring Boot
+### Bước 1: Chạy Backend Spring Boot
 ```bash
 cd SpringStudentSuccessHubApp
 mvn spring-boot:run
@@ -99,7 +99,7 @@ mvn spring-boot:run
 * Cổng Quản trị Thymeleaf: **`http://localhost:8080/login`**
 * REST API Base URL: **`http://localhost:8080/api`**
 
-### Bước 2: Khởi chạy Frontend ReactJS
+### Bước 2: Chạy Frontend ReactJS
 ```bash
 cd studentsuccesshubweb
 npm install
