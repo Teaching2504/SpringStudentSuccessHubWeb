@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="text-white py-3 mt-auto shadow-sm" style="background-color: #1e3a8a !important;">
+    <div class="container-fluid px-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small">
+        <!-- Bên trái: Tên & MSSV -->
+        <div class="d-flex align-items-center gap-2">
+            <span class="rounded-circle p-1.5 d-inline-flex align-items-center justify-content-center" 
+                  style="width: 24px; height: 24px; background-color: rgba(255, 255, 255, 0.15);">
+                <i class="fa-solid fa-user-graduate text-white fs-6"></i>
+            </span>
+            <span class="fw-semibold text-white">2351010216 - Nguyễn Thị Tuyết Trinh</span>
+        </div>
+
+        <!-- Bên phải: Đồ án tốt nghiệp -->
+        <div>
+            <span class="badge rounded-pill px-3 py-1.5 fw-semibold" 
+                  style="background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff;">
+                <i class="fa-solid fa-graduation-cap me-1"></i> Đồ án tốt nghiệp
+            </span>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

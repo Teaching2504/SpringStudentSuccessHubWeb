@@ -85,9 +85,9 @@ export const Sidebar = () => {
         })}
       </div>
 
-      <div className="p-3.5 bg-primary-50/70 border border-primary-100/80 rounded-2xl">
-        <p className="text-xs font-bold text-primary-900 leading-snug">Hệ thống OU-SSH</p>
-        <p className="text-[11px] text-primary-700 mt-0.5">Đồ Án Tốt Nghiệp 2026</p>
+      <div className="p-3 bg-primary-50/70 border border-primary-100/80 rounded-2xl">
+        <p className="text-xs font-bold text-primary-900 leading-snug">2351010216 - Nguyễn Thị Tuyết Trinh</p>
+        <p className="text-[11px] text-primary-700 font-medium mt-0.5">Đồ án tốt nghiệp</p>
       </div>
     </aside>
   );

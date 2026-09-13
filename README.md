@@ -15,7 +15,7 @@
 **OU-SSH (Open University Student Success Hub)** là hệ thống quản lý học vụ và hỗ trợ sinh viên thế hệ mới, giải quyết trọn vẹn bài toán theo dõi kết quả học tập (GPA), điểm rèn luyện (ĐRL), tiếp nhận minh chứng, xử lý kiến nghị và **tự động hóa toàn diện quy trình xét duyệt Học bổng Khuyến khích học tập (HB KKHT)** dựa trên **Dynamic Rule Engine & Versioning**.
 
 Hệ thống hỗ trợ 2 mô hình trải nghiệm:
-1. **Cổng Web Quản trị Thymeleaf (SSR)**: Dành cho công tác quản trị và báo cáo nhanh (`http://localhost:8080/web/login`).
+1. **Cổng Web Quản trị Thymeleaf (SSR)**: Dành cho công tác quản trị và báo cáo nhanh (`http://localhost:8080/login`).
 2. **Cổng Ứng dụng Single Page App (ReactJS + Tailwind CSS)**: Giao diện trực quan, hiện đại, mượt mà cho cả 4 vai trò (`http://localhost:8000`).
 
 ---
@@ -60,7 +60,7 @@ Hệ thống được thiết kế bám sát chặt chẽ theo **Quy chế Học
   - React 18, Vite 6, Tailwind CSS
   - Lucide React Icons, React Router DOM v6, Axios Interceptors
 - **Database**:
-  - MySQL 8.x (17 bảng thực thể quan hệ chặt chẽ)
+  - MySQL 8.x (20 bảng thực thể quan hệ chặt chẽ)
   - Script SQL mẫu: `ousshdb.sql` (chứa dữ liệu đầy đủ 12 Khoa, 32 Ngành, 9 học kỳ kết quả học tập).
 
 ---
@@ -96,7 +96,7 @@ cd SpringStudentSuccessHubApp
 mvn spring-boot:run
 ```
 * Backend khởi chạy tại: **`http://localhost:8080`**
-* Cổng Quản trị Thymeleaf: **`http://localhost:8080/web/login`**
+* Cổng Quản trị Thymeleaf: **`http://localhost:8080/login`**
 * REST API Base URL: **`http://localhost:8080/api`**
 
 ### Bước 2: Khởi chạy Frontend ReactJS

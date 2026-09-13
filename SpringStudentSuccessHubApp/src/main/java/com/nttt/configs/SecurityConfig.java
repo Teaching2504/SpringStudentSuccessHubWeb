@@ -87,7 +87,7 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/error"
                         ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "CAN_BO_TRUONG", "CAN_BO_KHOA")
                         .requestMatchers("/api/truong/**").hasAnyRole("ADMIN", "CAN_BO_TRUONG")
                         .requestMatchers("/api/khoa/**").hasAnyRole("ADMIN", "CAN_BO_KHOA")
                         .requestMatchers("/api/sinhvien/**").hasAnyRole("ADMIN", "SINH_VIEN", "CAN_BO_KHOA", "CAN_BO_TRUONG")

@@ -8,10 +8,14 @@ import com.nttt.services.ExcelService;
 import com.nttt.services.NguoiDungService;
 import com.nttt.services.SinhVienService;
 import com.nttt.services.ThongKeService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -144,6 +148,18 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
+    }
+
+    @GetMapping("/students/template-excel")
+    public ResponseEntity<InputStreamResource> downloadStudentTemplate() {
+        ByteArrayInputStream in = excelService.generateStudentTemplateExcel();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=Mau_Nhap_SinhVien_Diem.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(in));
     }
 
     // --- Stats ---

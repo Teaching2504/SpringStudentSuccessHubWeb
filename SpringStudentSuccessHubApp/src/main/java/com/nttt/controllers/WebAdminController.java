@@ -9,13 +9,21 @@ import com.nttt.services.ExcelService;
 import com.nttt.services.NguoiDungService;
 import com.nttt.services.SinhVienService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/web/admin")
@@ -47,7 +55,9 @@ public class WebAdminController {
 
     private boolean checkAdmin(HttpSession session) {
         NguoiDung u = (NguoiDung) session.getAttribute("currentUser");
-        return u != null && "ROLE_ADMIN".equals(u.getVaiTro());
+        if (u == null) return false;
+        String v = u.getVaiTro();
+        return "ROLE_ADMIN".equals(v) || "ADMIN".equals(v) || "ROLE_CAN_BO_TRUONG".equals(v) || "ROLE_CAN_BO_KHOA".equals(v);
     }
 
     @GetMapping("/dashboard")
@@ -101,15 +111,33 @@ public class WebAdminController {
     @PostMapping("/students/import-excel")
     public String importExcel(@RequestParam("file") MultipartFile file,
                               @RequestParam(value = "maHocKy", defaultValue = "HK1_2025_2026") String maHocKy,
-                              HttpSession session, Model model) {
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
         if (!checkAdmin(session)) return "redirect:/web/login";
         try {
-            excelService.importStudentsFromExcel(file, maHocKy);
-            model.addAttribute("successMessage", "Nhập dữ liệu Excel thành công!");
+            Map<String, Object> res = excelService.importStudentsFromExcel(file, maHocKy);
+            int imported = (int) res.getOrDefault("importedCount", 0);
+            int updated = (int) res.getOrDefault("updatedCount", 0);
+            redirectAttributes.addFlashAttribute("successMessage", "Đồng bộ Excel thành công! Đã thêm mới " + imported + " sinh viên, cập nhật điểm " + updated + " sinh viên.");
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "Lỗi nhập Excel: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi nhập Excel: " + e.getMessage());
         }
         return "redirect:/web/admin/students";
+    }
+
+    @GetMapping("/students/template-excel")
+    public ResponseEntity<InputStreamResource> downloadStudentTemplate(HttpSession session) {
+        if (!checkAdmin(session)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        ByteArrayInputStream in = excelService.generateStudentTemplateExcel();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=Mau_Nhap_SinhVien_Diem.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(in));
     }
 
     @GetMapping("/categories")

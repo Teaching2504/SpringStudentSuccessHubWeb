@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - OU-SSH Hub (Thymeleaf)</title>
+    <title>Đăng nhập - OU-SSH Hub</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 -->
@@ -76,8 +76,7 @@
                 <img th:src="@{/images/logo.png}" src="/images/logo.png" alt="Logo Trường Đại học Mở TP.HCM"
                      class="mb-3" style="max-height: 95px; width: auto;">
                 <h3 class="fw-bold text-dark mb-1">TRƯỜNG ĐẠI HỌC MỞ TP.HCM</h3>
-                <h6 class="text-primary fw-semibold mb-1">CỔNG QUẢN TRỊ & CÁN BỘ (OU-SSH HUB - THYMELEAF)</h6>
-                <small class="text-muted">Đề tài Đồ án tốt nghiệp - SV: Nguyễn Thị Tuyết Trinh (2351010216)</small>
+                <h6 class="text-primary fw-semibold mb-0">CỔNG QUẢN TRỊ & CÁN BỘ (OU-SSH HUB - THYMELEAF)</h6>
             </div>
 
             <!-- Login Card -->
@@ -93,7 +92,7 @@
                     <span th:text="${errorMessage}"></span>
                 </div>
 
-                <form th:action="@{/web/login}" method="post">
+                <form th:action="@{/login}" method="post">
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary small">Tên đăng nhập / Email</label>
                         <div class="input-group">
@@ -106,7 +105,10 @@
                         <label class="form-label fw-semibold text-secondary small">Mật khẩu</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
-                            <input type="password" id="matKhau" name="matKhau" class="form-control" placeholder="Nhập mật khẩu" required>
+                            <input type="password" id="matKhau" name="matKhau" class="form-control border-end-0" placeholder="Nhập mật khẩu" required>
+                            <button class="btn btn-outline-secondary border-start-0 bg-light" type="button" id="btnToggleMatKhau" onclick="togglePasswordVisibility()" style="border-color: #dee2e6;" title="Hiện/Ẩn mật khẩu">
+                                <i class="fa-solid fa-eye text-muted" id="iconEye"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -116,6 +118,7 @@
                 </form>
 
                 <!-- Quick Test Login Buttons -->
+                <!--
                 <div class="mt-4 pt-3 border-top">
                     <p class="text-muted small fw-bold text-uppercase mb-2" style="font-size: 0.7rem;">
                         Tài khoản mẫu thử nghiệm nhanh:
@@ -153,11 +156,22 @@
                         </div>
                     </div>
                 </div>
+                -->
             </div>
 
             <!-- Footer -->
-            <footer class="mt-4 text-muted small">
-                © 2025 - 2026 Trường Đại học Mở Thành phố Hồ Chí Minh. Bảo lưu mọi quyền.
+            <footer class="mt-4 p-3 text-white rounded-4 shadow-sm d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small" style="background-color: #1e3a8a !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle p-1.5 d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px; background-color: rgba(255, 255, 255, 0.15);">
+                        <i class="fa-solid fa-user-graduate text-white fs-6"></i>
+                    </span>
+                    <span class="fw-semibold text-white">2351010216 - Nguyễn Thị Tuyết Trinh</span>
+                </div>
+                <div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-semibold" style="background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff;">
+                        <i class="fa-solid fa-graduation-cap me-1"></i> Đồ án tốt nghiệp
+                    </span>
+                </div>
             </footer>
         </div>
     </div>
@@ -167,6 +181,20 @@
     function fillFast(u, p) {
         document.getElementById('tenDangNhap').value = u;
         document.getElementById('matKhau').value = p;
+    }
+
+    function togglePasswordVisibility() {
+        const pwdInput = document.getElementById('matKhau');
+        const iconEye = document.getElementById('iconEye');
+        if (pwdInput.type === 'password') {
+            pwdInput.type = 'text';
+            iconEye.classList.remove('fa-eye');
+            iconEye.classList.add('fa-eye-slash');
+        } else {
+            pwdInput.type = 'password';
+            iconEye.classList.remove('fa-eye-slash');
+            iconEye.classList.add('fa-eye');
+        }
     }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

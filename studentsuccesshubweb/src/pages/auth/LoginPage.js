@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { GraduationCap, Lock, User, AlertCircle, Shield } from 'lucide-react';
+import { GraduationCap, Lock, User, AlertCircle, Shield, Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
   const [tenDangNhap, setTenDangNhap] = useState('');
   const [matKhau, setMatKhau] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (user) {
+      if (user.vaiTro === 'ROLE_ADMIN') navigate('/admin', { replace: true });
+      else if (user.vaiTro === 'ROLE_CAN_BO_TRUONG') navigate('/truong', { replace: true });
+      else if (user.vaiTro === 'ROLE_CAN_BO_KHOA') navigate('/khoa', { replace: true });
+      else navigate('/sinh-vien', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -54,9 +64,6 @@ const LoginPage = () => {
         </h1>
         <p className="text-primary-700 font-semibold text-base sm:text-lg mt-1">
           HỆ THỐNG QUẢN LÝ KẾT QUẢ HỌC TẬP - RÈN LUYỆN VÀ XÉT DUYỆT HỌC BỔNG (OU-SSH)
-        </p>
-        <p className="text-xs text-slate-500 mt-1">
-          Đề tài Đồ án tốt nghiệp - Sinh viên: Nguyễn Thị Tuyết Trinh (2351010216)
         </p>
       </div>
 
@@ -103,13 +110,21 @@ const LoginPage = () => {
                 <Lock className="w-5 h-5" />
               </div>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={matKhau}
                 onChange={(e) => setMatKhau(e.target.value)}
                 placeholder="Nhập số CCCD (SV) hoặc Mật khẩu"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                className="w-full pl-10 pr-11 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5 text-primary-600" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
@@ -165,8 +180,17 @@ const LoginPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="mt-8 text-center text-xs text-slate-400">
-        © 2025 - 2026 Trường Đại học Mở Thành phố Hồ Chí Minh. Bảo lưu mọi quyền.
+      <footer className="mt-8 w-full max-w-2xl px-5 py-3 bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white border border-primary-800/60 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 text-xs shadow-md">
+        <div className="flex items-center gap-2 font-medium">
+          <span className="w-5 h-5 rounded-full bg-white/10 text-primary-200 flex items-center justify-center font-bold text-[10px] border border-white/15">
+            <User className="w-3 h-3" />
+          </span>
+          <span className="font-semibold text-white">2351010216 - Nguyễn Thị Tuyết Trinh</span>
+        </div>
+        <div className="flex items-center gap-1.5 font-semibold text-primary-200 bg-white/10 px-3 py-0.5 rounded-full border border-white/20">
+          <GraduationCap className="w-3.5 h-3.5 text-primary-300" />
+          <span>Đồ án tốt nghiệp</span>
+        </div>
       </footer>
     </div>
   );

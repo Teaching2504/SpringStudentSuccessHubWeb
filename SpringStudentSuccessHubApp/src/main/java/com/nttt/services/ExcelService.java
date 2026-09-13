@@ -10,4 +10,5 @@ import java.util.Map;
 public interface ExcelService {
     Map<String, Object> importStudentsFromExcel(MultipartFile file, String maHocKy);
     ByteArrayInputStream exportScholarshipAwardList(List<HoSoHocBongDTO> dossiers, String title);
+    ByteArrayInputStream generateStudentTemplateExcel();
 }

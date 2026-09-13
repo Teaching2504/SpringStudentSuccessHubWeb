@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
-import { UserPlus, Upload, Search, Filter, Edit2, Trash2, AlertTriangle, CheckCircle, FileSpreadsheet, AlertCircle } from 'lucide-react';
+import { UserPlus, Upload, Search, Filter, Edit2, Trash2, AlertTriangle, CheckCircle, FileSpreadsheet, AlertCircle, Download } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import Modal from '../../components/common/Modal';
 import { sortSemesters } from '../../utils/semesterSort';
@@ -160,9 +160,7 @@ const StudentManagement = () => {
     try {
       setImportLoading(true);
       setImportResult(null);
-      const res = await axiosClient.post('/api/admin/students/import-excel', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axiosClient.post('/api/admin/students/import-excel', data);
       setImportLoading(false);
       if (res.data.success) {
         setImportResult(res.data.data);
@@ -171,6 +169,25 @@ const StudentManagement = () => {
     } catch (err) {
       setImportLoading(false);
       alert(err.response?.data?.message || 'Lỗi khi nhập Excel');
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = await axiosClient.get('/api/admin/students/template-excel', {
+        responseType: 'blob'
+      });
+      const blob = new Blob([res.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = 'Mau_Nhap_SinhVien_Diem.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('Không thể tải file mẫu Excel: ' + (err.response?.data?.message || err.message || 'Lỗi kết nối'));
     }
   };
 
@@ -185,6 +202,12 @@ const StudentManagement = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleDownloadTemplate}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-sm font-semibold rounded-xl shadow-sm transition cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-emerald-700" /> Tải Mẫu Excel
+          </button>
           <button
             onClick={() => {
               setImportResult(null);
@@ -483,9 +506,29 @@ const StudentManagement = () => {
         title="Nhập dữ liệu Sinh viên & Điểm từ file Excel (.xlsx)"
       >
         <form onSubmit={handleImportExcel} className="space-y-4">
-          <div className="p-4 bg-blue-50/80 border border-blue-200 rounded-2xl text-xs text-blue-900 space-y-1">
-            <p className="font-bold">Định dạng các cột mẫu file Excel:</p>
-            <p>1. MSSV | 2. Họ Tên | 3. Email | 4. SĐT | 5. Mã Lớp | 6. Giới tính | 7. GPA | 8. ĐRL | 9. Số TC | 10. Rớt môn (true/false)</p>
+          {/* Template Download Card */}
+          <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div className="text-sm font-bold text-emerald-950 flex items-center gap-1.5">
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-700" /> File Excel mẫu chuẩn (.xlsx)
+                </div>
+                <p className="text-xs text-emerald-800 mt-0.5">
+                  Tải file mẫu có sẵn dữ liệu mẫu & hướng dẫn chi tiết từng cột để nhập liệu.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-sm transition cursor-pointer self-start sm:self-auto"
+              >
+                <Download className="w-3.5 h-3.5" /> Tải mẫu .xlsx
+              </button>
+            </div>
+            <div className="text-xs text-emerald-900 border-t border-emerald-200/80 pt-2.5">
+              <span className="font-semibold text-emerald-950">Quy định 10 cột: </span>
+              1. MSSV (*) | 2. Họ Tên (*) | 3. Email | 4. SĐT | 5. Mã Lớp (*) | 6. Giới tính | 7. GPA | 8. ĐRL | 9. Số TC | 10. Rớt môn (Khong/Co)
+            </div>
           </div>
 
           <div>

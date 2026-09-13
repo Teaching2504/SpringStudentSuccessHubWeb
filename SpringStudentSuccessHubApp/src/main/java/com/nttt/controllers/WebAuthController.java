@@ -35,7 +35,7 @@ public class WebAuthController {
         return "auth/login";
     }
 
-    @PostMapping("/web/login")
+    @PostMapping({"/login", "/web/login"})
     public String doLogin(@RequestParam("tenDangNhap") String username,
                           @RequestParam("matKhau") String password,
                           HttpSession session,
@@ -45,12 +45,12 @@ public class WebAuthController {
             userOpt = nguoiDungRepository.findByEmail(username.trim());
         }
 
-        // Aliases support
+        // Hỗ trợ alias tên đăng nhập
         if (userOpt.isEmpty()) {
             if ("captruong".equalsIgnoreCase(username) || "canbotruong".equalsIgnoreCase(username) || "truong.ctsv".equalsIgnoreCase(username)) {
                 userOpt = nguoiDungRepository.findByTenDangNhap("captruong")
                         .or(() -> nguoiDungRepository.findByTenDangNhap("captruong_tuan"));
-            } else if ("cbk_cntt".equalsIgnoreCase(username) || "canbokhoa".equalsIgnoreCase(username)) {
+            } else if ("cbk_cntt".equalsIgnoreCase(username) || "canbokhoa".equalsIgnoreCase(username) || "cbk_it".equalsIgnoreCase(username)) {
                 userOpt = nguoiDungRepository.findByTenDangNhap("cbk_it")
                         .or(() -> nguoiDungRepository.findByTenDangNhap("cbk_cntt"));
             }
@@ -58,13 +58,23 @@ public class WebAuthController {
 
         if (userOpt.isPresent()) {
             NguoiDung user = userOpt.get();
+            
+            // Kiểm tra mật khẩu (BCrypt hash, Plain Text, MatKhauHienThi hoặc Mật khẩu chuẩn)
             boolean valid = passwordEncoder.matches(password, user.getMatKhau())
+                    || password.equals(user.getMatKhau())
+                    || (user.getMatKhauHienThi() != null && password.equals(user.getMatKhauHienThi()))
                     || password.equals("admin123")
                     || password.equals("truong123")
                     || password.equals("khoa123")
                     || password.equals("Admin@123456");
 
             if (valid) {
+                // Tự động mã hóa chuẩn BCrypt và lưu vào CSDL nếu chưa đúng chuẩn
+                if (!passwordEncoder.matches(password, user.getMatKhau())) {
+                    user.setMatKhau(passwordEncoder.encode(password));
+                    nguoiDungRepository.save(user);
+                }
+
                 if ("ROLE_SINH_VIEN".equals(user.getVaiTro())) {
                     model.addAttribute("errorMessage", "Tài khoản Sinh viên vui lòng đăng nhập tại Cổng Sinh viên React (http://localhost:8000). Cổng Thymeleaf này chỉ dành cho Admin và Cán bộ Nhà trường.");
                     return "auth/login";
@@ -80,10 +90,10 @@ public class WebAuthController {
         return "auth/login";
     }
 
-    @GetMapping("/web/logout")
+    @GetMapping({"/logout", "/web/logout"})
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/web/login";
+        return "redirect:/login";
     }
 
     private String redirectBasedOnRole(String role) {
