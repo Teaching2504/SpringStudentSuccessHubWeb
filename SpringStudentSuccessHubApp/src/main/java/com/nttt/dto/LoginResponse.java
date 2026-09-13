@@ -12,10 +12,11 @@ public class LoginResponse {
     private String maKhoa;
     private String tenKhoa;
     private String maLop;
+    private String avatar;
 
     public LoginResponse() {}
 
-    public LoginResponse(String token, String tokenType, Long id, String tenDangNhap, String hoTen, String email, String vaiTro, String maDinhDanh, String maKhoa, String tenKhoa, String maLop) {
+    public LoginResponse(String token, String tokenType, Long id, String tenDangNhap, String hoTen, String email, String vaiTro, String maDinhDanh, String maKhoa, String tenKhoa, String maLop, String avatar) {
         this.token = token;
         this.tokenType = tokenType;
         this.id = id;
@@ -27,6 +28,7 @@ public class LoginResponse {
         this.maKhoa = maKhoa;
         this.tenKhoa = tenKhoa;
         this.maLop = maLop;
+        this.avatar = avatar;
     }
 
     public String getToken() { return token; }
@@ -62,6 +64,9 @@ public class LoginResponse {
     public String getMaLop() { return maLop; }
     public void setMaLop(String maLop) { this.maLop = maLop; }
 
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }
+
     public static LoginResponseBuilder builder() { return new LoginResponseBuilder(); }
 
     public static class LoginResponseBuilder {
@@ -76,6 +81,7 @@ public class LoginResponse {
         private String maKhoa;
         private String tenKhoa;
         private String maLop;
+        private String avatar;
 
         public LoginResponseBuilder token(String token) { this.token = token; return this; }
         public LoginResponseBuilder tokenType(String tokenType) { this.tokenType = tokenType; return this; }
@@ -88,9 +94,10 @@ public class LoginResponse {
         public LoginResponseBuilder maKhoa(String maKhoa) { this.maKhoa = maKhoa; return this; }
         public LoginResponseBuilder tenKhoa(String tenKhoa) { this.tenKhoa = tenKhoa; return this; }
         public LoginResponseBuilder maLop(String maLop) { this.maLop = maLop; return this; }
+        public LoginResponseBuilder avatar(String avatar) { this.avatar = avatar; return this; }
 
         public LoginResponse build() {
-            return new LoginResponse(token, tokenType, id, tenDangNhap, hoTen, email, vaiTro, maDinhDanh, maKhoa, tenKhoa, maLop);
+            return new LoginResponse(token, tokenType, id, tenDangNhap, hoTen, email, vaiTro, maDinhDanh, maKhoa, tenKhoa, maLop, avatar);
         }
     }
 }

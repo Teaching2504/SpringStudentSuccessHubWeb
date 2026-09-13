@@ -8,8 +8,12 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/web/khoa")
@@ -22,6 +26,7 @@ public class WebKhoaController {
     private final CanBoKhoaRepository canBoKhoaRepository;
     private final DotXetHbKhoaRepository dotXetHbKhoaRepository;
     private final KienNghiRepository kienNghiRepository;
+    private final CloudinaryService cloudinaryService;
 
     public WebKhoaController(SinhVienService sinhVienService,
                              DanhMucService danhMucService,
@@ -29,7 +34,8 @@ public class WebKhoaController {
                              MinhChungRenLuyenService minhChungService,
                              CanBoKhoaRepository canBoKhoaRepository,
                              DotXetHbKhoaRepository dotXetHbKhoaRepository,
-                             KienNghiRepository kienNghiRepository) {
+                             KienNghiRepository kienNghiRepository,
+                             CloudinaryService cloudinaryService) {
         this.sinhVienService = sinhVienService;
         this.danhMucService = danhMucService;
         this.dotXetHocBongService = dotXetHocBongService;
@@ -37,6 +43,7 @@ public class WebKhoaController {
         this.canBoKhoaRepository = canBoKhoaRepository;
         this.dotXetHbKhoaRepository = dotXetHbKhoaRepository;
         this.kienNghiRepository = kienNghiRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     private String getKhoaCode(HttpSession session) {
@@ -206,19 +213,59 @@ public class WebKhoaController {
 
         String maKhoa = getKhoaCode(session);
         model.addAttribute("evidenceList", minhChungService.getByKhoa(maKhoa, null));
+        model.addAttribute("students", sinhVienService.filterStudents(maKhoa, null, null, null, null, null));
+        model.addAttribute("hocKys", danhMucService.getAllHocKy());
+        model.addAttribute("maKhoa", maKhoa);
         return "khoa/evidence";
+    }
+
+    @PostMapping("/evidence/add")
+    public String addEvidence(@RequestParam("mssv") String mssv,
+                              @RequestParam("maHocKy") String maHocKy,
+                              @RequestParam("tenHoatDong") String tenHoatDong,
+                              @RequestParam(value = "diemDeXuat", defaultValue = "5.0") BigDecimal diemDeXuat,
+                              @RequestParam(value = "moTa", required = false) String moTa,
+                              @RequestParam(value = "file", required = false) MultipartFile file,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        if (!checkKhoa(session)) return "redirect:/web/login";
+        try {
+            String fileUrl = null;
+            if (file != null && !file.isEmpty()) {
+                Map<String, Object> up = cloudinaryService.uploadFile(file, "evidence");
+                fileUrl = (String) up.get("secure_url");
+            }
+            MinhChungRenLuyenDTO dto = MinhChungRenLuyenDTO.builder()
+                    .mssv(mssv)
+                    .maHocKy(maHocKy)
+                    .tenHoatDong(tenHoatDong)
+                    .diemDeXuat(diemDeXuat)
+                    .moTa(moTa)
+                    .fileUrl(fileUrl)
+                    .build();
+            minhChungService.submitMinhChung(dto);
+            redirectAttributes.addFlashAttribute("successMessage", "Tải lên và nộp minh chứng rèn luyện thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi nộp minh chứng: " + e.getMessage());
+        }
+        return "redirect:/web/khoa/evidence";
     }
 
     @PostMapping("/evidence/{maMinhChung}/review")
     public String reviewEvidence(@PathVariable("maMinhChung") String maMinhChung,
                                  @RequestParam("trangThai") String trangThai,
                                  @RequestParam("lyDoPhanHoi") String lyDoPhanHoi,
-                                 HttpSession session) {
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
         if (!checkKhoa(session)) return "redirect:/web/login";
-
-        NguoiDung u = (NguoiDung) session.getAttribute("currentUser");
-        boolean approve = "DA_DUYET".equalsIgnoreCase(trangThai) || "true".equalsIgnoreCase(trangThai);
-        minhChungService.reviewMinhChung(maMinhChung, u != null ? u.getTenDangNhap() : "system", approve, lyDoPhanHoi);
+        try {
+            NguoiDung u = (NguoiDung) session.getAttribute("currentUser");
+            boolean approve = "DA_DUYET".equalsIgnoreCase(trangThai) || "true".equalsIgnoreCase(trangThai);
+            minhChungService.reviewMinhChung(maMinhChung, u != null ? u.getTenDangNhap() : "system", approve, lyDoPhanHoi);
+            redirectAttributes.addFlashAttribute("successMessage", (approve ? "Đã duyệt và cộng điểm ĐRL" : "Đã từ chối minh chứng") + " thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi thẩm định: " + e.getMessage());
+        }
         return "redirect:/web/khoa/evidence";
     }
 

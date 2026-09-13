@@ -1,17 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axiosClient from '../../api/axiosClient';
-import { User, Lock, Mail, Phone, Shield, Building, Award, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lock, Mail, Shield, Building, Award, CheckCircle, AlertCircle, Camera, Upload, Loader2, X } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const fileInputRef = useRef(null);
+
+  // Password state
   const [matKhauCu, setMatKhauCu] = useState('');
   const [matKhauMoi, setMatKhauMoi] = useState('');
   const [xacNhanMk, setXacNhanMk] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  // Avatar upload state
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState('');
+  const [avatarErr, setAvatarErr] = useState('');
+
+  const handleAvatarFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type and size (5MB max)
+    if (!file.type.startsWith('image/')) {
+      setAvatarErr('Vui lòng chọn file hình ảnh (JPG, PNG, WEBP, GIF)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarErr('Kích thước ảnh tối đa là 5MB');
+      return;
+    }
+
+    setAvatarErr('');
+    setAvatarMsg('');
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleCancelAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setAvatarErr('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUploadAvatar = async () => {
+    if (!avatarFile) return;
+
+    setUploadingAvatar(true);
+    setAvatarErr('');
+    setAvatarMsg('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', avatarFile);
+
+      const res = await axiosClient.post('/api/auth/avatar', formData);
+      setUploadingAvatar(false);
+
+      if (res.data?.success) {
+        setAvatarMsg('Cập nhật ảnh đại diện thành công!');
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        await refreshUser();
+      } else {
+        setAvatarErr(res.data?.message || 'Không thể cập nhật ảnh đại diện');
+      }
+    } catch (err) {
+      setUploadingAvatar(false);
+      setAvatarErr(err.response?.data?.message || 'Lỗi khi tải ảnh lên máy chủ Cloudinary');
+    }
+  };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -59,22 +129,106 @@ const ProfilePage = () => {
     }
   };
 
+  const currentAvatarSrc = avatarPreview || user?.avatar;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Thông tin Tài khoản & Bảo mật</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Quản lý thông tin cá nhân và thiết lập mật khẩu bảo mật tài khoản
+          Quản lý thông tin cá nhân, ảnh đại diện và thiết lập mật khẩu bảo mật tài khoản
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
+        {/* Profile Card with Avatar Upload */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-2xl mb-3 shadow-inner">
-              {user?.hoTen ? user.hoTen.charAt(0).toUpperCase() : 'U'}
+            {/* Avatar Circle with Camera Overlay */}
+            <div className="relative group mb-3">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary-500 shadow-md flex items-center justify-center bg-primary-100 text-primary-700 font-bold text-3xl">
+                {currentAvatarSrc ? (
+                  <img
+                    src={currentAvatarSrc}
+                    alt={user?.hoTen || 'Avatar'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{user?.hoTen ? user.hoTen.charAt(0).toUpperCase() : 'U'}</span>
+                )}
+              </div>
+
+              {/* Upload trigger button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Thay đổi ảnh đại diện"
+                className="absolute bottom-0 right-0 p-2 bg-primary-700 text-white rounded-full shadow-lg hover:bg-primary-800 transition transform hover:scale-105 cursor-pointer border-2 border-white"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarFileSelect}
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                className="hidden"
+              />
             </div>
+
+            {/* Avatar Action buttons when file selected */}
+            {avatarFile && (
+              <div className="mb-3 p-3 bg-primary-50 border border-primary-200 rounded-xl space-y-2 w-full">
+                <p className="text-xs text-primary-800 font-medium truncate">
+                  Ảnh đã chọn: <span className="font-bold">{avatarFile.name}</span>
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleUploadAvatar}
+                    disabled={uploadingAvatar}
+                    className="px-3 py-1.5 bg-primary-700 hover:bg-primary-800 text-white text-xs font-semibold rounded-lg shadow flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+                  >
+                    {uploadingAvatar ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Đang tải lên...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        Lưu ảnh
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelAvatar}
+                    disabled={uploadingAvatar}
+                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1 transition disabled:opacity-50 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {avatarMsg && (
+              <div className="mb-3 w-full p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-xs flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{avatarMsg}</span>
+              </div>
+            )}
+
+            {avatarErr && (
+              <div className="mb-3 w-full p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{avatarErr}</span>
+              </div>
+            )}
+
             <h2 className="text-lg font-bold text-slate-800">{user?.hoTen || 'Người dùng'}</h2>
             <p className="text-sm text-slate-500 font-mono">@{user?.tenDangNhap}</p>
             <div className="mt-3">{getRoleBadge(user?.vaiTro)}</div>

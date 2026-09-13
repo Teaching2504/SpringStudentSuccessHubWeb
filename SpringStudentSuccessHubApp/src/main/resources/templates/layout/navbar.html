@@ -9,10 +9,80 @@
         </a>
         <div class="d-flex align-items-center gap-3">
             <span class="badge bg-light text-primary px-3 py-2 rounded-pill fw-semibold" th:text="${session.userRole}">ROLE_ADMIN</span>
-            <span class="text-white small fw-medium" th:text="${session.userName != null ? session.userName : 'Cán bộ Quản trị'}">Admin</span>
+
+            <!-- User Avatar & Profile Modal Trigger -->
+            <div class="d-flex align-items-center gap-2 text-decoration-none text-white cursor-pointer"
+                 data-bs-toggle="modal" data-bs-target="#profileAvatarModal" role="button" title="Nhấp để đổi Avatar / Xem hồ sơ">
+                <div class="position-relative">
+                    <img th:if="${session.userAvatar != null and !session.userAvatar.isEmpty()}"
+                         th:src="${session.userAvatar}"
+                         alt="Avatar"
+                         class="rounded-circle shadow-sm border border-2 border-white"
+                         style="width: 36px; height: 36px; object-fit: cover;">
+                    <div th:unless="${session.userAvatar != null and !session.userAvatar.isEmpty()}"
+                         class="rounded-circle bg-white text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm"
+                         style="width: 36px; height: 36px; font-size: 14px; text-align: center; line-height: 36px;">
+                        <span th:text="${session.userName != null and !session.userName.isEmpty() ? session.userName.substring(0, 1) : 'U'}">U</span>
+                    </div>
+                </div>
+                <div class="d-none d-md-block text-start">
+                    <div class="text-white small fw-bold" th:text="${session.userName != null ? session.userName : 'Cán bộ Quản trị'}">Admin</div>
+                    <div class="text-white-50 small" style="font-size: 11px;">
+                        <i class="fa-solid fa-cloud-arrow-up me-1"></i>Đổi Avatar
+                    </div>
+                </div>
+            </div>
+
             <a th:href="@{/web/logout}" class="btn btn-outline-light btn-sm rounded-pill px-3">
                 <i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất
             </a>
+        </div>
+    </div>
+
+    <!-- Modal Change Avatar / User Profile -->
+    <div class="modal fade text-start" id="profileAvatarModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <form th:action="@{/web/profile/avatar}" method="post" enctype="multipart/form-data">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="modal-title fw-bold text-dark">
+                            <i class="fa-solid fa-camera text-primary me-2"></i>Cập nhật Ảnh đại diện (Cloudinary)
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-3 text-center">
+                        <div class="mb-3">
+                            <div class="position-relative d-inline-block">
+                                <img id="previewNavbarAvatar"
+                                     th:src="${session.userAvatar != null and !session.userAvatar.isEmpty() ? session.userAvatar : 'https://placehold.co/120x120/1e3a8a/ffffff?text=Avatar'}"
+                                     class="rounded-circle shadow border border-3 border-primary"
+                                     style="width: 110px; height: 110px; object-fit: cover;">
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1" th:text="${session.userName != null ? session.userName : 'Người dùng'}">Họ và tên</h6>
+                        <p class="text-muted small mb-3">
+                            <span class="badge bg-primary-subtle text-primary" th:text="${session.userRole}">ROLE</span>
+                        </p>
+
+                        <div class="text-start bg-light p-3 rounded-3 mb-3 small">
+                            <label class="form-label fw-semibold text-dark mb-1">
+                                <i class="fa-solid fa-cloud-arrow-up text-primary me-1"></i>Chọn file ảnh mới tải lên Cloudinary:
+                            </label>
+                            <input type="file" name="avatarFile" accept="image/*" class="form-control form-control-sm" required
+                                   onchange="document.getElementById('previewNavbarAvatar').src = window.URL.createObjectURL(this.files[0])">
+                            <div class="text-muted mt-1" style="font-size: 11px;">
+                                * Hỗ trợ định dạng JPG, PNG, WEBP. Ảnh được tự động lưu trữ và tối ưu hóa qua Cloudinary CDN.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Lưu ảnh lên Cloudinary
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </nav>

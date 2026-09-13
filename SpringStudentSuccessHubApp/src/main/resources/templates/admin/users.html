@@ -39,12 +39,24 @@
         <div class="col-md-9 col-lg-10">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h3 class="fw-bold text-dark mb-1">Quản lý Tài khoản Người dùng</h3>
-                    <p class="text-muted small mb-0">Quản trị danh sách người dùng, cấp quyền hệ thống, thiết lập & tự động đồng bộ mật khẩu bảo mật BCrypt</p>
+                    <h3 class="fw-bold text-dark mb-1">Quản lý Tài khoản & Phân quyền</h3>
+                    <p class="text-muted small mb-0">Quản trị danh sách người dùng, cấp quyền hệ thống, đồng bộ ảnh Avatar Cloudinary & mật khẩu bảo mật BCrypt</p>
                 </div>
                 <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addUserModal">
                     <i class="fa-solid fa-user-plus me-1"></i> Thêm tài khoản mới
                 </button>
+            </div>
+
+            <!-- Flash Alerts -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 py-2 px-3 mb-3 small d-flex align-items-center shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-check me-2 fs-6"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.75rem;"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 py-2 px-3 mb-3 small d-flex align-items-center shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-exclamation me-2 fs-6"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.75rem;"></button>
             </div>
 
             <!-- Users Table -->
@@ -53,20 +65,41 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Người dùng & Avatar</th>
                             <th>Tên đăng nhập</th>
-                            <th>Họ và Tên</th>
                             <th>Email / SĐT</th>
                             <th>Vai trò (Phân quyền)</th>
                             <th>Mật khẩu khởi tạo</th>
                             <th>Trạng thái</th>
-                            <th class="text-end pe-3">Thao tác & Mật khẩu</th>
+                            <th class="text-end pe-3">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="u : ${users}">
-                            <td class="font-monospace" th:text="${u.id}">1</td>
+                            <td class="font-monospace text-muted" th:text="${u.id}">1</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2.5">
+                                    <div class="position-relative">
+                                        <img th:if="${u.avatar != null and !u.avatar.isEmpty()}"
+                                             th:src="${u.avatar}"
+                                             class="rounded-circle shadow-sm border"
+                                             style="width: 38px; height: 38px; object-fit: cover;"
+                                             alt="Avatar">
+                                        <div th:unless="${u.avatar != null and !u.avatar.isEmpty()}"
+                                             class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center border border-primary-subtle"
+                                             style="width: 38px; height: 38px; font-size: 14px;">
+                                            <span th:text="${u.hoTen != null and !u.hoTen.isEmpty() ? u.hoTen.substring(0, 1) : 'U'}">U</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark" th:text="${u.hoTen}">Quản trị viên</div>
+                                        <div th:if="${u.avatar != null and !u.avatar.isEmpty()}" class="text-muted" style="font-size: 10px;">
+                                            <i class="fa-solid fa-cloud text-info me-0.5"></i>Cloudinary
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
                             <td class="fw-bold text-primary font-monospace" th:text="${u.tenDangNhap}">admin</td>
-                            <td class="fw-semibold text-dark" th:text="${u.hoTen}">Quản trị viên</td>
                             <td class="text-muted">
                                 <div th:text="${u.email != null ? u.email : '-'}">admin@ou.edu.vn</div>
                                 <small class="text-muted" th:text="${u.soDienThoai}"></small>
@@ -84,13 +117,21 @@
                                 <span th:if="${u.trangThai == 'HOAT_DONG'}" class="badge bg-success-subtle text-success border border-success-subtle">Đang hoạt động</span>
                                 <span th:if="${u.trangThai == 'BI_KHOA'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">Bị khóa</span>
                             </td>
-                            <td class="text-end pe-3">
+                            <td class="text-end pe-3 whitespace-nowrap">
+                                <!-- Edit User Modal Button -->
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill me-1"
+                                        data-bs-toggle="modal" th:data-bs-target="'#editUserModal_' + ${u.id}"
+                                        title="Chỉnh sửa thông tin & Avatar">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+
                                 <!-- Reset Password Modal Button -->
                                 <button type="button" class="btn btn-outline-warning btn-sm rounded-pill me-1"
                                         data-bs-toggle="modal" th:data-bs-target="'#resetPwdModal_' + ${u.id}"
                                         title="Đặt lại mật khẩu">
-                                    <i class="fa-solid fa-key me-1"></i> Đổi MK
+                                    <i class="fa-solid fa-key"></i> Đổi MK
                                 </button>
+
                                 <!-- Lock Button (When Active) -->
                                 <a th:if="${u.trangThai == 'HOAT_DONG'}"
                                    th:href="@{'/web/admin/users/' + ${u.id} + '/toggle-status'}"
@@ -116,6 +157,78 @@
                                    class="btn btn-outline-danger btn-sm rounded-pill" title="Xóa tài khoản">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
+
+                                <!-- Edit User Modal -->
+                                <div class="modal fade text-start" th:id="'editUserModal_' + ${u.id}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content rounded-4 border-0 shadow">
+                                            <form th:action="@{'/web/admin/users/' + ${u.id} + '/edit'}" method="post" enctype="multipart/form-data">
+                                                <div class="modal-header border-bottom-0 pb-0">
+                                                    <h5 class="modal-title fw-bold text-dark">
+                                                        <i class="fa-solid fa-user-pen text-primary me-2"></i>Cập nhật thông tin tài khoản
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body py-3">
+                                                    <div class="text-center mb-3">
+                                                        <img th:id="'editAvatarPreview_' + ${u.id}"
+                                                             th:src="${u.avatar != null and !u.avatar.isEmpty() ? u.avatar : 'https://placehold.co/100x100/1e3a8a/ffffff?text=Avatar'}"
+                                                             class="rounded-circle shadow border border-2 border-primary mb-2"
+                                                             style="width: 80px; height: 80px; object-fit: cover;">
+                                                        <div>
+                                                            <label class="btn btn-outline-primary btn-sm rounded-pill px-3 cursor-pointer">
+                                                                <i class="fa-solid fa-camera me-1"></i> Tải ảnh Avatar (Cloudinary)
+                                                                <input type="file" name="avatarFile" accept="image/*" class="d-none"
+                                                                       th:onchange="'document.getElementById(\'editAvatarPreview_' + ${u.id} + '\').src = window.URL.createObjectURL(this.files[0])'">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold small">Tên đăng nhập (Mã định danh)</label>
+                                                        <input type="text" class="form-control font-monospace bg-light" th:value="${u.tenDangNhap}" disabled>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold small">Họ và Tên</label>
+                                                        <input type="text" class="form-control" name="hoTen" th:value="${u.hoTen}" required>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold small">Email</label>
+                                                            <input type="email" class="form-control" name="email" th:value="${u.email}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold small">Số điện thoại</label>
+                                                            <input type="text" class="form-control" name="soDienThoai" th:value="${u.soDienThoai}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold small">Vai trò</label>
+                                                            <select class="form-select" name="vaiTro">
+                                                                <option value="ROLE_SINH_VIEN" th:selected="${u.vaiTro == 'ROLE_SINH_VIEN'}">🎓 Sinh viên</option>
+                                                                <option value="ROLE_CAN_BO_KHOA" th:selected="${u.vaiTro == 'ROLE_CAN_BO_KHOA'}">🏢 Cán bộ Khoa</option>
+                                                                <option value="ROLE_CAN_BO_TRUONG" th:selected="${u.vaiTro == 'ROLE_CAN_BO_TRUONG'}">🏛️ Cán bộ Trường</option>
+                                                                <option value="ROLE_ADMIN" th:selected="${u.vaiTro == 'ROLE_ADMIN'}">👑 Quản trị viên</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold small">Trạng thái</label>
+                                                            <select class="form-select" name="trangThai">
+                                                                <option value="HOAT_DONG" th:selected="${u.trangThai == 'HOAT_DONG'}">Hoạt động</option>
+                                                                <option value="BI_KHOA" th:selected="${u.trangThai == 'BI_KHOA'}">Bị khóa</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-top-0 pt-0">
+                                                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Lưu thay đổi</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <!-- Reset Password Modal for this user -->
                                 <div class="modal fade text-start" th:id="'resetPwdModal_' + ${u.id}" tabindex="-1" aria-hidden="true">
@@ -160,7 +273,7 @@
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
-            <form th:action="@{/web/admin/users/add}" method="post">
+            <form th:action="@{/web/admin/users/add}" method="post" enctype="multipart/form-data">
                 <div class="modal-header border-bottom-0 pb-0">
                     <h5 class="modal-title fw-bold text-dark">
                         <i class="fa-solid fa-user-plus text-primary me-2"></i>Thêm tài khoản người dùng mới
@@ -168,6 +281,20 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-3">
+                    <div class="text-center mb-3">
+                        <img id="newAvatarPreview"
+                             src="https://placehold.co/100x100/1e3a8a/ffffff?text=Avatar"
+                             class="rounded-circle shadow border border-2 border-primary mb-2"
+                             style="width: 70px; height: 70px; object-fit: cover;">
+                        <div>
+                            <label class="btn btn-outline-primary btn-sm rounded-pill px-3 cursor-pointer">
+                                <i class="fa-solid fa-camera me-1"></i> Tải ảnh Avatar (Cloudinary)
+                                <input type="file" name="avatarFile" accept="image/*" class="d-none"
+                                       onchange="document.getElementById('newAvatarPreview').src = window.URL.createObjectURL(this.files[0])">
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-semibold small">Tên đăng nhập / Mã định danh</label>
                         <input type="text" class="form-control font-monospace" name="tenDangNhap" required placeholder="VD: cbk_cntt, 2351010001, captruong2">

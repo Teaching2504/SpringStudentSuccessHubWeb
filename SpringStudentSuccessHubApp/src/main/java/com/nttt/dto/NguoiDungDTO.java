@@ -14,10 +14,11 @@ public class NguoiDungDTO {
     private LocalDateTime ngayTao;
     private String cccd;
     private String matKhauHienThi;
+    private String avatar;
 
     public NguoiDungDTO() {}
 
-    public NguoiDungDTO(Long id, String tenDangNhap, String matKhau, String hoTen, String email, String soDienThoai, String vaiTro, String trangThai, LocalDateTime ngayTao, String cccd, String matKhauHienThi) {
+    public NguoiDungDTO(Long id, String tenDangNhap, String matKhau, String hoTen, String email, String soDienThoai, String vaiTro, String trangThai, LocalDateTime ngayTao, String cccd, String matKhauHienThi, String avatar) {
         this.id = id;
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
@@ -29,10 +30,14 @@ public class NguoiDungDTO {
         this.ngayTao = ngayTao;
         this.cccd = cccd;
         this.matKhauHienThi = matKhauHienThi;
+        this.avatar = avatar;
     }
 
     public String getMatKhauHienThi() { return matKhauHienThi; }
     public void setMatKhauHienThi(String matKhauHienThi) { this.matKhauHienThi = matKhauHienThi; }
+
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }
 
     public String getCccd() { return cccd; }
     public void setCccd(String cccd) { this.cccd = cccd; }
@@ -78,6 +83,7 @@ public class NguoiDungDTO {
         private LocalDateTime ngayTao;
         private String cccd;
         private String matKhauHienThi;
+        private String avatar;
 
         public Builder id(Long id) { this.id = id; return this; }
         public Builder tenDangNhap(String tenDangNhap) { this.tenDangNhap = tenDangNhap; return this; }
@@ -90,9 +96,10 @@ public class NguoiDungDTO {
         public Builder ngayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; return this; }
         public Builder cccd(String cccd) { this.cccd = cccd; return this; }
         public Builder matKhauHienThi(String matKhauHienThi) { this.matKhauHienThi = matKhauHienThi; return this; }
+        public Builder avatar(String avatar) { this.avatar = avatar; return this; }
 
         public NguoiDungDTO build() {
-            return new NguoiDungDTO(id, tenDangNhap, matKhau, hoTen, email, soDienThoai, vaiTro, trangThai, ngayTao, cccd, matKhauHienThi);
+            return new NguoiDungDTO(id, tenDangNhap, matKhau, hoTen, email, soDienThoai, vaiTro, trangThai, ngayTao, cccd, matKhauHienThi, avatar);
         }
     }
 }

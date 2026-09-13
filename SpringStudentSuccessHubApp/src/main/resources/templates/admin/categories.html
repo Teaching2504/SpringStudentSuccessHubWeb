@@ -42,6 +42,18 @@
                 <p class="text-muted small">Cơ cấu tổ chức Khoa, Ngành học, Lớp sinh hoạt và Niên khóa / Học kỳ</p>
             </div>
 
+            <!-- Alerts -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 py-2" role="alert">
+                <i class="fa-solid fa-circle-check fs-5"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 py-2" role="alert">
+                <i class="fa-solid fa-triangle-exclamation fs-5"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <!-- Tabs -->
             <ul class="nav nav-pills mb-4 gap-2">
                 <li class="nav-item">
@@ -78,95 +90,190 @@
 
             <!-- Khoa Table -->
             <div th:if="${activeTab == 'khoa'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
-                <table class="table table-hover align-middle mb-0 small">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Mã Khoa (Tiếng Anh)</th>
-                            <th>Tên Khoa</th>
-                            <th class="text-end">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="k : ${khoas}">
-                            <td class="fw-bold text-primary font-monospace" th:text="${k.maKhoa}">IT</td>
-                            <td class="fw-semibold text-dark" th:text="${k.tenKhoa}">Khoa Công nghệ Thông tin</td>
-                            <td class="text-end">
-                                <a th:href="@{'/web/admin/categories/khoa/delete/' + ${k.maKhoa}}" onclick="return confirm('Bạn có chắc chắn muốn xóa?')" class="btn btn-outline-danger btn-sm">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <div class="fw-bold text-dark"><i class="fa-solid fa-building-columns me-2 text-primary"></i>Danh sách Khoa đào tạo</div>
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalAddKhoa">
+                        <i class="fa-solid fa-plus me-1"></i> Thêm Khoa mới
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 150px;">Mã Khoa</th>
+                                <th>Tên Khoa</th>
+                                <th class="text-end" style="width: 140px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="k : ${khoas}">
+                                <td class="fw-bold text-primary font-monospace" th:text="${k.maKhoa}">IT</td>
+                                <td class="fw-semibold text-dark" th:text="${k.tenKhoa}">Khoa Công nghệ Thông tin</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-2 me-1"
+                                            th:data-makhoa="${k.maKhoa}"
+                                            th:data-tenkhoa="${k.tenKhoa}"
+                                            onclick="openEditKhoa(this.getAttribute('data-makhoa'), this.getAttribute('data-tenkhoa'))"
+                                            title="Sửa Khoa">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <a th:href="@{'/web/admin/categories/khoa/delete/' + ${k.maKhoa}}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa Khoa này?')"
+                                       class="btn btn-outline-danger btn-sm rounded-2"
+                                       title="Xóa Khoa">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Nganh Table -->
             <div th:if="${activeTab == 'nganh'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
-                <table class="table table-hover align-middle mb-0 small">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Mã Ngành (Mã Lớp)</th>
-                            <th>Tên Ngành Đào tạo</th>
-                            <th>Hệ đào tạo</th>
-                            <th>Trực thuộc Khoa</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="n : ${nganhs}">
-                            <td class="fw-bold text-primary font-monospace" th:text="${n.maNganh}">CS</td>
-                            <td class="fw-semibold text-dark" th:text="${n.tenNganh}">Khoa học Máy tính</td>
-                            <td>
-                                <span class="badge bg-primary-subtle text-primary" th:text="${n.heDaoTao}">CHUAN</span>
-                            </td>
-                            <td th:text="${n.khoa?.tenKhoa}">Khoa CNTT</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <div class="fw-bold text-dark"><i class="fa-solid fa-book me-2 text-primary"></i>Danh sách Ngành đào tạo</div>
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalAddNganh">
+                        <i class="fa-solid fa-plus me-1"></i> Thêm Ngành mới
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 140px;">Mã Ngành</th>
+                                <th>Tên Ngành Đào tạo</th>
+                                <th style="width: 130px;">Hệ đào tạo</th>
+                                <th>Trực thuộc Khoa</th>
+                                <th class="text-end" style="width: 140px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="n : ${nganhs}">
+                                <td class="fw-bold text-primary font-monospace" th:text="${n.maNganh}">CS</td>
+                                <td class="fw-semibold text-dark" th:text="${n.tenNganh}">Khoa học Máy tính</td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary" th:text="${n.heDaoTao}">CHUAN</span>
+                                </td>
+                                <td th:text="${n.khoa?.tenKhoa}">Khoa CNTT</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-2 me-1"
+                                            th:data-manganh="${n.maNganh}"
+                                            th:data-tennganh="${n.tenNganh}"
+                                            th:data-hedaotao="${n.heDaoTao}"
+                                            onclick="openEditNganh(this.getAttribute('data-manganh'), this.getAttribute('data-tennganh'), this.getAttribute('data-hedaotao'))"
+                                            title="Sửa Ngành">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <a th:href="@{'/web/admin/categories/nganh/delete/' + ${n.maNganh}}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa Ngành này?')"
+                                       class="btn btn-outline-danger btn-sm rounded-2"
+                                       title="Xóa Ngành">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Lop Table -->
             <div th:if="${activeTab == 'lop'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
-                <table class="table table-hover align-middle mb-0 small">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Mã Lớp</th>
-                            <th>Tên Lớp Sinh Hoạt</th>
-                            <th>Khóa học</th>
-                            <th>Khoa / Ngành</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="l : ${lops}">
-                            <td class="fw-bold text-primary font-monospace" th:text="${l.maLop}">DH23CS01</td>
-                            <td class="fw-semibold text-dark" th:text="${l.tenLop}">ĐH Khoa học Máy tính 2023 - Lớp 01</td>
-                            <td th:text="${l.khoaHoc}">K23 (2023-2027)</td>
-                            <td>
-                                <div class="fw-semibold" th:text="${l.khoa?.tenKhoa}">Khoa CNTT</div>
-                                <small class="text-muted" th:text="${l.nganh?.tenNganh}">Khoa học Máy tính</small>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <div class="fw-bold text-dark"><i class="fa-solid fa-users-rectangle me-2 text-primary"></i>Danh sách Lớp sinh hoạt</div>
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalAddLop">
+                        <i class="fa-solid fa-plus me-1"></i> Thêm Lớp mới
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 140px;">Mã Lớp</th>
+                                <th>Tên Lớp Sinh Hoạt</th>
+                                <th style="width: 150px;">Khóa học</th>
+                                <th>Khoa / Ngành</th>
+                                <th class="text-end" style="width: 140px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="l : ${lops}">
+                                <td class="fw-bold text-primary font-monospace" th:text="${l.maLop}">DH23CS01</td>
+                                <td class="fw-semibold text-dark" th:text="${l.tenLop}">ĐH Khoa học Máy tính 2023 - Lớp 01</td>
+                                <td th:text="${l.khoaHoc}">K23 (2023-2027)</td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${l.khoa?.tenKhoa}">Khoa CNTT</div>
+                                    <small class="text-muted" th:text="${l.nganh?.tenNganh}">Khoa học Máy tính</small>
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-2 me-1"
+                                            th:data-malop="${l.maLop}"
+                                            th:data-tenlop="${l.tenLop}"
+                                            th:data-khoahoc="${l.khoaHoc}"
+                                            onclick="openEditLop(this.getAttribute('data-malop'), this.getAttribute('data-tenlop'), this.getAttribute('data-khoahoc'))"
+                                            title="Sửa Lớp">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <a th:href="@{'/web/admin/categories/lop/delete/' + ${l.maLop}}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa Lớp này?')"
+                                       class="btn btn-outline-danger btn-sm rounded-2"
+                                       title="Xóa Lớp">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Hoc Ky Table -->
             <div th:if="${activeTab == 'hoc-ky'}" class="bg-white rounded-4 border shadow-sm overflow-hidden">
-                <table class="table table-hover align-middle mb-0 small">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Mã Học Kỳ</th>
-                            <th>Tên Học Kỳ</th>
-                            <th>Năm Học</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="h : ${hocKys}">
-                            <td class="fw-bold text-primary font-monospace" th:text="${h.maHocKy}">HK1_2023_2024</td>
-                            <td class="fw-semibold text-dark" th:text="${h.tenHocKy}">Học kỳ 1 (2023-2024)</td>
-                            <td class="badge bg-secondary-subtle text-secondary m-2" th:text="${h.namHoc}">2023-2024</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <div class="fw-bold text-dark"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Danh mục Học kỳ & Niên khóa</div>
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalAddHocKy">
+                        <i class="fa-solid fa-plus me-1"></i> Thêm Học kỳ mới
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 180px;">Mã Học Kỳ</th>
+                                <th>Tên Học Kỳ</th>
+                                <th style="width: 150px;">Năm Học</th>
+                                <th class="text-end" style="width: 140px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="h : ${hocKys}">
+                                <td class="fw-bold text-primary font-monospace" th:text="${h.maHocKy}">HK1_2023_2024</td>
+                                <td class="fw-semibold text-dark" th:text="${h.tenHocKy}">Học kỳ 1 (2023-2024)</td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary" th:text="${h.namHoc}">2023-2024</span>
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-2 me-1"
+                                            th:data-mahocky="${h.maHocKy}"
+                                            th:data-tenhocky="${h.tenHocKy}"
+                                            th:data-namhoc="${h.namHoc}"
+                                            onclick="openEditHocKy(this.getAttribute('data-mahocky'), this.getAttribute('data-tenhocky'), this.getAttribute('data-namhoc'))"
+                                            title="Sửa Học kỳ">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <a th:href="@{'/web/admin/categories/hoc-ky/delete/' + ${h.maHocKy}}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa Học kỳ này?')"
+                                       class="btn btn-outline-danger btn-sm rounded-2"
+                                       title="Xóa Học kỳ">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Mon Hoc Table (QĐ 561) -->
@@ -262,8 +369,322 @@
     </div>
 </div>
 
+<!-- ===================================================================
+     MODALS FOR KHOA (ADD & EDIT)
+=================================================================== -->
+<!-- Modal Add Khoa -->
+<div class="modal fade" id="modalAddKhoa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/khoa/add}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-plus-circle text-primary me-2"></i>Thêm Khoa đào tạo mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Khoa (Viết tắt/Tiếng Anh)</label>
+                        <input type="text" name="maKhoa" class="form-control text-uppercase" placeholder="VD: IT, BA, ACC" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Khoa</label>
+                        <input type="text" name="tenKhoa" class="form-control" placeholder="VD: Khoa Công nghệ Thông tin" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu Khoa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Khoa -->
+<div class="modal fade" id="modalEditKhoa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/khoa/edit}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square text-primary me-2"></i>Chỉnh sửa Khoa đào tạo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Khoa</label>
+                        <input type="text" id="editKhoa_maKhoa" name="maKhoa" class="form-control bg-light text-muted font-monospace" readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Khoa</label>
+                        <input type="text" id="editKhoa_tenKhoa" name="tenKhoa" class="form-control" placeholder="Nhập tên khoa mới" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODALS FOR NGANH (ADD & EDIT)
+=================================================================== -->
+<!-- Modal Add Nganh -->
+<div class="modal fade" id="modalAddNganh" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/nganh/add}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-plus-circle text-primary me-2"></i>Thêm Ngành đào tạo mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Thuộc Khoa</label>
+                        <select name="maKhoa" class="form-select" required>
+                            <option th:each="k : ${khoas}" th:value="${k.maKhoa}" th:text="${k.tenKhoa + ' (' + k.maKhoa + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Ngành (Viết tắt/Tiếng Anh)</label>
+                        <input type="text" name="maNganh" class="form-control text-uppercase font-monospace" placeholder="VD: CS, IT, SE, BA" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Ngành Đào tạo</label>
+                        <input type="text" name="tenNganh" class="form-control" placeholder="VD: Khoa học Máy tính" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Hệ đào tạo</label>
+                        <select name="heDaoTao" class="form-select">
+                            <option value="CHUAN">Chuẩn (Đại trà)</option>
+                            <option value="CHAT_LUONG_CAO">Chất lượng cao</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu Ngành</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Nganh -->
+<div class="modal fade" id="modalEditNganh" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/nganh/edit}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square text-primary me-2"></i>Chỉnh sửa Ngành đào tạo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Ngành</label>
+                        <input type="text" id="editNganh_maNganh" name="maNganh" class="form-control bg-light text-muted font-monospace" readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Ngành Đào tạo</label>
+                        <input type="text" id="editNganh_tenNganh" name="tenNganh" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Hệ đào tạo</label>
+                        <select id="editNganh_heDaoTao" name="heDaoTao" class="form-select">
+                            <option value="CHUAN">Chuẩn (Đại trà)</option>
+                            <option value="CHAT_LUONG_CAO">Chất lượng cao</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODALS FOR LOP (ADD & EDIT)
+=================================================================== -->
+<!-- Modal Add Lop -->
+<div class="modal fade" id="modalAddLop" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/lop/add}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-plus-circle text-primary me-2"></i>Thêm Lớp sinh hoạt mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Thuộc Khoa</label>
+                        <select name="maKhoa" class="form-select" required>
+                            <option th:each="k : ${khoas}" th:value="${k.maKhoa}" th:text="${k.tenKhoa + ' (' + k.maKhoa + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Thuộc Ngành</label>
+                        <select name="maNganh" class="form-select" required>
+                            <option th:each="n : ${nganhs}" th:value="${n.maNganh}" th:text="${n.tenNganh + ' (' + n.maNganh + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Lớp</label>
+                        <input type="text" name="maLop" class="form-control text-uppercase font-monospace" placeholder="VD: DH23CS01, DH23IT02" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Lớp Sinh Hoạt</label>
+                        <input type="text" name="tenLop" class="form-control" placeholder="VD: ĐH Khoa học Máy tính 2023 - Lớp 01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Khóa học / Niên khóa</label>
+                        <input type="text" name="khoaHoc" class="form-control" placeholder="VD: K23 (2023-2027)" value="K23 (2023-2027)" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu Lớp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Lop -->
+<div class="modal fade" id="modalEditLop" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/lop/edit}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square text-primary me-2"></i>Chỉnh sửa Lớp sinh hoạt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Lớp</label>
+                        <input type="text" id="editLop_maLop" name="maLop" class="form-control bg-light text-muted font-monospace" readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Lớp Sinh Hoạt</label>
+                        <input type="text" id="editLop_tenLop" name="tenLop" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Khóa học / Niên khóa</label>
+                        <input type="text" id="editLop_khoaHoc" name="khoaHoc" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODALS FOR HOC KY (ADD & EDIT)
+=================================================================== -->
+<!-- Modal Add Hoc Ky -->
+<div class="modal fade" id="modalAddHocKy" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/hoc-ky/add}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-plus-circle text-primary me-2"></i>Thêm Học kỳ mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Học Kỳ</label>
+                        <input type="text" name="maHocKy" class="form-control font-monospace" placeholder="VD: HK1_2025_2026, HK2_2025_2026" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Học Kỳ</label>
+                        <input type="text" name="tenHocKy" class="form-control" placeholder="VD: Học kỳ 1 (2025-2026)" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Năm Học</label>
+                        <input type="text" name="namHoc" class="form-control" placeholder="VD: 2025-2026" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu Học kỳ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Hoc Ky -->
+<div class="modal fade" id="modalEditHocKy" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/admin/categories/hoc-ky/edit}" method="post">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square text-primary me-2"></i>Chỉnh sửa Học kỳ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Mã Học Kỳ</label>
+                        <input type="text" id="editHocKy_maHocKy" name="maHocKy" class="form-control bg-light text-muted font-monospace" readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Tên Học Kỳ</label>
+                        <input type="text" id="editHocKy_tenHocKy" name="tenHocKy" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Năm Học</label>
+                        <input type="text" id="editHocKy_namHoc" name="namHoc" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div th:replace="~{layout/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openEditKhoa(maKhoa, tenKhoa) {
+        document.getElementById('editKhoa_maKhoa').value = maKhoa || '';
+        document.getElementById('editKhoa_tenKhoa').value = tenKhoa || '';
+        new bootstrap.Modal(document.getElementById('modalEditKhoa')).show();
+    }
+
+    function openEditNganh(maNganh, tenNganh, heDaoTao) {
+        document.getElementById('editNganh_maNganh').value = maNganh || '';
+        document.getElementById('editNganh_tenNganh').value = tenNganh || '';
+        if (heDaoTao) {
+            document.getElementById('editNganh_heDaoTao').value = heDaoTao;
+        }
+        new bootstrap.Modal(document.getElementById('modalEditNganh')).show();
+    }
+
+    function openEditLop(maLop, tenLop, khoaHoc) {
+        document.getElementById('editLop_maLop').value = maLop || '';
+        document.getElementById('editLop_tenLop').value = tenLop || '';
+        document.getElementById('editLop_khoaHoc').value = khoaHoc || '';
+        new bootstrap.Modal(document.getElementById('modalEditLop')).show();
+    }
+
+    function openEditHocKy(maHocKy, tenHocKy, namHoc) {
+        document.getElementById('editHocKy_maHocKy').value = maHocKy || '';
+        document.getElementById('editHocKy_tenHocKy').value = tenHocKy || '';
+        document.getElementById('editHocKy_namHoc').value = namHoc || '';
+        new bootstrap.Modal(document.getElementById('modalEditHocKy')).show();
+    }
+</script>
 </body>
 </html>

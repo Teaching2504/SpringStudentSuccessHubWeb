@@ -7,9 +7,11 @@ import com.nttt.pojo.*;
 import com.nttt.repositories.*;
 import com.nttt.security.JwtTokenProvider;
 import com.nttt.services.AuthService;
+import com.nttt.services.CloudinaryService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
     private final CanBoKhoaRepository canBoKhoaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final CloudinaryService cloudinaryService;
 
     public AuthServiceImpl(
             NguoiDungRepository nguoiDungRepository,
@@ -31,7 +34,8 @@ public class AuthServiceImpl implements AuthService {
             NhanVienRepository nhanVienRepository,
             CanBoKhoaRepository canBoKhoaRepository,
             PasswordEncoder passwordEncoder,
-            JwtTokenProvider jwtTokenProvider
+            JwtTokenProvider jwtTokenProvider,
+            CloudinaryService cloudinaryService
     ) {
         this.nguoiDungRepository = nguoiDungRepository;
         this.sinhVienRepository = sinhVienRepository;
@@ -39,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
         this.canBoKhoaRepository = canBoKhoaRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Override
@@ -134,6 +139,16 @@ public class AuthServiceImpl implements AuthService {
         return buildLoginResponse(user, null);
     }
 
+    @Override
+    public LoginResponse updateAvatar(String username, MultipartFile file) {
+        NguoiDung user = nguoiDungRepository.findByTenDangNhap(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        String avatarUrl = cloudinaryService.uploadAvatar(file, username);
+        user.setAvatar(avatarUrl);
+        nguoiDungRepository.save(user);
+        return buildLoginResponse(user, null);
+    }
+
     private LoginResponse buildLoginResponse(NguoiDung user, String token) {
         LoginResponse.LoginResponseBuilder builder = LoginResponse.builder()
                 .token(token)
@@ -142,7 +157,8 @@ public class AuthServiceImpl implements AuthService {
                 .tenDangNhap(user.getTenDangNhap())
                 .hoTen(user.getHoTen())
                 .email(user.getEmail())
-                .vaiTro(user.getVaiTro());
+                .vaiTro(user.getVaiTro())
+                .avatar(user.getAvatar());
 
         if ("ROLE_SINH_VIEN".equals(user.getVaiTro()) || "SINH_VIEN".equals(user.getVaiTro())) {
             Optional<SinhVien> svOpt = sinhVienRepository.findByNguoiDung_Id(user.getId());

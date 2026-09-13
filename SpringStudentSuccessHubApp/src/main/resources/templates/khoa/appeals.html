@@ -53,13 +53,14 @@
                             <th>Mã KN</th>
                             <th>Sinh viên</th>
                             <th>Nội dung khiếu nại</th>
+                            <th>Tệp minh chứng</th>
                             <th>Trạng thái</th>
                             <th>Phản hồi của Khoa</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:if="${appeals == null or appeals.isEmpty()}">
-                            <td colspan="5" class="text-center py-4 text-muted">Chưa có khiếu nại nào từ sinh viên</td>
+                            <td colspan="6" class="text-center py-4 text-muted">Chưa có khiếu nại nào từ sinh viên</td>
                         </tr>
                         <tr th:each="kn : ${appeals}">
                             <td class="fw-bold text-primary font-monospace" th:text="${kn.maKienNghi}">KN01</td>
@@ -69,8 +70,20 @@
                             </td>
                             <td th:text="${kn.noiDung}">Đề nghị rà soát lại ĐRL HK1</td>
                             <td>
-                                <span th:if="${kn.trangThai == 'CHO_XU_LY'}" class="badge bg-warning-subtle text-warning">Chờ xử lý</span>
-                                <span th:if="${kn.trangThai == 'DA_TRA_LOI'}" class="badge bg-success-subtle text-success">Đã trả lời</span>
+                                <div th:if="${kn.tepMinhChung != null and !kn.tepMinhChung.isEmpty()}" class="d-flex align-items-center gap-2">
+                                    <a th:href="${kn.tepMinhChung}" target="_blank" class="text-decoration-none">
+                                        <img th:src="${kn.tepMinhChung}" class="rounded border shadow-sm" style="width: 36px; height: 36px; object-fit: cover;"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                        <span class="btn btn-outline-primary btn-sm rounded-pill py-0 px-2" style="font-size: 11px; display: none;">
+                                            <i class="fa-solid fa-file me-1"></i>Xem file
+                                        </span>
+                                    </a>
+                                </div>
+                                <span th:unless="${kn.tepMinhChung != null and !kn.tepMinhChung.isEmpty()}" class="text-muted small">-</span>
+                            </td>
+                            <td>
+                                <span th:if="${kn.trangThai == 'CHO_XU_LY'}" class="badge bg-warning-subtle text-warning border border-warning-subtle">Chờ xử lý</span>
+                                <span th:if="${kn.trangThai == 'DA_TRA_LOI'}" class="badge bg-success-subtle text-success border border-success-subtle">Đã trả lời</span>
                             </td>
                             <td th:text="${kn.phanHoi != null ? kn.phanHoi : '-'}">-</td>
                         </tr>

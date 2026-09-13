@@ -40,9 +40,26 @@
 
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
-            <div class="mb-4">
-                <h3 class="fw-bold text-dark mb-1">Thẩm định & Duyệt Minh chứng Rèn luyện</h3>
-                <p class="text-muted small">Cán bộ khoa xem xét giấy chứng nhận hoạt động của sinh viên và cộng điểm ĐRL</p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Thẩm định & Duyệt Minh chứng Rèn luyện</h3>
+                    <p class="text-muted small mb-0">Cán bộ khoa xem xét giấy chứng nhận hoạt động từ Cloudinary và thẩm định cộng điểm ĐRL cho sinh viên</p>
+                </div>
+                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addEvidenceModal">
+                    <i class="fa-solid fa-cloud-arrow-up me-1"></i> Nộp Minh chứng mới
+                </button>
+            </div>
+
+            <!-- Flash Alerts -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 py-2 px-3 mb-3 small d-flex align-items-center shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-check me-2 fs-6"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.75rem;"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show rounded-3 py-2 px-3 mb-3 small d-flex align-items-center shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-exclamation me-2 fs-6"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.75rem;"></button>
             </div>
 
             <!-- Evidence Table -->
@@ -54,49 +71,73 @@
                             <th>Sinh viên</th>
                             <th>Tên hoạt động / Mô tả</th>
                             <th class="text-center">Điểm đề xuất</th>
-                            <th>Tệp đính kèm</th>
+                            <th>Ảnh / Tệp đính kèm (Cloudinary)</th>
                             <th>Trạng thái</th>
-                            <th class="text-end">Thao tác</th>
+                            <th class="text-end pe-3">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:if="${evidenceList.isEmpty()}">
-                            <td colspan="7" class="text-center py-4 text-muted">Hiện tại không có minh chứng nào cần duyệt</td>
+                        <tr th:if="${evidenceList == null or evidenceList.isEmpty()}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-file-circle-check fs-1 text-slate-300 d-block mb-2"></i>
+                                Hiện tại không có minh chứng nào cần duyệt
+                            </td>
                         </tr>
                         <tr th:each="mc : ${evidenceList}">
                             <td class="fw-bold text-primary font-monospace" th:text="${mc.maMinhChung}">MC01</td>
                             <td>
-                                <div class="fw-semibold text-dark" th:text="${mc.sinhVien?.hoTen}">Nguyễn Thị Tuyết Trinh</div>
-                                <small class="text-muted font-monospace" th:text="${mc.sinhVien?.mssv}">2351010216</small>
+                                <div class="fw-semibold text-dark" th:text="${mc.hoTenSinhVien}">Nguyễn Thị Tuyết Trinh</div>
+                                <div class="text-muted font-monospace" style="font-size: 11px;">
+                                    <span th:text="${mc.mssv}">2351010216</span>
+                                    <span th:if="${mc.maLop != null}" class="badge bg-light text-dark ms-1" th:text="${mc.maLop}">DH23IT01</span>
+                                </div>
                             </td>
                             <td>
-                                <div class="fw-semibold" th:text="${mc.tenHoatDong}">Cuộc thi Olympic Tin học</div>
+                                <div class="fw-semibold text-dark" th:text="${mc.tenHoatDong}">Cuộc thi Olympic Tin học</div>
                                 <small class="text-muted" th:text="${mc.moTa}">Đạt giải nhì</small>
                             </td>
-                            <td class="text-center fw-bold text-success" th:text="${'+' + mc.diemDeXuat + ' đ'}">+5 đ</td>
+                            <td class="text-center fw-bold text-success fs-6" th:text="${'+' + mc.diemDeXuat + ' đ'}">+5 đ</td>
                             <td>
-                                <a th:if="${mc.fileUrl != null}" th:href="${mc.fileUrl}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-2">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem file
-                                </a>
-                                <span th:if="${mc.fileUrl == null}" class="text-muted">-</span>
+                                <div th:if="${mc.fileUrl != null and !mc.fileUrl.isEmpty()}" class="d-flex align-items-center gap-2">
+                                    <!-- Image Thumbnail with Lightbox trigger -->
+                                    <a th:href="${mc.fileUrl}" target="_blank" class="text-decoration-none position-relative group d-inline-block" title="Nhấp để xem ảnh phóng to">
+                                        <img th:src="${mc.fileUrl}"
+                                             class="rounded-3 border shadow-sm"
+                                             style="width: 44px; height: 44px; object-fit: cover;"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                                        <div class="rounded-3 bg-light border align-items-center justify-content-center text-primary"
+                                             style="width: 44px; height: 44px; display: none;">
+                                            <i class="fa-solid fa-file-lines"></i>
+                                        </div>
+                                    </a>
+                                    <div>
+                                        <a th:href="${mc.fileUrl}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill py-0 px-2" style="font-size: 11px;">
+                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Xem ảnh
+                                        </a>
+                                        <div th:if="${mc.fileUrl.contains('cloudinary')}" class="text-muted" style="font-size: 10px;">
+                                            <i class="fa-solid fa-cloud text-info me-0.5"></i>Cloudinary
+                                        </div>
+                                    </div>
+                                </div>
+                                <span th:unless="${mc.fileUrl != null and !mc.fileUrl.isEmpty()}" class="text-muted small">Không có tệp</span>
                             </td>
                             <td>
-                                <span th:if="${mc.trangThai == 'CHO_DUYET'}" class="badge bg-warning-subtle text-warning">Chờ duyệt</span>
-                                <span th:if="${mc.trangThai == 'DA_DUYET'}" class="badge bg-success-subtle text-success">Đã duyệt</span>
-                                <span th:if="${mc.trangThai == 'TU_CHOI'}" class="badge bg-danger-subtle text-danger">Từ chối</span>
+                                <span th:if="${mc.trangThai == 'CHO_DUYET'}" class="badge bg-warning-subtle text-warning border border-warning-subtle">⏳ Chờ duyệt</span>
+                                <span th:if="${mc.trangThai == 'DA_DUYET'}" class="badge bg-success-subtle text-success border border-success-subtle">✓ Đã duyệt (+ĐRL)</span>
+                                <span th:if="${mc.trangThai == 'TU_CHOI'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">✕ Từ chối</span>
                             </td>
-                            <td class="text-end">
+                            <td class="text-end pe-3 whitespace-nowrap">
                                 <form th:action="@{'/web/khoa/evidence/' + ${mc.maMinhChung} + '/review'}" method="post" class="d-inline">
                                     <input type="hidden" name="trangThai" value="DA_DUYET">
                                     <input type="hidden" name="lyDoPhanHoi" value="Hồ sơ minh chứng hợp lệ.">
-                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 me-1">
-                                        <i class="fa-solid fa-check"></i> Duyệt (+ĐRL)
+                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 me-1" title="Duyệt minh chứng và cộng điểm ĐRL">
+                                        <i class="fa-solid fa-check me-1"></i> Duyệt (+ĐRL)
                                     </button>
                                 </form>
                                 <form th:action="@{'/web/khoa/evidence/' + ${mc.maMinhChung} + '/review'}" method="post" class="d-inline">
                                     <input type="hidden" name="trangThai" value="TU_CHOI">
                                     <input type="hidden" name="lyDoPhanHoi" value="Không đủ minh chứng hợp lệ.">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2.5" title="Từ chối">
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
                                 </form>
@@ -105,6 +146,74 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Evidence with Cloudinary Upload -->
+<div class="modal fade" id="addEvidenceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form th:action="@{/web/khoa/evidence/add}" method="post" enctype="multipart/form-data">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="fa-solid fa-cloud-arrow-up text-primary me-2"></i>Nộp Minh chứng Rèn luyện mới
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Sinh viên</label>
+                        <select class="form-select" name="mssv" required>
+                            <option value="">-- Chọn sinh viên --</option>
+                            <option th:each="sv : ${students}" th:value="${sv.mssv}" th:text="${sv.mssv + ' - ' + sv.hoTen + ' (' + sv.maLop + ')'}"></option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold small">Học kỳ áp dụng</label>
+                            <select class="form-select" name="maHocKy" required>
+                                <option th:each="hk : ${hocKys}" th:value="${hk.maHocKy}" th:text="${hk.tenHocKy}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold small">Điểm đề xuất (+ĐRL)</label>
+                            <input type="number" step="0.5" class="form-control fw-bold" name="diemDeXuat" value="5.0" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Tên hoạt động / Thành tích</label>
+                        <input type="text" class="form-control" name="tenHoatDong" required placeholder="VD: Tham gia Hội thao Sinh viên OU 2025">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Mô tả chi tiết</label>
+                        <textarea class="form-control" rows="2" name="moTa" placeholder="Chi tiết giải thưởng, thành tích hoặc vai trò tham gia..."></textarea>
+                    </div>
+
+                    <div class="mb-3 bg-light p-3 rounded-3 border">
+                        <label class="form-label fw-semibold small text-dark mb-1">
+                            <i class="fa-solid fa-image text-primary me-1"></i>Tải lên Ảnh / File Minh chứng (Cloudinary)
+                        </label>
+                        <input type="file" name="file" accept="image/*,.pdf" class="form-control form-control-sm"
+                               onchange="if(this.files[0] && this.files[0].type.startsWith('image/')) { document.getElementById('evidenceFilePreview').src = window.URL.createObjectURL(this.files[0]); document.getElementById('evidenceFilePreview').style.display='block'; }">
+                        <div class="text-center mt-2">
+                            <img id="evidenceFilePreview" class="rounded-3 border shadow-sm mx-auto" style="max-height: 120px; display: none; object-fit: contain;">
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 11px;">
+                            * Ảnh/PDF sẽ được tự động tải lên và lưu trữ trực tuyến an toàn trên máy chủ Cloudinary.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                        <i class="fa-solid fa-cloud-arrow-up me-1"></i> Gửi Minh chứng lên Cloudinary
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

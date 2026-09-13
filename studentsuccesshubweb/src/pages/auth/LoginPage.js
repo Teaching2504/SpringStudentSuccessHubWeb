@@ -45,32 +45,29 @@ const LoginPage = () => {
     }
   };
 
-  const fillQuickLogin = (u, p) => {
-    setTenDangNhap(u);
-    setMatKhau(p);
-  };
-
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-8">
       {/* Brand Header */}
       <div className="text-center mb-8 max-w-lg flex flex-col items-center">
-        <img
-          src="/logo.png"
-          alt="Trường Đại học Mở TP.HCM"
-          className="h-28 w-auto object-contain mb-3 drop-shadow"
-        />
+        <div className="bg-white p-2.5 rounded-2xl shadow-md mb-3 border border-slate-200">
+          <img
+            src="/logo.png"
+            alt="Trường Đại học Mở TP.HCM"
+            className="h-24 w-auto object-contain"
+          />
+        </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">
           TRƯỜNG ĐẠI HỌC MỞ TP. HỒ CHÍ MINH
         </h1>
-        <p className="text-primary-700 font-semibold text-base sm:text-lg mt-1">
+        <p className="text-primary-700 font-semibold text-sm sm:text-base mt-1">
           HỆ THỐNG QUẢN LÝ KẾT QUẢ HỌC TẬP - RÈN LUYỆN VÀ XÉT DUYỆT HỌC BỔNG (OU-SSH)
         </p>
       </div>
 
       {/* Login Card */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200/80 p-8">
-        <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
-          <Shield className="w-6 h-6 text-primary-600" />
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200/90 p-8">
+        <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-slate-100">
+          <Shield className="w-6 h-6 text-primary-700" />
           <h2 className="text-xl font-bold text-slate-800">Đăng nhập tài khoản</h2>
         </div>
 
@@ -96,14 +93,14 @@ const LoginPage = () => {
                 value={tenDangNhap}
                 onChange={(e) => setTenDangNhap(e.target.value)}
                 placeholder="Nhập MSSV hoặc Tên đăng nhập"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:border-primary-700 transition-colors"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Mật khẩu (Mặc định SV là CCCD 12 số)
+              Mật khẩu
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -115,7 +112,7 @@ const LoginPage = () => {
                 value={matKhau}
                 onChange={(e) => setMatKhau(e.target.value)}
                 placeholder="Nhập số CCCD (SV) hoặc Mật khẩu"
-                className="w-full pl-10 pr-11 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                className="w-full pl-10 pr-11 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:border-primary-700 transition-colors"
               />
               <button
                 type="button"
@@ -123,7 +120,7 @@ const LoginPage = () => {
                 className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                 title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
               >
-                {showPassword ? <EyeOff className="w-5 h-5 text-primary-600" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-5 h-5 text-primary-700" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
@@ -131,7 +128,7 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 px-4 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-xl shadow-lg shadow-primary-700/25 transition duration-150 flex justify-center items-center gap-2 cursor-pointer disabled:opacity-70"
+            className="w-full mt-2 py-3 px-4 ou-btn-primary"
           >
             {loading ? (
               <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -140,55 +137,18 @@ const LoginPage = () => {
             )}
           </button>
         </form>
-
-        {/* Demo Fast Logins */}
-        <div className="mt-8 pt-6 border-t border-slate-100">
-          <p className="text-xs font-semibold uppercase text-slate-400 tracking-wider mb-3">
-            Tài khoản mẫu kiểm thử nhanh:
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() => fillQuickLogin('admin', 'admin123')}
-              className="p-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 font-medium text-left border border-purple-200/60 transition cursor-pointer"
-            >
-              👑 <strong>Admin</strong>: admin
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickLogin('captruong', 'truong123')}
-              className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 font-medium text-left border border-blue-200/60 transition cursor-pointer"
-            >
-              🏛️ <strong>Cấp Trường</strong>: captruong
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickLogin('cbk_it', 'khoa123')}
-              className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium text-left border border-emerald-200/60 transition cursor-pointer"
-            >
-              🏢 <strong>Khoa IT</strong>: cbk_it
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickLogin('2351010216', '092305006276')}
-              className="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium text-left border border-amber-200/60 transition cursor-pointer"
-            >
-              🎓 <strong>Sinh viên</strong>: Tuyết Trinh
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Footer */}
-      <footer className="mt-8 w-full max-w-2xl px-5 py-3 bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white border border-primary-800/60 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 text-xs shadow-md">
+      <footer className="mt-8 w-full max-w-2xl px-5 py-3 ou-footer rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 text-xs shadow-md">
         <div className="flex items-center gap-2 font-medium">
-          <span className="w-5 h-5 rounded-full bg-white/10 text-primary-200 flex items-center justify-center font-bold text-[10px] border border-white/15">
-            <User className="w-3 h-3" />
+          <span className="ou-footer-icon-circle text-white">
+            <User className="w-3.5 h-3.5" />
           </span>
           <span className="font-semibold text-white">2351010216 - Nguyễn Thị Tuyết Trinh</span>
         </div>
-        <div className="flex items-center gap-1.5 font-semibold text-primary-200 bg-white/10 px-3 py-0.5 rounded-full border border-white/20">
-          <GraduationCap className="w-3.5 h-3.5 text-primary-300" />
+        <div className="ou-footer-badge flex items-center gap-1.5">
+          <GraduationCap className="w-3.5 h-3.5" />
           <span>Đồ án tốt nghiệp</span>
         </div>
       </footer>

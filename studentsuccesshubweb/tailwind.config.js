@@ -7,6 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        ouNavy: {
+          DEFAULT: '#1e3a8a',
+          dark: '#172554',
+          hover: '#1e40af',
+          light: '#3b82f6',
+          subtle: '#eff6ff',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -14,10 +21,10 @@ export default {
           300: '#93c5fd',
           400: '#60a5fa',
           500: '#3b82f6',
-          600: '#005baa', // Đại học Mở primary blue
-          700: '#004785',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          600: '#2563eb',
+          700: '#1e3a8a', // Deep OU Navy
+          800: '#172554', // Dark OU Navy
+          900: '#0f172a',
         },
       },
     },

@@ -58,7 +58,7 @@ export const Sidebar = () => {
   else if (role === 'ROLE_SINH_VIEN') links = svLinks;
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)] flex flex-col justify-between p-4 shadow-sm">
+    <aside className="ou-sidebar w-64 min-h-[calc(100vh-4rem)] flex flex-col justify-between p-4 shadow-sm">
       <div className="space-y-1">
         <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
           Chức năng nghiệp vụ
@@ -71,11 +71,7 @@ export const Sidebar = () => {
               to={item.to}
               end={item.to === '/admin' || item.to === '/truong' || item.to === '/khoa' || item.to === '/sinh-vien'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-primary-700 text-white shadow-md shadow-primary-700/25 font-semibold'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`
+                `ou-sidebar-link ${isActive ? 'active' : ''}`
               }
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -85,9 +81,9 @@ export const Sidebar = () => {
         })}
       </div>
 
-      <div className="p-3 bg-primary-50/70 border border-primary-100/80 rounded-2xl">
-        <p className="text-xs font-bold text-primary-900 leading-snug">2351010216 - Nguyễn Thị Tuyết Trinh</p>
-        <p className="text-[11px] text-primary-700 font-medium mt-0.5">Đồ án tốt nghiệp</p>
+      <div className="p-3 bg-blue-50/80 border border-blue-200/80 rounded-2xl">
+        <p className="text-xs font-bold text-primary-800 leading-snug">2351010216 - Nguyễn Thị Tuyết Trinh</p>
+        <p className="text-[11px] text-primary-600 font-medium mt-0.5">Đồ án tốt nghiệp</p>
       </div>
     </aside>
   );

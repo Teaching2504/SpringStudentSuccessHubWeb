@@ -36,6 +36,7 @@ public class WebAdminController {
     private final NguoiDungService nguoiDungService;
     private final PasswordEncoder passwordEncoder;
     private final CurriculumService curriculumService;
+    private final com.nttt.services.CloudinaryService cloudinaryService;
 
     public WebAdminController(SinhVienService sinhVienService,
                               DanhMucService danhMucService,
@@ -43,7 +44,8 @@ public class WebAdminController {
                               NguoiDungRepository nguoiDungRepository,
                               NguoiDungService nguoiDungService,
                               PasswordEncoder passwordEncoder,
-                              CurriculumService curriculumService) {
+                              CurriculumService curriculumService,
+                              com.nttt.services.CloudinaryService cloudinaryService) {
         this.sinhVienService = sinhVienService;
         this.danhMucService = danhMucService;
         this.excelService = excelService;
@@ -51,6 +53,7 @@ public class WebAdminController {
         this.nguoiDungService = nguoiDungService;
         this.passwordEncoder = passwordEncoder;
         this.curriculumService = curriculumService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     private boolean checkAdmin(HttpSession session) {
@@ -160,17 +163,151 @@ public class WebAdminController {
     }
 
     @PostMapping("/categories/khoa/add")
-    public String addKhoa(@ModelAttribute Khoa khoa, HttpSession session) {
+    public String addKhoa(@ModelAttribute Khoa khoa, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!checkAdmin(session)) return "redirect:/web/login";
-        danhMucService.createKhoa(khoa);
+        try {
+            danhMucService.createKhoa(khoa);
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm Khoa thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi thêm Khoa: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=khoa";
+    }
+
+    @PostMapping("/categories/khoa/edit")
+    public String editKhoa(@ModelAttribute Khoa khoa, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.updateKhoa(khoa.getMaKhoa(), khoa);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật Khoa thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cập nhật Khoa: " + e.getMessage());
+        }
         return "redirect:/web/admin/categories?tab=khoa";
     }
 
     @GetMapping("/categories/khoa/delete/{maKhoa}")
-    public String deleteKhoa(@PathVariable("maKhoa") String maKhoa, HttpSession session) {
+    public String deleteKhoa(@PathVariable("maKhoa") String maKhoa, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!checkAdmin(session)) return "redirect:/web/login";
-        danhMucService.deleteKhoa(maKhoa);
+        try {
+            danhMucService.deleteKhoa(maKhoa);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa Khoa thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa Khoa: " + e.getMessage());
+        }
         return "redirect:/web/admin/categories?tab=khoa";
+    }
+
+    @PostMapping("/categories/nganh/add")
+    public String addNganh(@RequestParam("maKhoa") String maKhoa, @ModelAttribute Nganh nganh, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.createNganh(maKhoa, nganh);
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm Ngành đào tạo thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi thêm Ngành: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=nganh";
+    }
+
+    @PostMapping("/categories/nganh/edit")
+    public String editNganh(@ModelAttribute Nganh nganh, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.updateNganh(nganh.getMaNganh(), nganh);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật Ngành đào tạo thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cập nhật Ngành: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=nganh";
+    }
+
+    @GetMapping("/categories/nganh/delete/{maNganh}")
+    public String deleteNganh(@PathVariable("maNganh") String maNganh, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.deleteNganh(maNganh);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa Ngành thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa Ngành: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=nganh";
+    }
+
+    @PostMapping("/categories/lop/add")
+    public String addLop(@RequestParam("maKhoa") String maKhoa,
+                         @RequestParam("maNganh") String maNganh,
+                         @ModelAttribute LopSinhHoat lop,
+                         HttpSession session,
+                         RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.createLop(maKhoa, maNganh, lop);
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm Lớp sinh hoạt thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi thêm Lớp: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=lop";
+    }
+
+    @PostMapping("/categories/lop/edit")
+    public String editLop(@ModelAttribute LopSinhHoat lop, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.updateLop(lop.getMaLop(), lop);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật Lớp sinh hoạt thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cập nhật Lớp: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=lop";
+    }
+
+    @GetMapping("/categories/lop/delete/{maLop}")
+    public String deleteLop(@PathVariable("maLop") String maLop, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.deleteLop(maLop);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa Lớp thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa Lớp: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=lop";
+    }
+
+    @PostMapping("/categories/hoc-ky/add")
+    public String addHocKy(@ModelAttribute HocKy hocKy, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.createHocKy(hocKy);
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm Học kỳ thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi thêm Học kỳ: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=hoc-ky";
+    }
+
+    @PostMapping("/categories/hoc-ky/edit")
+    public String editHocKy(@ModelAttribute HocKy hocKy, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.updateHocKy(hocKy.getMaHocKy(), hocKy);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật Học kỳ thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cập nhật Học kỳ: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=hoc-ky";
+    }
+
+    @GetMapping("/categories/hoc-ky/delete/{maHocKy}")
+    public String deleteHocKy(@PathVariable("maHocKy") String maHocKy, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            danhMucService.deleteHocKy(maHocKy);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa Học kỳ thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa Học kỳ: " + e.getMessage());
+        }
+        return "redirect:/web/admin/categories?tab=hoc-ky";
     }
 
     @GetMapping("/users")
@@ -187,53 +324,113 @@ public class WebAdminController {
                           @RequestParam(value = "email", required = false) String email,
                           @RequestParam(value = "soDienThoai", required = false) String soDienThoai,
                           @RequestParam(value = "vaiTro", defaultValue = "ROLE_SINH_VIEN") String vaiTro,
-                          HttpSession session) {
+                          @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+                          HttpSession session,
+                          RedirectAttributes redirectAttributes) {
         if (!checkAdmin(session)) return "redirect:/web/login";
-        String rawPwd = matKhau != null && !matKhau.isBlank() ? matKhau : "123456";
-        NguoiDung user = NguoiDung.builder()
-                .tenDangNhap(tenDangNhap)
-                .matKhau(passwordEncoder.encode(rawPwd))
-                .matKhauHienThi(rawPwd)
-                .hoTen(hoTen)
-                .email(email)
-                .soDienThoai(soDienThoai)
-                .vaiTro(vaiTro)
-                .trangThai("HOAT_DONG")
-                .build();
-        nguoiDungRepository.save(user);
+        try {
+            String rawPwd = matKhau != null && !matKhau.isBlank() ? matKhau : "123456";
+            String avatarUrl = null;
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                Map<String, Object> up = cloudinaryService.uploadFile(avatarFile, "avatars");
+                avatarUrl = (String) up.get("secure_url");
+            }
+            NguoiDung user = NguoiDung.builder()
+                    .tenDangNhap(tenDangNhap)
+                    .matKhau(passwordEncoder.encode(rawPwd))
+                    .matKhauHienThi(rawPwd)
+                    .hoTen(hoTen)
+                    .email(email)
+                    .soDienThoai(soDienThoai)
+                    .vaiTro(vaiTro)
+                    .trangThai("HOAT_DONG")
+                    .avatar(avatarUrl)
+                    .build();
+            nguoiDungRepository.save(user);
+            redirectAttributes.addFlashAttribute("successMessage", "Tạo tài khoản \"" + tenDangNhap + "\" thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi tạo tài khoản: " + e.getMessage());
+        }
+        return "redirect:/web/admin/users";
+    }
+
+    @PostMapping("/users/{id}/edit")
+    public String editUser(@PathVariable("id") Long id,
+                           @RequestParam("hoTen") String hoTen,
+                           @RequestParam(value = "email", required = false) String email,
+                           @RequestParam(value = "soDienThoai", required = false) String soDienThoai,
+                           @RequestParam(value = "vaiTro") String vaiTro,
+                           @RequestParam(value = "trangThai") String trangThai,
+                           @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+                           HttpSession session,
+                           RedirectAttributes redirectAttributes) {
+        if (!checkAdmin(session)) return "redirect:/web/login";
+        try {
+            NguoiDung user = nguoiDungRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng ID: " + id));
+            user.setHoTen(hoTen);
+            user.setEmail(email);
+            user.setSoDienThoai(soDienThoai);
+            user.setVaiTro(vaiTro);
+            user.setTrangThai(trangThai);
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                Map<String, Object> up = cloudinaryService.uploadFile(avatarFile, "avatars");
+                user.setAvatar((String) up.get("secure_url"));
+            }
+            nguoiDungRepository.save(user);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin tài khoản \"" + user.getTenDangNhap() + "\" thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cập nhật tài khoản: " + e.getMessage());
+        }
         return "redirect:/web/admin/users";
     }
 
     @PostMapping("/users/{id}/reset-password")
     public String resetUserPassword(@PathVariable("id") Long id,
                                     @RequestParam("newPassword") String newPassword,
-                                    HttpSession session) {
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
         if (!checkAdmin(session)) return "redirect:/web/login";
-        NguoiDung user = nguoiDungRepository.findById(id).orElse(null);
-        if (user != null) {
-            String rawPwd = newPassword != null && !newPassword.isBlank() ? newPassword : "123456";
-            user.setMatKhau(passwordEncoder.encode(rawPwd));
-            user.setMatKhauHienThi(rawPwd);
-            nguoiDungRepository.save(user);
+        try {
+            NguoiDung user = nguoiDungRepository.findById(id).orElse(null);
+            if (user != null) {
+                String rawPwd = newPassword != null && !newPassword.isBlank() ? newPassword : "123456";
+                user.setMatKhau(passwordEncoder.encode(rawPwd));
+                user.setMatKhauHienThi(rawPwd);
+                nguoiDungRepository.save(user);
+                redirectAttributes.addFlashAttribute("successMessage", "Đặt lại mật khẩu cho \"" + user.getTenDangNhap() + "\" thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi đặt lại mật khẩu: " + e.getMessage());
         }
         return "redirect:/web/admin/users";
     }
 
     @GetMapping("/users/{id}/toggle-status")
-    public String toggleStatus(@PathVariable("id") Long id, HttpSession session) {
+    public String toggleStatus(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!checkAdmin(session)) return "redirect:/web/login";
-        NguoiDung user = nguoiDungRepository.findById(id).orElse(null);
-        if (user != null) {
-            user.setTrangThai("HOAT_DONG".equals(user.getTrangThai()) ? "BI_KHOA" : "HOAT_DONG");
-            nguoiDungRepository.save(user);
+        try {
+            NguoiDung user = nguoiDungRepository.findById(id).orElse(null);
+            if (user != null) {
+                boolean isLocking = "HOAT_DONG".equals(user.getTrangThai());
+                user.setTrangThai(isLocking ? "BI_KHOA" : "HOAT_DONG");
+                nguoiDungRepository.save(user);
+                redirectAttributes.addFlashAttribute("successMessage", (isLocking ? "Đã khóa" : "Đã mở khóa") + " tài khoản \"" + user.getTenDangNhap() + "\" thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi thay đổi trạng thái: " + e.getMessage());
         }
         return "redirect:/web/admin/users";
     }
 
     @GetMapping("/users/{id}/delete")
-    public String deleteUser(@PathVariable("id") Long id, HttpSession session) {
+    public String deleteUser(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!checkAdmin(session)) return "redirect:/web/login";
-        nguoiDungRepository.deleteById(id);
+        try {
+            nguoiDungRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa tài khoản thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa tài khoản: " + e.getMessage());
+        }
         return "redirect:/web/admin/users";
     }
 }

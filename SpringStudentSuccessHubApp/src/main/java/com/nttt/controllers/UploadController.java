@@ -1,6 +1,7 @@
 package com.nttt.controllers;
 
 import com.nttt.dto.ApiResponse;
+import com.nttt.services.CloudinaryService;
 import com.nttt.services.FileStorageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,16 +17,26 @@ import java.util.Map;
 @RequestMapping("/api/common")
 public class UploadController {
 
+    private final CloudinaryService cloudinaryService;
     private final FileStorageService fileStorageService;
 
-    public UploadController(FileStorageService fileStorageService) {
+    public UploadController(CloudinaryService cloudinaryService, FileStorageService fileStorageService) {
+        this.cloudinaryService = cloudinaryService;
         this.fileStorageService = fileStorageService;
     }
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            String fileUrl = fileStorageService.storeFile(file);
+            String fileUrl;
+            try {
+                // Ưu tiên lưu trữ đám mây Cloudinary
+                Map<String, Object> uploadResult = cloudinaryService.uploadFile(file, "evidence");
+                fileUrl = (String) uploadResult.get("secure_url");
+            } catch (Exception cloudEx) {
+                // Fallback lưu trữ máy chủ nội bộ
+                fileUrl = fileStorageService.storeFile(file);
+            }
             Map<String, String> data = new HashMap<>();
             data.put("url", fileUrl);
             data.put("originalName", file.getOriginalFilename());

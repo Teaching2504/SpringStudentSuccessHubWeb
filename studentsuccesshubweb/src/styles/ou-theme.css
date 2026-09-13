@@ -1,0 +1,230 @@
+/* ===================================================================
+   OU-SSH HUB - UNIFIED THEME STYLESHEET (THYMELEAF & REACT SYNC)
+   Màu sắc chủ đạo: Xanh Navy Đại học Mở TP.HCM (#1e3a8a)
+=================================================================== */
+
+:root {
+  --ou-navy: #1e3a8a;
+  --ou-navy-dark: #172554;
+  --ou-navy-hover: #1e40af;
+  --ou-navy-subtle: #eff6ff;
+  --ou-navy-light: #3b82f6;
+
+  --ou-bg: #f8fafc;
+  --ou-card-bg: #ffffff;
+  --ou-border: #e2e8f0;
+  --ou-text-main: #0f172a;
+  --ou-text-muted: #64748b;
+}
+
+/* ===================================================================
+   1. HEADER NAVBAR (ĐỒNG BỘ CHUẨN THYMELEAF)
+=================================================================== */
+.ou-navbar {
+  background-color: var(--ou-navy) !important;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.ou-navbar-logo-badge {
+  background-color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ou-navbar-role-pill {
+  background-color: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.ou-navbar-btn-logout {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ou-navbar-btn-logout:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+/* ===================================================================
+   2. FOOTER (ĐỒNG BỘ CHUẨN THYMELEAF)
+=================================================================== */
+.ou-footer {
+  background-color: var(--ou-navy) !important;
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.ou-footer-badge {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.ou-footer-icon-circle {
+  width: 24px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===================================================================
+   3. SIDEBAR NAVIGATION
+=================================================================== */
+.ou-sidebar {
+  background-color: #ffffff;
+  border-right: 1px solid var(--ou-border);
+}
+
+.ou-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.75rem;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.ou-sidebar-link:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.ou-sidebar-link.active,
+.ou-sidebar-link-active {
+  background-color: var(--ou-navy) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(30, 58, 138, 0.25);
+}
+
+/* ===================================================================
+   4. CARDS & KPI BLOCKS
+=================================================================== */
+.ou-card {
+  background-color: #ffffff;
+  border: 1px solid var(--ou-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.ou-kpi-card {
+  background-color: #ffffff;
+  border: 1px solid var(--ou-border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ===================================================================
+   5. BUTTONS (CHUẨN OU NAVY)
+=================================================================== */
+.ou-btn-primary {
+  background-color: var(--ou-navy);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.25);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.ou-btn-primary:hover:not(:disabled) {
+  background-color: var(--ou-navy-dark);
+  box-shadow: 0 6px 12px -2px rgba(30, 58, 138, 0.35);
+  transform: translateY(-1px);
+}
+
+.ou-btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.ou-btn-outline {
+  border: 1.5px solid var(--ou-navy);
+  color: var(--ou-navy);
+  background-color: transparent;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.6rem 1.15rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.ou-btn-outline:hover {
+  background-color: var(--ou-navy);
+  color: #ffffff;
+}
+
+/* ===================================================================
+   6. FORM INPUTS & TABLES
+=================================================================== */
+.ou-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ou-input:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--ou-navy);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+}
+
+.ou-table-header {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--ou-border);
+}

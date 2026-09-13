@@ -24,6 +24,7 @@ const UserManagement = () => {
     trangThai: 'HOAT_DONG'
   });
   const [error, setError] = useState('');
+  const [pageError, setPageError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   // Modal State for Quick Reset Password
@@ -56,16 +57,24 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      setPageError('');
       const res = await axiosClient.get('/api/admin/users');
-      if (res.data.success) {
+      if (res.data && res.data.success) {
         setUsers(res.data.data);
+      } else if (res.data && Array.isArray(res.data)) {
+        setUsers(res.data);
       }
       setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi tải danh sách người dùng:', err);
+      setPageError(err.response?.data?.message || 'Không thể tải danh sách tài khoản từ máy chủ. Vui lòng kiểm tra quyền truy cập hoặc đăng nhập lại.');
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleOpenModal = (user = null) => {
     setError('');
@@ -220,6 +229,22 @@ const UserManagement = () => {
         <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-sm shadow-sm animate-fade-in">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
           <span className="font-medium">{successMsg}</span>
+        </div>
+      )}
+
+      {/* Error Notification Alert */}
+      {pageError && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between gap-3 text-rose-800 text-sm shadow-sm animate-fade-in">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+            <span className="font-medium">{pageError}</span>
+          </div>
+          <button
+            onClick={fetchUsers}
+            className="px-3 py-1 bg-white border border-rose-300 hover:bg-rose-100 rounded-lg text-xs font-semibold text-rose-700 cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       )}
 

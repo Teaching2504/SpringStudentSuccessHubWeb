@@ -17,45 +17,63 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 flex items-center justify-between px-6 shadow-sm">
+    <header className="ou-navbar h-16 sticky top-0 z-30 flex items-center justify-between px-6">
       <div className="flex items-center gap-3">
-        <img
-          src="/logo.png"
-          alt="Trường Đại học Mở TP.HCM"
-          className="h-11 w-auto object-contain"
-        />
+        <div className="ou-navbar-logo-badge">
+          <img
+            src="/logo.png"
+            alt="Trường Đại học Mở TP.HCM"
+            className="h-9 w-auto object-contain"
+          />
+        </div>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-base font-bold text-slate-800 tracking-tight leading-tight">OU-SSH</h1>
-            <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-primary-50 text-primary-700 border border-primary-200 rounded">
+            <h1 className="text-base font-extrabold text-white tracking-tight leading-tight">OU-SSH HUB</h1>
+            <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-white/20 text-white rounded border border-white/25">
               Đại học Mở TP.HCM
             </span>
           </div>
-          <p className="text-xs text-slate-500 font-medium">Hệ Thống Quản Lý Kết Quả Học Tập & Xét Học Bổng</p>
+          <p className="text-xs text-blue-100/90 font-medium">Hệ Thống Quản Lý Kết Quả Học Tập & Xét Học Bổng</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Role Pill Badge */}
+        <span className="ou-navbar-role-pill hidden md:inline-flex">
+          {getRoleLabel()}
+        </span>
+
+        {/* User Profile info */}
+        <div className="flex items-center gap-3 pl-3 border-l border-white/20">
           <Link
             to="/profile"
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition-colors text-left"
+            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors text-left"
           >
-            <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs">
-              {user?.hoTen ? user.hoTen.charAt(0).toUpperCase() : 'U'}
-            </div>
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.hoTen}
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-white/40"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-white text-primary-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                {user?.hoTen ? user.hoTen.charAt(0).toUpperCase() : 'U'}
+              </div>
+            )}
             <div className="hidden sm:block">
-              <p className="text-xs font-semibold text-slate-800 leading-tight">{user?.hoTen}</p>
-              <p className="text-[11px] text-primary-600 font-medium">{getRoleLabel()}</p>
+              <p className="text-xs font-semibold text-white leading-tight">{user?.hoTen}</p>
+              <p className="text-[11px] text-blue-200 font-medium">@{user?.tenDangNhap}</p>
             </div>
           </Link>
 
+          {/* Logout Button in Thymeleaf pill outline style */}
           <button
             onClick={logout}
             title="Đăng xuất"
-            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+            className="ou-navbar-btn-logout cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Đăng xuất</span>
           </button>
         </div>
       </div>

@@ -143,6 +143,7 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 .ngayTao(u.getNgayTao())
                 .cccd(cccd)
                 .matKhauHienThi(plain)
+                .avatar(u.getAvatar())
                 .build();
     }
 }

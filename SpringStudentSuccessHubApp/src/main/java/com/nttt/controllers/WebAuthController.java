@@ -2,6 +2,8 @@ package com.nttt.controllers;
 
 import com.nttt.pojo.NguoiDung;
 import com.nttt.repositories.NguoiDungRepository;
+import com.nttt.services.CloudinaryService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -9,7 +11,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -17,10 +22,14 @@ public class WebAuthController {
 
     private final NguoiDungRepository nguoiDungRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CloudinaryService cloudinaryService;
 
-    public WebAuthController(NguoiDungRepository nguoiDungRepository, PasswordEncoder passwordEncoder) {
+    public WebAuthController(NguoiDungRepository nguoiDungRepository,
+                             PasswordEncoder passwordEncoder,
+                             CloudinaryService cloudinaryService) {
         this.nguoiDungRepository = nguoiDungRepository;
         this.passwordEncoder = passwordEncoder;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @GetMapping({"/", "/login", "/web/login"})
@@ -82,12 +91,39 @@ public class WebAuthController {
                 session.setAttribute("currentUser", user);
                 session.setAttribute("userRole", user.getVaiTro());
                 session.setAttribute("userName", user.getHoTen());
+                session.setAttribute("userAvatar", user.getAvatar());
                 return redirectBasedOnRole(user.getVaiTro());
             }
         }
 
         model.addAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không chính xác!");
         return "auth/login";
+    }
+
+    @PostMapping("/web/profile/avatar")
+    public String updateProfileAvatar(@RequestParam("avatarFile") MultipartFile file,
+                                      HttpSession session,
+                                      HttpServletRequest request,
+                                      RedirectAttributes redirectAttributes) {
+        NguoiDung currentUser = (NguoiDung) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/web/login";
+        }
+        try {
+            if (file != null && !file.isEmpty()) {
+                Map<String, Object> uploadResult = cloudinaryService.uploadFile(file, "avatars");
+                String avatarUrl = (String) uploadResult.get("secure_url");
+                currentUser.setAvatar(avatarUrl);
+                nguoiDungRepository.save(currentUser);
+                session.setAttribute("currentUser", currentUser);
+                session.setAttribute("userAvatar", avatarUrl);
+                redirectAttributes.addFlashAttribute("successMessage", "Cập nhật ảnh đại diện lên Cloudinary thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi tải ảnh đại diện lên Cloudinary: " + e.getMessage());
+        }
+        String referer = request.getHeader("Referer");
+        return referer != null ? "redirect:" + referer : "redirect:/web/admin/dashboard";
     }
 
     @GetMapping({"/logout", "/web/logout"})
