@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
-import { Play, Send, CheckCircle, ArrowLeft, AlertTriangle, RefreshCw, MessageSquare, BookOpen, TrendingUp } from 'lucide-react';
+import { Play, Send, CheckCircle, ArrowLeft, AlertTriangle, RefreshCw, MessageSquare } from 'lucide-react';
 import Badge from '../../components/common/Badge';
-import Modal from '../../components/common/Modal';
 import { formatCurrency } from '../../utils/formatters';
+import CohortMajorSummary from './components/CohortMajorSummary';
+import KhoaDossierTable from './components/KhoaDossierTable';
+import KhoaGradesModal from './components/KhoaGradesModal';
 
 const KhoaCampaignDetail = () => {
   const { id } = useParams();
@@ -221,253 +223,32 @@ const KhoaCampaignDetail = () => {
         ))}
       </div>
 
-      {cohortMajorGroups.length > 0 && (
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
-              Quỹ Học Bổng 8% Phân bổ theo từng Ngành & Khóa học ({cohortMajorGroups.length} nhóm)
-            </h3>
-            <span className="text-xs text-slate-500 font-medium">* Xét duyệt & xếp thứ tự riêng biệt cho từng nhóm (Ngành - Khóa)</span>
-          </div>
+      <CohortMajorSummary cohortMajorGroups={cohortMajorGroups} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {cohortMajorGroups.map(g => (
-              <div key={g.key} className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-800 text-xs">{g.tenNganh}</span>
-                  <span className="text-[11px] font-bold px-2 py-0.5 bg-primary-100 text-primary-800 rounded-md">{g.khoaHoc}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/60">
-                  <div>
-                    <span className="text-slate-500 block text-[11px]">Tổng học phí thu:</span>
-                    <span className="font-semibold text-slate-800">{formatCurrency(g.totalTuition)}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 block text-[11px]">Quỹ 8% học bổng:</span>
-                    <span className="font-black text-emerald-700">{formatCurrency(g.totalTuition * 0.08)}</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <span className="text-slate-500">Đã cấp: <strong>{g.awardedCount} / {g.totalSV} SV</strong></span>
-                  <span className="font-bold text-emerald-700">{formatCurrency(g.totalAwarded)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <KhoaDossierTable
+        search={search}
+        setSearch={setSearch}
+        selectedKhoaHoc={selectedKhoaHoc}
+        setSelectedKhoaHoc={setSelectedKhoaHoc}
+        uniqueKhoaHoc={uniqueKhoaHoc}
+        selectedNganh={selectedNganh}
+        setSelectedNganh={setSelectedNganh}
+        uniqueNganh={uniqueNganh}
+        selectedHeDaoTao={selectedHeDaoTao}
+        setSelectedHeDaoTao={setSelectedHeDaoTao}
+        selectedLoaiHb={selectedLoaiHb}
+        setSelectedLoaiHb={setSelectedLoaiHb}
+        filteredDossiers={filteredDossiers}
+        totalDossiersCount={dossiers.length}
+        onViewGrades={handleViewGrades}
+      />
 
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Bộ lọc xét duyệt</span>
-          <button
-            onClick={() => { setSearch(''); setSelectedKhoaHoc('ALL'); setSelectedNganh('ALL'); setSelectedHeDaoTao('ALL'); setSelectedLoaiHb('ALL'); }}
-            className="text-xs text-primary-600 hover:text-primary-700 font-semibold cursor-pointer"
-          >
-            Đặt lại bộ lọc
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Tìm kiếm sinh viên</label>
-            <input
-              type="text"
-              placeholder="Nhập MSSV, Tên hoặc Lớp..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Khóa học</label>
-            <select value={selectedKhoaHoc} onChange={(e) => setSelectedKhoaHoc(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
-              <option value="ALL">-- Tất cả Khóa học --</option>
-              {uniqueKhoaHoc.map(k => <option key={k} value={k}>{k}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Ngành học</label>
-            <select value={selectedNganh} onChange={(e) => setSelectedNganh(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
-              <option value="ALL">-- Tất cả Ngành học --</option>
-              {uniqueNganh.map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Chương trình Đào tạo</label>
-            <select value={selectedHeDaoTao} onChange={(e) => setSelectedHeDaoTao(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
-              <option value="ALL">-- Tất cả Chương trình --</option>
-              <option value="CHUAN">Chương trình Chuẩn (Đại trà)</option>
-              <option value="DAC_BIET">Chương trình Đặc biệt (CLC)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Phân loại Học bổng</label>
-            <select value={selectedLoaiHb} onChange={(e) => setSelectedLoaiHb(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
-              <option value="ALL">-- Tất cả Phân loại --</option>
-              <option value="XUAT_SAC">Xuất sắc (100% HP)</option>
-              <option value="GIOI">Giỏi (70% HP)</option>
-              <option value="KHA">Khá (50% HP)</option>
-              <option value="KHONG_DAT">Không đạt (0đ / Hết quỹ)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h3 className="font-bold text-slate-800 text-sm">Danh sách kết quả tính điểm & xếp hạng sinh viên</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Hiển thị <strong>{filteredDossiers.length}</strong> / <strong>{dossiers.length}</strong> sinh viên theo bộ lọc</p>
-          </div>
-          <div className="text-xs font-medium text-slate-500">* Cấp từ thứ hạng 1 xuống dưới đến khi hết Quỹ học bổng khoa</div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3 text-center">Thứ hạng</th>
-                <th className="px-4 py-3">MSSV</th>
-                <th className="px-4 py-3">Họ và Tên</th>
-                <th className="px-4 py-3">Lớp & Khóa</th>
-                <th className="px-4 py-3">Ngành & CTĐT</th>
-                <th className="px-4 py-3 text-center">GPA</th>
-                <th className="px-4 py-3 text-center">ĐRL</th>
-                <th className="px-4 py-3">Phân loại HB</th>
-                <th className="px-4 py-3 text-right">Tiền HB nhận</th>
-                <th className="px-4 py-3 text-center">Bảng điểm</th>
-                <th className="px-4 py-3 text-center">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-normal">
-              {filteredDossiers.length === 0 ? (
-                <tr>
-                  <td colSpan="11" className="text-center py-12 text-slate-400">
-                    <p className="text-base font-semibold">Không tìm thấy sinh viên phù hợp</p>
-                    <p className="text-xs mt-1">
-                      {dossiers.length === 0
-                        ? 'Bấm nút "Chạy Dynamic Rule Engine" ở trên để hệ thống tự động lọc và xếp thứ tự'
-                        : 'Thử điều chỉnh lại bộ lọc Khóa, Ngành hoặc Chương trình đào tạo'}
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                filteredDossiers.map((hs) => {
-                  const isAwarded = hs.mucHocBong && parseFloat(hs.mucHocBong) > 0;
-                  return (
-                    <tr key={hs.maHoSo} className={`hover:bg-slate-50/80 transition-colors ${isAwarded ? 'bg-emerald-50/30' : ''}`}>
-                      <td className="px-4 py-3 text-center font-bold text-slate-800">
-                        {hs.thuHang != null ? (
-                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${isAwarded ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'}`}>
-                            {hs.thuHang}
-                          </span>
-                        ) : '-'}
-                      </td>
-                      <td className="px-4 py-3 font-mono font-bold text-primary-700">{hs.mssv}</td>
-                      <td className="px-4 py-3 font-medium text-slate-800">{hs.hoTen}</td>
-                      <td className="px-4 py-3 text-xs">
-                        <div className="font-semibold text-slate-800">{hs.maLop || '-'}</div>
-                        <div className="text-slate-500">{hs.khoaHoc || '-'}</div>
-                      </td>
-                      <td className="px-4 py-3 text-xs">
-                        <div className="font-semibold text-slate-800">{hs.tenNganh || '-'}</div>
-                        <div className="mt-0.5">
-                          {['DAC_BIET', 'CHAT_LUONG_CAO'].includes(hs.heDaoTao) ? (
-                            <span className="inline-block px-1.5 py-0.5 bg-purple-100 text-purple-800 font-bold rounded text-[10px]">Đặc biệt (CLC)</span>
-                          ) : (
-                            <span className="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-700 font-semibold rounded text-[10px]">Chuẩn (Đại trà)</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-center font-bold text-slate-800">{hs.diemTrungBinh != null ? hs.diemTrungBinh.toFixed(2) : '-'}</td>
-                      <td className="px-4 py-3 text-center font-bold text-slate-800">{hs.diemRenLuyen != null ? hs.diemRenLuyen : '-'}</td>
-                      <td className="px-4 py-3"><Badge status={hs.loaiHocBong} /></td>
-                      <td className="px-4 py-3 text-right font-bold text-emerald-700">{formatCurrency(hs.mucHocBong)}</td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => handleViewGrades(hs.mssv)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <BookOpen className="w-3.5 h-3.5" /> Xem điểm
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 text-center"><Badge status={hs.trangThai} /></td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <Modal isOpen={showGradesModal} onClose={() => { setShowGradesModal(false); setStudentGrades(null); }} title="Bảng điểm Học phần & Học phí Chi tiết" maxWidth="max-w-4xl">
-        {loadingGrades ? (
-          <div className="py-12 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : !studentGrades || !studentGrades.danhSachDiemMonHoc?.length ? (
-          <div className="py-8 text-center text-slate-500">
-            <p className="font-semibold">Chưa có bảng điểm chi tiết môn học trong kỳ của sinh viên này.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div><span className="text-slate-500 block font-semibold">Sinh viên:</span><span className="font-bold text-slate-800 text-sm">{studentGrades.hoTen}</span></div>
-              <div><span className="text-slate-500 block font-semibold">MSSV / Lớp:</span><span className="font-mono font-bold text-primary-700">{studentGrades.mssv}</span> - {studentGrades.tenLop}</div>
-              <div><span className="text-slate-500 block font-semibold">Tổng tín chỉ:</span><span className="font-bold text-slate-800 text-sm">{studentGrades.tongSoTinChi} TC</span></div>
-              <div><span className="text-slate-500 block font-semibold">Tổng học phí kỳ:</span><span className="font-bold text-emerald-700 text-sm">{formatCurrency(studentGrades.tongHocPhiHocKy)}</span></div>
-            </div>
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
-                    <th className="py-2.5 px-3">Mã môn</th>
-                    <th className="py-2.5 px-3">Tên môn học</th>
-                    <th className="py-2.5 px-2 text-center">TC</th>
-                    <th className="py-2.5 px-2 text-right">Học phí</th>
-                    <th className="py-2.5 px-2 text-center">CC (10%)</th>
-                    <th className="py-2.5 px-2 text-center">GK (30%)</th>
-                    <th className="py-2.5 px-2 text-center">CK (60%)</th>
-                    <th className="py-2.5 px-2 text-center font-black">Điểm 10</th>
-                    <th className="py-2.5 px-2 text-center font-black">Hệ 4</th>
-                    <th className="py-2.5 px-2 text-center">Điểm chữ</th>
-                    <th className="py-2.5 px-3 text-center">Kết quả</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {studentGrades.danhSachDiemMonHoc.map((m, i) => (
-                    <tr key={m.id || i} className="hover:bg-slate-50">
-                      <td className="py-2.5 px-3 font-bold text-primary-700">{m.maMon}</td>
-                      <td className="py-2.5 px-3 font-semibold text-slate-800">{m.tenMon}</td>
-                      <td className="py-2.5 px-2 text-center font-bold">{m.soTinChi}</td>
-                      <td className="py-2.5 px-2 text-right font-semibold text-slate-700">{formatCurrency(m.hocPhiMon)}</td>
-                      <td className="py-2.5 px-2 text-center text-slate-600">{m.diemChuyenCan != null ? Number(m.diemChuyenCan).toFixed(1) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center text-slate-600">{m.diemGiuaKy != null ? Number(m.diemGiuaKy).toFixed(1) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center text-slate-600">{m.diemCuoiKy != null ? Number(m.diemCuoiKy).toFixed(1) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center font-black text-slate-900 bg-slate-50">{m.diemTongKet10 != null ? Number(m.diemTongKet10).toFixed(2) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center font-black text-amber-700 bg-amber-50">{m.diemHe4 != null ? Number(m.diemHe4).toFixed(2) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center font-bold">{m.diemChu}</td>
-                      <td className="py-2.5 px-3 text-center">
-                        <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${m.dat ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50'}`}>
-                          {m.dat ? 'Đạt' : 'Rớt'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex justify-end pt-2">
-              <button onClick={() => setShowGradesModal(false)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl cursor-pointer">
-                Đóng
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+      <KhoaGradesModal
+        isOpen={showGradesModal}
+        onClose={() => { setShowGradesModal(false); setStudentGrades(null); }}
+        loadingGrades={loadingGrades}
+        studentGrades={studentGrades}
+      />
     </div>
   );
 };

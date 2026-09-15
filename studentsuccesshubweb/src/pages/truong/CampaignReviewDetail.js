@@ -1,29 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
-import { 
-  Award, CheckCircle, XCircle, ArrowLeft, Download, DollarSign, Users, AlertCircle, 
-  Edit3, Send, BookOpen, RefreshCw, Zap, TrendingUp, Building2, Filter, Settings 
-} from 'lucide-react';
-import Badge from '../../components/common/Badge';
-import Modal from '../../components/common/Modal';
-import { formatCurrency } from '../../utils/formatters';
+import { ArrowLeft, Send, CheckCircle, Building2, TrendingUp } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-
-const SUB_STATUS = {
-  CHUA_XET: <Badge variant="slate">Khoa chưa xét</Badge>,
-  DA_CONG_BO_DU_KIEN: <Badge variant="blue">Khoa đã công bố dự kiến</Badge>,
-  DA_CHOT_GUI_TRUONG: <Badge variant="purple">Đã gửi chờ trường duyệt</Badge>,
-  DA_PHE_DUYET: <Badge variant="emerald">Trường đã duyệt</Badge>,
-  BI_TRA_VE: <Badge variant="rose">Bị trả về yêu cầu sửa</Badge>,
-};
-
-const HB_BADGES = {
-  XUAT_SAC: <Badge variant="emerald">Xuất sắc (100%)</Badge>,
-  GIOI: <Badge variant="blue">Giỏi (70%)</Badge>,
-  KHA: <Badge variant="amber">Khá (50%)</Badge>,
-  KHONG_DAT: <Badge variant="slate">Không đạt</Badge>,
-};
+import FacultySubCampaignList from './components/FacultySubCampaignList';
+import DossierTable from './components/DossierTable';
+import BudgetBreakdownTable from './components/BudgetBreakdownTable';
+import { QuotaModal, ReviewDecisionModal, GradesDetailModal } from './components/TruongModals';
 
 const CampaignReviewDetail = () => {
   const { id } = useParams();
@@ -105,7 +88,7 @@ const CampaignReviewDetail = () => {
   };
 
   const handleAutoSync8Percent = async () => {
-    if (window.confirm('Hệ thống sẽ tự động tính 8% tổng học phí thực tế của tất cả sinh viên thuộc từng Khoa (chia theo Ngành & Khóa) và cập nhật trực tiếp vào Ngân sách & Chỉ tiêu của các Khoa. Xác nhận đồng bộ?')) {
+    if (window.confirm('Hệ thống sẽ tự động tính 8% tổng học phí thực tế của tất cả sinh viên thuộc từng Khoa và cập nhật trực tiếp vào Ngân sách & Chỉ tiêu của các Khoa. Xác nhận?')) {
       try {
         setSyncingBudget(true);
         const res = await axiosClient.post(`/api/truong/campaigns/${id}/auto-sync-8percent-budget`);
@@ -247,270 +230,90 @@ const CampaignReviewDetail = () => {
       </div>
 
       {activeTab === 'BUDGET_8_PERCENT' ? (
-        <div className="space-y-6 animate-fade-in">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase"><span>Sinh viên (Bộ lọc)</span><Users className="w-4 h-4 text-primary-600" /></div>
-              <p className="text-2xl font-black text-slate-800 mt-2">{filteredStudents} <span className="text-sm font-normal text-slate-500">sinh viên</span></p>
-              <p className="text-xs text-slate-500 mt-1">Theo 3 Khóa K23, K24, K25</p>
-            </div>
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase"><span>Tổng Thu Học Phí Kỳ</span><DollarSign className="w-4 h-4 text-blue-600" /></div>
-              <p className="text-2xl font-black text-blue-700 mt-2">{formatCurrency(filteredTuitionSum)}</p>
-              <p className="text-xs text-slate-500 mt-1">Căn cứ trích lập học bổng</p>
-            </div>
-            <div className="bg-white p-5 rounded-2xl border border-emerald-200 shadow-sm bg-gradient-to-br from-white to-emerald-50/50">
-              <div className="flex items-center justify-between text-emerald-800 text-xs font-bold uppercase"><span>Quỹ 8% Học Bổng</span><TrendingUp className="w-4 h-4 text-emerald-600" /></div>
-              <p className="text-2xl font-black text-emerald-700 mt-2">{formatCurrency(filtered8PercentFund)}</p>
-              <p className="text-xs text-emerald-600 font-semibold mt-1">8% × Tổng thu học phí</p>
-            </div>
-            <div className="bg-white p-5 rounded-2xl border border-purple-200 shadow-sm bg-gradient-to-br from-white to-purple-50/50">
-              <div className="flex items-center justify-between text-purple-800 text-xs font-bold uppercase"><span>Hạn Mức Ngân Sách Khoa</span><Award className="w-4 h-4 text-purple-600" /></div>
-              <p className="text-2xl font-black text-purple-700 mt-2">{formatCurrency(totalAllocatedFacultyBudget)}</p>
-              <p className="text-xs text-purple-600 font-semibold mt-1">Tổng hạn mức 12 Khoa</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2"><Zap className="w-5 h-5 text-amber-500" /> Cơ chế Tự động Phân bổ Ngân sách 8% theo từng Khoa, Ngành & Khóa</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-2xl">Quy chế chuẩn OU: Học bổng được chia riêng biệt theo từng <strong>Khoa</strong> → <strong>Ngành đào tạo</strong> → <strong>Khóa học (K23, K24, K25)</strong> dựa trên 8% tổng số tiền học phí thực tế thu từ sinh viên của nhóm đó.</p>
-            </div>
-            <button onClick={handleAutoSync8Percent} disabled={syncingBudget} className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm rounded-xl shadow-md shadow-emerald-700/20 transition cursor-pointer flex items-center justify-center gap-2 shrink-0">
-              {syncingBudget ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 text-amber-300" />} ⚡ Tự động tính & Phân bổ 8% Ngân sách từ Học phí
-            </button>
-          </div>
-
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5"><Filter className="w-4 h-4 text-emerald-600" /> Bộ lọc Ngân sách Quỹ 8% theo Khoa, Khóa học & Ngành đào tạo</span>
-              <button onClick={() => { setBudgetSearch(''); setBudgetSelectedKhoa('ALL'); setBudgetSelectedKhoaHoc('ALL'); setBudgetSelectedNganh('ALL'); setBudgetSelectedHeDaoTao('ALL'); }} className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer">Đặt lại bộ lọc</button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-              <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Tìm kiếm</label><input type="text" placeholder="Nhập tên Khoa hoặc Ngành..." value={budgetSearch} onChange={e => setBudgetSearch(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" /></div>
-              <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Khoa quản lý</label><select value={budgetSelectedKhoa} onChange={e => setBudgetSelectedKhoa(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Khoa ({uniqueBudgetKhoas.length}) --</option>{uniqueBudgetKhoas.map(k => <option key={k.maKhoa} value={k.maKhoa}>{k.tenKhoa || k.maKhoa}</option>)}</select></div>
-              <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Khóa học</label><select value={budgetSelectedKhoaHoc} onChange={e => setBudgetSelectedKhoaHoc(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Khóa học --</option>{uniqueBudgetKhoaHocs.map(kh => <option key={kh} value={kh}>{kh}</option>)}</select></div>
-              <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Ngành học</label><select value={budgetSelectedNganh} onChange={e => setBudgetSelectedNganh(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Ngành học --</option>{uniqueBudgetNganhs.map(ng => <option key={ng} value={ng}>{ng}</option>)}</select></div>
-              <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Chương trình Đào tạo</label><select value={budgetSelectedHeDaoTao} onChange={e => setBudgetSelectedHeDaoTao(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Chương trình --</option><option value="CHUAN">Chương trình Chuẩn (Đại trà)</option><option value="DAC_BIET">Chương trình Đặc biệt (CLC)</option></select></div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-sm">Chi tiết Quỹ 8% Học phí phân rã theo Khoa, Ngành & Khóa học</h3>
-              <span className="text-xs text-slate-500">Hiển thị {filteredBudgetBreakdown.length} / {budgetBreakdown.length} nhóm ngành & khóa</span>
-            </div>
-            {loadingBreakdown ? (
-              <div className="py-16 flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div></div>
-            ) : filteredBudgetBreakdown.length === 0 ? (
-              <div className="p-12 text-center text-slate-500"><p className="font-semibold">Không tìm thấy dữ liệu ngân sách theo bộ lọc đã chọn.</p></div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-700">
-                  <thead className="bg-slate-100/70 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-600">
-                    <tr>
-                      <th className="py-3 px-4">Khoa quản lý</th><th className="py-3 px-4">Ngành đào tạo</th><th className="py-3 px-3">Hệ ĐT</th><th className="py-3 px-3">Khóa học</th><th className="py-3 px-3 text-center">Số SV</th>
-                      <th className="py-3 px-4 text-right">Tổng học phí thu</th><th className="py-3 px-4 text-right font-black text-emerald-800">Quỹ 8% học bổng</th><th className="py-3 px-3 text-center">Suất ước tính</th><th className="py-3 px-4 text-right">Hạn mức Khoa hiện tại</th><th className="py-3 px-3 text-center">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium">
-                    {filteredBudgetBreakdown.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-800">{item.tenKhoa || item.maKhoa}</td>
-                        <td className="py-3 px-4 font-semibold text-primary-700">{item.tenNganh || item.maNganh}</td>
-                        <td className="py-3 px-3 text-xs">{item.heDaoTao === 'DAC_BIET' || item.heDaoTao === 'CHAT_LUONG_CAO' ? <span className="px-2 py-0.5 bg-purple-100 text-purple-800 font-bold rounded text-[11px]">CLC</span> : <span className="px-2 py-0.5 bg-slate-100 text-slate-700 font-semibold rounded text-[11px]">Chuẩn</span>}</td>
-                        <td className="py-3 px-3 text-xs font-bold text-slate-800">{item.khoaHoc}</td>
-                        <td className="py-3 px-3 text-center font-bold text-slate-800">{item.soSinhVienTong}</td>
-                        <td className="py-3 px-4 text-right font-semibold text-slate-700">{formatCurrency(item.tongHocPhiThu)}</td>
-                        <td className="py-3 px-4 text-right font-black text-emerald-700 bg-emerald-50/40">{formatCurrency(item.quyHocBong8PhanTram)}</td>
-                        <td className="py-3 px-3 text-center font-bold text-blue-700">{item.soSinhVienDatHocBong || 1} suất</td>
-                        <td className="py-3 px-4 text-right font-bold text-slate-800">{formatCurrency(item.nganSachKhoaHienTai)}</td>
-                        <td className="py-3 px-3 text-center">
-                          <button onClick={() => handleOpenQuotaModalByKhoaCode(item.maKhoa)} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors cursor-pointer" title="Điều chỉnh chỉ tiêu & ngân sách của Khoa này">
-                            <Settings className="w-3.5 h-3.5" /> Sửa Quỹ
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
+        <BudgetBreakdownTable
+          budgetBreakdown={filteredBudgetBreakdown}
+          loadingBreakdown={loadingBreakdown}
+          syncingBudget={syncingBudget}
+          onAutoSync={handleAutoSync8Percent}
+          search={budgetSearch}
+          setSearch={setBudgetSearch}
+          selectedKhoa={budgetSelectedKhoa}
+          setSelectedKhoa={setBudgetSelectedKhoa}
+          selectedKhoaHoc={budgetSelectedKhoaHoc}
+          setSelectedKhoaHoc={setBudgetSelectedKhoaHoc}
+          selectedNganh={budgetSelectedNganh}
+          setSelectedNganh={setBudgetSelectedNganh}
+          selectedHeDaoTao={budgetSelectedHeDaoTao}
+          setSelectedHeDaoTao={setBudgetSelectedHeDaoTao}
+          uniqueKhoas={uniqueBudgetKhoas}
+          uniqueKhoaHocs={uniqueBudgetKhoaHocs}
+          uniqueNganhs={uniqueBudgetNganhs}
+          filteredStudents={filteredStudents}
+          filteredTuitionSum={filteredTuitionSum}
+          filtered8PercentFund={filtered8PercentFund}
+          totalAllocatedBudget={totalAllocatedFacultyBudget}
+          onOpenQuotaModalByKhoaCode={handleOpenQuotaModalByKhoaCode}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider px-2">Danh sách các Khoa:</h3>
-            <div className="space-y-2">
-              {facultyCampaigns.map(sub => (
-                <div key={sub.maDotXetHbKhoa} onClick={() => handleSelectFaculty(sub)} className={`p-3.5 rounded-xl border transition cursor-pointer ${selectedSubCamp?.maDotXetHbKhoa === sub.maDotXetHbKhoa ? 'border-primary-600 bg-primary-50/60 shadow-sm' : 'border-slate-200 hover:bg-slate-50'}`}>
-                  <h4 className="font-bold text-sm text-slate-800">{sub.tenKhoa}</h4>
-                  <div className="mt-2 flex items-center justify-between">{SUB_STATUS[sub.trangThai] || <Badge>{sub.trangThai}</Badge>}<span className="text-xs font-bold text-slate-600">Chỉ tiêu: {sub.chiTieu}</span></div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <FacultySubCampaignList
+            facultyCampaigns={facultyCampaigns}
+            selectedSubCamp={selectedSubCamp}
+            onSelectFaculty={handleSelectFaculty}
+            onOpenQuotaModal={handleOpenQuotaModal}
+            onOpenReviewModal={(sub, approve) => {
+              setSelectedSubCamp(sub);
+              setReviewAction({ approve, lyDo: approve ? 'Hồ sơ đạt yêu cầu, đồng ý phê duyệt' : 'Cần rà soát lại chỉ tiêu hoặc danh sách' });
+              setIsReviewModalOpen(true);
+            }}
+          />
 
-          <div className="lg:col-span-3 space-y-5">
-            {selectedSubCamp && (
-              <>
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-800">{selectedSubCamp.tenKhoa}</h2>
-                      <p className="text-xs text-slate-500 mt-1">Chỉ tiêu: <strong>{selectedSubCamp.chiTieu} suất</strong> | Ngân sách: <strong className="text-emerald-700">{formatCurrency(selectedSubCamp.nganSachKhoa)}</strong></p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button onClick={() => handleOpenQuotaModal(selectedSubCamp)} className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition cursor-pointer flex items-center gap-1.5"><Edit3 className="w-3.5 h-3.5" /> Phân bổ Chỉ tiêu / Quỹ</button>
-                      <button onClick={() => window.open(`/api/truong/campaigns/faculty-campaigns/${selectedSubCamp.maDotXetHbKhoa}/export-excel`, '_blank')} className="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold rounded-xl transition cursor-pointer flex items-center gap-1.5"><Download className="w-3.5 h-3.5" /> Xuất Excel</button>
-                      <button onClick={() => { setReviewAction({ approve: true, lyDo: '' }); setIsReviewModalOpen(true); }} className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-md shadow-emerald-700/20 transition cursor-pointer flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Duyệt danh sách</button>
-                      <button onClick={() => { setReviewAction({ approve: false, lyDo: '' }); setIsReviewModalOpen(true); }} className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-xl transition cursor-pointer flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" /> Trả về yêu cầu sửa</button>
-                    </div>
-                  </div>
-                  {selectedSubCamp.lyDoTraVe && (
-                    <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" /><div><strong>Lý do trả về gần nhất:</strong> {selectedSubCamp.lyDoTraVe}</div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Bộ lọc xét duyệt theo Khóa học, Ngành đào tạo & Chương trình</span>
-                    <button onClick={() => { setSearch(''); setSelectedKhoaHoc('ALL'); setSelectedNganh('ALL'); setSelectedHeDaoTao('ALL'); setSelectedLoaiHb('ALL'); }} className="text-xs text-primary-600 hover:text-primary-700 font-semibold cursor-pointer">Đặt lại bộ lọc</button>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                    <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Tìm kiếm sinh viên</label><input type="text" placeholder="Nhập MSSV, Tên hoặc Lớp..." value={search} onChange={e => setSearch(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500" /></div>
-                    <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Khóa học</label><select value={selectedKhoaHoc} onChange={e => setSelectedKhoaHoc(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Khóa học --</option>{uniqueKhoaHoc.map(k => <option key={k} value={k}>{k}</option>)}</select></div>
-                    <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Ngành học</label><select value={selectedNganh} onChange={e => setSelectedNganh(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Ngành học --</option>{uniqueNganh.map(n => <option key={n} value={n}>{n}</option>)}</select></div>
-                    <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Chương trình Đào tạo</label><select value={selectedHeDaoTao} onChange={e => setSelectedHeDaoTao(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Chương trình --</option><option value="CHUAN">Chương trình Chuẩn (Đại trà)</option><option value="DAC_BIET">Chương trình Đặc biệt (CLC)</option></select></div>
-                    <div><label className="block text-[11px] font-semibold text-slate-500 mb-1">Phân loại Học bổng</label><select value={selectedLoaiHb} onChange={e => setSelectedLoaiHb(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"><option value="ALL">-- Tất cả Phân loại --</option><option value="XUAT_SAC">Xuất sắc (100% HP)</option><option value="GIOI">Giỏi (70% HP)</option><option value="KHA">Khá (50% HP)</option><option value="KHONG_DAT">Không đạt (0đ / Hết quỹ)</option></select></div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="p-4 border-b border-slate-200 flex items-center justify-between"><h3 className="font-bold text-slate-800 text-sm">Danh sách xếp hạng sinh viên đề xuất ({filteredDossiers.length} / {dossiers.length} sinh viên)</h3></div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-slate-700">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase text-slate-500">
-                        <tr>
-                          <th className="px-4 py-3 text-center">Thứ hạng</th><th className="px-4 py-3">MSSV</th><th className="px-4 py-3">Họ và Tên</th><th className="px-4 py-3">Lớp & Khóa</th>
-                          <th className="px-4 py-3">Ngành & CTĐT</th><th className="px-4 py-3 text-center">GPA</th><th className="px-4 py-3 text-center">ĐRL</th><th className="px-4 py-3">Loại HB</th>
-                          <th className="px-4 py-3 text-right">Tiền HB nhận</th><th className="px-4 py-3 text-center">Bảng điểm</th><th className="px-4 py-3 text-center">Trạng thái</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 font-normal">
-                        {filteredDossiers.length === 0 ? (
-                          <tr><td colSpan="11" className="text-center py-8 text-slate-400">{dossiers.length === 0 ? 'Khoa chưa chạy Dynamic Rule Engine xét duyệt' : 'Không tìm thấy sinh viên phù hợp theo bộ lọc'}</td></tr>
-                        ) : (
-                          filteredDossiers.map(hs => {
-                            const isAwarded = hs.mucHocBong && parseFloat(hs.mucHocBong) > 0;
-                            return (
-                              <tr key={hs.maHoSo} className={`hover:bg-slate-50/80 transition-colors ${isAwarded ? 'bg-emerald-50/30' : ''}`}>
-                                <td className="px-4 py-3 text-center font-bold text-slate-800">{hs.thuHang != null ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-800 text-xs font-bold">{hs.thuHang}</span> : '-'}</td>
-                                <td className="px-4 py-3 font-mono font-bold text-primary-700">{hs.mssv}</td>
-                                <td className="px-4 py-3 font-medium text-slate-800">{hs.hoTen}</td>
-                                <td className="px-4 py-3 text-xs"><div className="font-semibold text-slate-800">{hs.maLop || '-'}</div><div className="text-slate-500">{hs.khoaHoc || '-'}</div></td>
-                                <td className="px-4 py-3 text-xs"><div className="font-semibold text-slate-800">{hs.tenNganh || '-'}</div><div className="mt-0.5">{hs.heDaoTao === 'DAC_BIET' || hs.heDaoTao === 'CHAT_LUONG_CAO' ? <span className="inline-block px-1.5 py-0.5 bg-purple-100 text-purple-800 font-bold rounded text-[10px]">Đặc biệt (CLC)</span> : <span className="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-700 font-semibold rounded text-[10px]">Chuẩn (Đại trà)</span>}</div></td>
-                                <td className="px-4 py-3 text-center font-bold text-slate-800">{hs.diemTrungBinh != null ? hs.diemTrungBinh.toFixed(2) : '-'}</td>
-                                <td className="px-4 py-3 text-center font-bold text-slate-800">{hs.diemRenLuyen != null ? hs.diemRenLuyen : '-'}</td>
-                                <td className="px-4 py-3">{HB_BADGES[hs.loaiHocBong] || <Badge>{hs.loaiHocBong}</Badge>}</td>
-                                <td className="px-4 py-3 text-right font-bold text-emerald-700">{formatCurrency(hs.mucHocBong)}</td>
-                                <td className="px-4 py-3 text-center">
-                                  <button onClick={() => handleViewGrades(hs.mssv)} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors cursor-pointer" title="Xem bảng điểm chi tiết các môn">
-                                    <BookOpen className="w-3.5 h-3.5" /> Xem điểm
-                                  </button>
-                                </td>
-                                <td className="px-4 py-3 text-center"><Badge variant={hs.trangThai === 'CHINH_THUC' ? 'emerald' : hs.trangThai === 'DU_KIEN' ? 'blue' : 'slate'}>{hs.trangThai === 'CHINH_THUC' ? 'Chính thức' : hs.trangThai === 'DU_KIEN' ? 'Dự kiến' : 'Không đạt'}</Badge></td>
-                              </tr>
-                            );
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
+          <div className="lg:col-span-3 space-y-4">
+            <DossierTable
+              dossiers={filteredDossiers}
+              search={search}
+              setSearch={setSearch}
+              selectedKhoaHoc={selectedKhoaHoc}
+              setSelectedKhoaHoc={setSelectedKhoaHoc}
+              selectedNganh={selectedNganh}
+              setSelectedNganh={setSelectedNganh}
+              selectedHeDaoTao={selectedHeDaoTao}
+              setSelectedHeDaoTao={setSelectedHeDaoTao}
+              selectedLoaiHb={selectedLoaiHb}
+              setSelectedLoaiHb={setSelectedLoaiHb}
+              uniqueKhoaHoc={uniqueKhoaHoc}
+              uniqueNganh={uniqueNganh}
+              onViewGrades={handleViewGrades}
+            />
           </div>
         </div>
       )}
 
-      <Modal isOpen={isQuotaModalOpen} onClose={() => setIsQuotaModalOpen(false)} title={`Phân bổ Chỉ tiêu & Ngân sách: ${selectedSubCamp?.tenKhoa}`}>
-        <form onSubmit={handleSaveQuota} className="space-y-4">
-          <div><label className="block text-xs font-semibold text-slate-700 mb-1">Chỉ tiêu số suất học bổng</label><input type="number" required value={quotaForm.chiTieu} onChange={e => setQuotaForm({ ...quotaForm, chiTieu: parseInt(e.target.value) })} className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold" /></div>
-          <div><label className="block text-xs font-semibold text-slate-700 mb-1">Hạn mức Ngân sách cấp cho Khoa (VNĐ)</label><input type="number" required value={quotaForm.nganSach} onChange={e => setQuotaForm({ ...quotaForm, nganSach: parseFloat(e.target.value) })} className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-emerald-700" /></div>
-          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
-            <button type="button" onClick={() => setIsQuotaModalOpen(false)} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm hover:bg-slate-50 cursor-pointer">Hủy</button>
-            <button type="submit" className="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-xl text-sm font-semibold shadow-md shadow-primary-700/20 cursor-pointer">Lưu chỉ tiêu</button>
-          </div>
-        </form>
-      </Modal>
+      <QuotaModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        selectedSubCamp={selectedSubCamp}
+        quotaForm={quotaForm}
+        setQuotaForm={setQuotaForm}
+        onSubmit={handleSaveQuota}
+      />
 
-      <Modal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} title={reviewAction.approve ? 'Xác nhận Phê duyệt danh sách Khoa' : 'Trả về yêu cầu Khoa rà soát / điều chỉnh'}>
-        <form onSubmit={handleExecuteReview} className="space-y-4">
-          <p className="text-sm text-slate-600">{reviewAction.approve ? `Bạn có chắc chắn muốn phê duyệt danh sách xét học bổng của ${selectedSubCamp?.tenKhoa}?` : `Vui lòng nhập lý do và yêu cầu điều chỉnh để cán bộ khoa cập nhật lại danh sách:`}</p>
-          {!reviewAction.approve && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Lý do / Hướng dẫn điều chỉnh</label>
-              <textarea rows="4" required value={reviewAction.lyDo} onChange={e => setReviewAction({ ...reviewAction, lyDo: e.target.value })} placeholder="VD: Cần rà soát lại trường hợp điểm ĐRL của sinh viên lớp IT01..." className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
-            </div>
-          )}
-          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
-            <button type="button" onClick={() => setIsReviewModalOpen(false)} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm hover:bg-slate-50 cursor-pointer">Hủy</button>
-            <button type="submit" className={`px-4 py-2 text-white rounded-xl text-sm font-semibold shadow-md transition cursor-pointer ${reviewAction.approve ? 'bg-emerald-700 hover:bg-emerald-800 shadow-emerald-700/20' : 'bg-rose-700 hover:bg-rose-800 shadow-rose-700/20'}`}>{reviewAction.approve ? 'Xác nhận Phê duyệt' : 'Gửi Trả về Khoa'}</button>
-          </div>
-        </form>
-      </Modal>
+      <ReviewDecisionModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        selectedSubCamp={selectedSubCamp}
+        reviewAction={reviewAction}
+        setReviewAction={setReviewAction}
+        onSubmit={handleExecuteReview}
+      />
 
-      <Modal isOpen={showGradesModal} onClose={() => { setShowGradesModal(false); setStudentGrades(null); }} title="Bảng điểm Học phần & Học phí Chi tiết" maxWidth="max-w-4xl">
-        {loadingGrades ? (
-          <div className="py-12 flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div></div>
-        ) : !studentGrades?.danhSachDiemMonHoc?.length ? (
-          <div className="py-8 text-center text-slate-500"><p className="font-semibold">Chưa có bảng điểm chi tiết môn học trong kỳ của sinh viên này.</p></div>
-        ) : (
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div><span className="text-slate-500 block font-semibold">Sinh viên:</span><span className="font-bold text-slate-800 text-sm">{studentGrades.hoTen}</span></div>
-              <div><span className="text-slate-500 block font-semibold">MSSV / Lớp:</span><span className="font-mono font-bold text-primary-700">{studentGrades.mssv}</span> - {studentGrades.tenLop}</div>
-              <div><span className="text-slate-500 block font-semibold">Tổng tín chỉ:</span><span className="font-bold text-slate-800 text-sm">{studentGrades.tongSoTinChi} TC</span></div>
-              <div><span className="text-slate-500 block font-semibold">Tổng học phí kỳ:</span><span className="font-bold text-emerald-700 text-sm">{formatCurrency(studentGrades.tongHocPhiHocKy)}</span></div>
-            </div>
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
-                    <th className="py-2.5 px-3">Mã môn</th><th className="py-2.5 px-3">Tên môn học</th><th className="py-2.5 px-2 text-center">TC</th><th className="py-2.5 px-2 text-right">Học phí</th>
-                    <th className="py-2.5 px-2 text-center">CC (10%)</th><th className="py-2.5 px-2 text-center">GK (30%)</th><th className="py-2.5 px-2 text-center">CK (60%)</th>
-                    <th className="py-2.5 px-2 text-center font-black">Điểm 10</th><th className="py-2.5 px-2 text-center font-black">Hệ 4</th><th className="py-2.5 px-2 text-center">Điểm chữ</th><th className="py-2.5 px-3 text-center">Kết quả</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {studentGrades.danhSachDiemMonHoc.map((m, i) => (
-                    <tr key={m.id || i} className="hover:bg-slate-50">
-                      <td className="py-2.5 px-3 font-bold text-primary-700">{m.maMon}</td><td className="py-2.5 px-3 font-semibold text-slate-800">{m.tenMon}</td><td className="py-2.5 px-2 text-center font-bold">{m.soTinChi}</td>
-                      <td className="py-2.5 px-2 text-right font-semibold text-slate-700">{formatCurrency(m.hocPhiMon)}</td>
-                      <td className="py-2.5 px-2 text-center text-slate-600">{m.diemChuyenCan != null ? Number(m.diemChuyenCan).toFixed(1) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center text-slate-600">{m.diemGiuaKy != null ? Number(m.diemGiuaKy).toFixed(1) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center text-slate-600">{m.diemCuoiKy != null ? Number(m.diemCuoiKy).toFixed(1) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center font-black text-slate-900 bg-slate-50">{m.diemTongKet10 != null ? Number(m.diemTongKet10).toFixed(2) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center font-black text-amber-700 bg-amber-50">{m.diemHe4 != null ? Number(m.diemHe4).toFixed(2) : '-'}</td>
-                      <td className="py-2.5 px-2 text-center font-bold">{m.diemChu}</td>
-                      <td className="py-2.5 px-3 text-center">{m.dat ? <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Đạt</span> : <span className="text-[11px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">Rớt</span>}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex justify-end pt-2">
-              <button onClick={() => setShowGradesModal(false)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl cursor-pointer">Đóng</button>
-            </div>
-          </div>
-        )}
-      </Modal>
+      <GradesDetailModal
+        isOpen={showGradesModal}
+        onClose={() => { setShowGradesModal(false); setStudentGrades(null); }}
+        loadingGrades={loadingGrades}
+        studentGrades={studentGrades}
+      />
     </div>
   );
 };
-
 export default CampaignReviewDetail;

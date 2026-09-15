@@ -1,9 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
-import { Building, BookOpen, Layers, Calendar, Plus, Trash2, Edit2, AlertCircle, GraduationCap, Network, Filter } from 'lucide-react';
-import Modal from '../../components/common/Modal';
+import { Building, BookOpen, Layers, Calendar, Plus, GraduationCap, Network } from 'lucide-react';
 import { sortSemesters } from '../../utils/semesterSort';
-import { formatCurrency } from '../../utils/formatters';
+import CategoryTables from './components/CategoryTables';
+import CategoryModal from './components/CategoryModal';
 
 const CategoryManagement = () => {
   const [activeTab, setActiveTab] = useState('khoa');
@@ -15,7 +15,6 @@ const CategoryManagement = () => {
   const [curriculums, setCurriculums] = useState([]);
   const [selectedNganh, setSelectedNganh] = useState('CS');
   const [loading, setLoading] = useState(true);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
@@ -101,17 +100,6 @@ const CategoryManagement = () => {
     }
   };
 
-  const ActionButtons = ({ onEdit, onDelete, title }) => (
-    <td className="px-5 py-3.5 text-right space-x-1">
-      <button onClick={onEdit} className="p-1.5 rounded-lg border border-slate-200 text-primary-700 hover:bg-primary-50 cursor-pointer transition-colors" title={`Sửa ${title}`}>
-        <Edit2 className="w-4 h-4" />
-      </button>
-      <button onClick={onDelete} className="p-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 cursor-pointer transition-colors" title={`Xóa ${title}`}>
-        <Trash2 className="w-4 h-4" />
-      </button>
-    </td>
-  );
-
   const tabs = [
     { id: 'khoa', label: `Khoa (${khoas.length})`, icon: Building },
     { id: 'nganh', label: `Ngành học (${nganhs.length})`, icon: BookOpen },
@@ -148,179 +136,34 @@ const CategoryManagement = () => {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          {activeTab === 'khoa' && (
-            <table className="w-full text-left text-sm text-slate-700">
-              <thead className="ou-table-header"><tr><th className="px-5 py-3.5 w-40">Mã Khoa</th><th className="px-5 py-3.5">Tên Khoa</th><th className="px-5 py-3.5 text-right w-36">Thao tác</th></tr></thead>
-              <tbody className="divide-y divide-slate-100 font-normal">
-                {khoas.map(k => (
-                  <tr key={k.maKhoa} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-5 py-3.5 font-mono font-bold text-primary-700">{k.maKhoa}</td>
-                    <td className="px-5 py-3.5 font-medium text-slate-800">{k.tenKhoa}</td>
-                    <ActionButtons onEdit={() => handleOpenModal(k)} onDelete={() => handleDelete(k.maKhoa)} title="Khoa" />
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {activeTab === 'nganh' && (
-            <table className="w-full text-left text-sm text-slate-700">
-              <thead className="ou-table-header"><tr><th className="px-5 py-3.5 w-36">Mã Ngành</th><th className="px-5 py-3.5">Tên Ngành Đào tạo</th><th className="px-5 py-3.5 w-36">Hệ đào tạo</th><th className="px-5 py-3.5">Trực thuộc Khoa</th><th className="px-5 py-3.5 text-right w-36">Thao tác</th></tr></thead>
-              <tbody className="divide-y divide-slate-100 font-normal">
-                {nganhs.map(n => (
-                  <tr key={n.maNganh} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-5 py-3.5 font-mono font-bold text-primary-700">{n.maNganh}</td>
-                    <td className="px-5 py-3.5 font-medium text-slate-800">{n.tenNganh}</td>
-                    <td className="px-5 py-3.5"><span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">{n.heDaoTao || 'CHUAN'}</span></td>
-                    <td className="px-5 py-3.5 text-slate-600">{n.khoa?.tenKhoa || '-'}</td>
-                    <ActionButtons onEdit={() => handleOpenModal(n)} onDelete={() => handleDelete(n.maNganh)} title="Ngành" />
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {activeTab === 'lop' && (
-            <table className="w-full text-left text-sm text-slate-700">
-              <thead className="ou-table-header"><tr><th className="px-5 py-3.5 w-36">Mã Lớp</th><th className="px-5 py-3.5">Tên Lớp Sinh Hoạt</th><th className="px-5 py-3.5 w-40">Khóa học</th><th className="px-5 py-3.5">Khoa / Ngành</th><th className="px-5 py-3.5 text-right w-36">Thao tác</th></tr></thead>
-              <tbody className="divide-y divide-slate-100 font-normal">
-                {lops.map(l => (
-                  <tr key={l.maLop} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-5 py-3.5 font-mono font-bold text-primary-700">{l.maLop}</td>
-                    <td className="px-5 py-3.5 font-medium text-slate-800">{l.tenLop}</td>
-                    <td className="px-5 py-3.5 text-xs text-slate-600 font-medium">{l.khoaHoc}</td>
-                    <td className="px-5 py-3.5 text-xs text-slate-600"><div className="font-semibold text-slate-800">{l.khoa?.tenKhoa}</div><div className="text-slate-400">{l.nganh?.tenNganh}</div></td>
-                    <ActionButtons onEdit={() => handleOpenModal(l)} onDelete={() => handleDelete(l.maLop)} title="Lớp" />
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {activeTab === 'hoc-ky' && (
-            <table className="w-full text-left text-sm text-slate-700">
-              <thead className="ou-table-header"><tr><th className="px-5 py-3.5 w-48">Mã Học Kỳ</th><th className="px-5 py-3.5">Tên Học Kỳ</th><th className="px-5 py-3.5 w-40">Năm Học</th><th className="px-5 py-3.5 text-right w-36">Thao tác</th></tr></thead>
-              <tbody className="divide-y divide-slate-100 font-normal">
-                {hocKys.map(h => (
-                  <tr key={h.maHocKy} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-5 py-3.5 font-mono font-bold text-primary-700">{h.maHocKy}</td>
-                    <td className="px-5 py-3.5 font-medium text-slate-800">{h.tenHocKy}</td>
-                    <td className="px-5 py-3.5"><span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">{h.namHoc}</span></td>
-                    <ActionButtons onEdit={() => handleOpenModal(h)} onDelete={() => handleDelete(h.maHocKy)} title="Học kỳ" />
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {activeTab === 'mon-hoc' && (
-            <div>
-              <div className="p-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center px-5">
-                <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-primary-700" /> Danh mục Môn học theo Chương trình đào tạo Quyết định 561/QĐ-ĐHM
-                </div>
-                <span className="px-3 py-1 bg-primary-700 text-white rounded-full text-xs font-semibold shadow-xs">{monHocs.length} Môn học</span>
-              </div>
-              <table className="w-full text-left text-sm text-slate-700">
-                <thead className="ou-table-header">
-                  <tr><th className="px-5 py-3.5 w-32">Mã Môn</th><th className="px-5 py-3.5">Tên Môn học</th><th className="px-5 py-3.5 text-center w-28">Số Tín chỉ</th><th className="px-5 py-3.5 text-center w-28">Lý thuyết</th><th className="px-5 py-3.5 text-center w-28">Thực hành</th><th className="px-5 py-3.5 text-right w-36">Đơn giá / 1 TC</th><th className="px-5 py-3.5 w-28">Khoa quản lý</th></tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-normal">
-                  {monHocs.map(m => (
-                    <tr key={m.maMon} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-5 py-3.5 font-mono font-bold text-primary-700">{m.maMon}</td>
-                      <td className="px-5 py-3.5 font-medium text-slate-800">{m.tenMon}</td>
-                      <td className="px-5 py-3.5 text-center font-bold text-slate-800">{m.soTinChi}</td>
-                      <td className="px-5 py-3.5 text-center text-xs text-slate-600">{m.soTietLyThuyet ? `${m.soTietLyThuyet} tiết` : '-'}</td>
-                      <td className="px-5 py-3.5 text-center text-xs text-slate-600">{m.soTietThucHanh ? `${m.soTietThucHanh} tiết` : '-'}</td>
-                      <td className="px-5 py-3.5 text-right font-mono font-semibold text-primary-700">{formatCurrency(m.donGiaTinChi)}</td>
-                      <td className="px-5 py-3.5"><span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">{m.maKhoa || '-'}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {activeTab === 'ctdt' && (
-            <div className="space-y-4 p-4">
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1.5 font-bold text-slate-800 text-sm"><Filter className="w-4 h-4 text-primary-700" /> Chọn Ngành Đào tạo:</div>
-                <select value={selectedNganh} onChange={(e) => setSelectedNganh(e.target.value)} className="px-3.5 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-primary-500">
-                  {nganhs.map(n => <option key={n.maNganh} value={n.maNganh}>{n.tenNganh} ({n.maNganh})</option>)}
-                </select>
-                <span className="text-xs text-slate-500 font-medium ml-auto">Khung Kế hoạch Đào tạo Chuẩn 11 Học kỳ - Quyết định 561/QĐ-ĐHM</span>
-              </div>
-              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-                <table className="w-full text-left text-sm text-slate-700">
-                  <thead className="ou-table-header"><tr><th className="px-5 py-3.5 text-center w-36">Học kỳ Gợi ý</th><th className="px-5 py-3.5 w-32">Mã Môn</th><th className="px-5 py-3.5">Tên Môn học</th><th className="px-5 py-3.5 text-center w-24">Tín chỉ</th><th className="px-5 py-3.5 w-32">Loại Học phần</th><th className="px-5 py-3.5 w-32">Hệ Đào tạo</th></tr></thead>
-                  <tbody className="divide-y divide-slate-100 font-normal">
-                    {curriculums.map((c, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-5 py-3.5 text-center font-bold text-primary-700 font-mono">Học kỳ {c.hocKyGoiY}</td>
-                        <td className="px-5 py-3.5 font-mono font-bold text-slate-800">{c.maMon}</td>
-                        <td className="px-5 py-3.5 font-medium text-slate-800">{c.tenMon}</td>
-                        <td className="px-5 py-3.5 text-center font-bold text-slate-800">{c.soTinChi}</td>
-                        <td className="px-5 py-3.5"><span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${c.loaiHocPhan === 'BAT_BUOC' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{c.loaiHocPhan === 'BAT_BUOC' ? 'Bắt buộc' : 'Tự chọn'}</span></td>
-                        <td className="px-5 py-3.5"><span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">{c.heDaoTao || 'CHUAN'}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
+        <CategoryTables
+          activeTab={activeTab}
+          khoas={khoas}
+          nganhs={nganhs}
+          lops={lops}
+          hocKys={hocKys}
+          monHocs={monHocs}
+          curriculums={curriculums}
+          selectedNganh={selectedNganh}
+          setSelectedNganh={setSelectedNganh}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+        />
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingItem ? `Chỉnh sửa ${activeTab.toUpperCase()}` : `Thêm mới ${activeTab.toUpperCase()}`}>
-        {error && <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-sm"><AlertCircle className="w-4 h-4 shrink-0" /><span>{error}</span></div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {activeTab === 'khoa' && (
-            <>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Mã Khoa (Viết tắt/Tiếng Anh)</label><input type="text" required disabled={!!editingItem} value={formData.maKhoa || ''} onChange={e => setFormData({ ...formData, maKhoa: e.target.value })} placeholder="VD: IT, BA, ACC" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm disabled:bg-slate-100 font-mono text-uppercase" /></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tên Khoa</label><input type="text" required value={formData.tenKhoa || ''} onChange={e => setFormData({ ...formData, tenKhoa: e.target.value })} placeholder="VD: Khoa Công nghệ Thông tin" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm" /></div>
-            </>
-          )}
-
-          {activeTab === 'nganh' && (
-            <>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Trực thuộc Khoa</label><select value={formData.maKhoa || ''} onChange={e => setFormData({ ...formData, maKhoa: e.target.value })} className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium">{khoas.map(k => <option key={k.maKhoa} value={k.maKhoa}>{k.tenKhoa} ({k.maKhoa})</option>)}</select></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Mã Ngành (Viết tắt/Tiếng Anh)</label><input type="text" required disabled={!!editingItem} value={formData.maNganh || ''} onChange={e => setFormData({ ...formData, maNganh: e.target.value })} placeholder="VD: CS, SE, IT, BA" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm disabled:bg-slate-100 font-mono text-uppercase" /></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tên Ngành Đào tạo</label><input type="text" required value={formData.tenNganh || ''} onChange={e => setFormData({ ...formData, tenNganh: e.target.value })} placeholder="VD: Khoa học Máy tính" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm" /></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Hệ đào tạo</label><select value={formData.heDaoTao || 'CHUAN'} onChange={e => setFormData({ ...formData, heDaoTao: e.target.value })} className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium"><option value="CHUAN">Chuẩn (Đại trà)</option><option value="CHAT_LUONG_CAO">Chất lượng cao</option></select></div>
-            </>
-          )}
-
-          {activeTab === 'lop' && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-semibold text-slate-700 mb-1">Khoa</label><select value={formData.maKhoa || ''} onChange={e => setFormData({ ...formData, maKhoa: e.target.value })} className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium">{khoas.map(k => <option key={k.maKhoa} value={k.maKhoa}>{k.tenKhoa}</option>)}</select></div>
-                <div><label className="block text-xs font-semibold text-slate-700 mb-1">Ngành</label><select value={formData.maNganh || ''} onChange={e => setFormData({ ...formData, maNganh: e.target.value })} className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium">{nganhs.map(n => <option key={n.maNganh} value={n.maNganh}>{n.tenNganh}</option>)}</select></div>
-              </div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Mã Lớp</label><input type="text" required disabled={!!editingItem} value={formData.maLop || ''} onChange={e => setFormData({ ...formData, maLop: e.target.value })} placeholder="VD: DH23CS01, DH23IT02" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm disabled:bg-slate-100 font-mono text-uppercase" /></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tên Lớp Sinh Hoạt</label><input type="text" required value={formData.tenLop || ''} onChange={e => setFormData({ ...formData, tenLop: e.target.value })} placeholder="VD: ĐH Khoa học Máy tính 2023 - Lớp 01" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm" /></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Khóa học</label><input type="text" value={formData.khoaHoc || ''} onChange={e => setFormData({ ...formData, khoaHoc: e.target.value })} placeholder="VD: K23 (2023-2027)" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm" /></div>
-            </>
-          )}
-
-          {activeTab === 'hoc-ky' && (
-            <>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Mã Học Kỳ</label><input type="text" required disabled={!!editingItem} value={formData.maHocKy || ''} onChange={e => setFormData({ ...formData, maHocKy: e.target.value })} placeholder="VD: HK1_2025_2026" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm disabled:bg-slate-100 font-mono text-uppercase" /></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tên Học Kỳ</label><input type="text" required value={formData.tenHocKy || ''} onChange={e => setFormData({ ...formData, tenHocKy: e.target.value })} placeholder="VD: Học kỳ 1 (2025-2026)" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm" /></div>
-              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Năm Học</label><input type="text" required value={formData.namHoc || ''} onChange={e => setFormData({ ...formData, namHoc: e.target.value })} placeholder="VD: 2025-2026" className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold" /></div>
-            </>
-          )}
-
-          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm hover:bg-slate-50 transition cursor-pointer">Hủy</button>
-            <button type="submit" className="ou-btn-primary text-sm shadow-md">{editingItem ? 'Lưu thay đổi' : 'Thêm mới'}</button>
-          </div>
-        </form>
-      </Modal>
+      <CategoryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        activeTab={activeTab}
+        editingItem={editingItem}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmit}
+        error={error}
+        khoas={khoas}
+        nganhs={nganhs}
+      />
     </div>
   );
 };
-
 export default CategoryManagement;

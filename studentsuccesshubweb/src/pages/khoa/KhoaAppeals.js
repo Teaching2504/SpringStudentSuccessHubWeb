@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axiosClient from '../../api/axiosClient';
-import { MessageSquare, CheckCircle, XCircle, ExternalLink, Clock, Star } from 'lucide-react';
-import Badge from '../../components/common/Badge';
-import Modal from '../../components/common/Modal';
+import { MessageSquare, CheckCircle, XCircle, Clock } from 'lucide-react';
+import AppealTable from './components/AppealTable';
+import AppealResolveModal from './components/AppealResolveModal';
 
 const KhoaAppeals = () => {
   const { user } = useAuth();
@@ -124,162 +124,18 @@ const KhoaAppeals = () => {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase text-slate-500">
-              <tr>
-                <th className="px-5 py-3.5">Sinh viên</th>
-                <th className="px-5 py-3.5">Nội dung kiến nghị</th>
-                <th className="px-5 py-3.5 text-center">GPA / ĐRL hiện tại</th>
-                <th className="px-5 py-3.5">Minh chứng</th>
-                <th className="px-5 py-3.5 text-center">Trạng thái</th>
-                <th className="px-5 py-3.5">Kết quả phản hồi</th>
-                <th className="px-5 py-3.5 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-normal">
-              {loading ? (
-                <tr><td colSpan="7" className="text-center py-8 text-slate-400">Đang tải danh sách kiến nghị...</td></tr>
-              ) : appeals.length === 0 ? (
-                <tr><td colSpan="7" className="text-center py-8 text-slate-400">Không có kiến nghị nào cần xử lý</td></tr>
-              ) : (
-                appeals.map((kn) => (
-                  <tr key={kn.maKienNghi} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-5 py-3.5 font-medium text-slate-800">
-                      <div className="font-bold">{kn.hoTenSinhVien}</div>
-                      <div className="text-xs font-mono text-primary-700">{kn.mssv} {kn.maLop ? `(${kn.maLop})` : ''}</div>
-                      <div className="text-[11px] text-slate-400">{kn.tenDot || kn.maHocKy}</div>
-                    </td>
-                    <td className="px-5 py-3.5 max-w-sm">
-                      <p className="text-slate-800 text-xs font-medium bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">{kn.noiDung}</p>
-                      <span className="text-[11px] text-slate-400 font-mono mt-1 block">Ngày gửi: {kn.ngayGui}</span>
-                    </td>
-                    <td className="px-5 py-3.5 text-center">
-                      <div className="font-bold text-primary-700">GPA: {kn.diemTrungBinhHienTai != null ? Number(kn.diemTrungBinhHienTai).toFixed(2) : '-'}</div>
-                      <div className="text-xs font-semibold text-purple-700 mt-0.5">ĐRL: {kn.diemRenLuyenHienTai != null ? kn.diemRenLuyenHienTai : '-'} đ</div>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      {kn.tepMinhChung ? (
-                        <a href={kn.tepMinhChung} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-800 underline">
-                          <ExternalLink className="w-3.5 h-3.5" /> Xem file
-                        </a>
-                      ) : <span className="text-xs text-slate-400">Không đính kèm</span>}
-                    </td>
-                    <td className="px-5 py-3.5 text-center"><Badge status={kn.trangThai} /></td>
-                    <td className="px-5 py-3.5 text-xs text-slate-600 max-w-xs">
-                      {kn.phanHoi ? (
-                        <div>
-                          <p className="line-clamp-2">{kn.phanHoi}</p>
-                          {kn.hoTenNhanVien && <span className="text-[10px] text-slate-400 block mt-0.5">Bởi: {kn.hoTenNhanVien}</span>}
-                        </div>
-                      ) : <span className="text-slate-400 italic">Chưa phản hồi</span>}
-                    </td>
-                    <td className="px-5 py-3.5 text-right space-x-2 whitespace-nowrap">
-                      {kn.trangThai === 'CHO_XU_LY' ? (
-                        <>
-                          <button onClick={() => handleOpenModal(kn, true)} className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-sm transition cursor-pointer inline-flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5" /> Chấp nhận & Chỉnh ĐRL
-                          </button>
-                          <button onClick={() => handleOpenModal(kn, false)} className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition cursor-pointer inline-flex items-center gap-1">
-                            <XCircle className="w-3.5 h-3.5" /> Từ chối
-                          </button>
-                        </>
-                      ) : (
-                        <button onClick={() => handleOpenModal(kn, true)} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition cursor-pointer">
-                          Cập nhật lại
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AppealTable appeals={appeals} loading={loading} onOpenModal={handleOpenModal} />
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={actionForm.accept ? 'Xử lý Khiếu nại: Chấp nhận & Cập nhật Điểm Rèn Luyện' : 'Từ chối khiếu nại của sinh viên'} maxWidth="max-w-xl">
-        <form onSubmit={handleExecuteAction} className="space-y-4">
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-slate-400">Sinh viên: </span>
-                <strong className="text-slate-800 text-sm">{selectedAppeal?.hoTenSinhVien}</strong>
-                <span className="font-mono text-primary-700 ml-1">({selectedAppeal?.mssv})</span>
-              </div>
-              <div className="text-right">
-                <span className="text-slate-400">Lớp: </span>
-                <strong className="text-slate-700">{selectedAppeal?.maLop}</strong>
-              </div>
-            </div>
-            <div className="flex items-center justify-between pt-2 border-t border-slate-200">
-              <span>ĐRL hiện tại: <strong className="text-purple-700 text-sm">{selectedAppeal?.diemRenLuyenHienTai != null ? selectedAppeal.diemRenLuyenHienTai : '-'} đ</strong></span>
-              <span>GPA hiện tại: <strong className="text-primary-700 text-sm">{selectedAppeal?.diemTrungBinhHienTai != null ? Number(selectedAppeal.diemTrungBinhHienTai).toFixed(2) : '-'}</strong></span>
-              <span>Học kỳ: <strong className="text-slate-700">{selectedAppeal?.maHocKy || 'HK1_2025_2026'}</strong></span>
-            </div>
-            <div className="pt-2 border-t border-slate-200">
-              <span className="text-slate-500 font-semibold block mb-0.5">Nội dung khiếu nại:</span>
-              <p className="text-slate-700 italic bg-white p-2 rounded-lg border border-slate-200">"{selectedAppeal?.noiDung}"</p>
-            </div>
-          </div>
-
-          {actionForm.accept && (
-            <div className="p-4 bg-gradient-to-r from-amber-50/80 to-yellow-50/80 border border-amber-200 rounded-2xl space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <label className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-                  <Star className="w-4 h-4 text-amber-600 fill-amber-500" />
-                  Điểm Rèn Luyện (ĐRL) mới điều chỉnh (0 - 100)
-                </label>
-                {previewRank && <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${previewRank.color}`}>Xếp loại ĐRL: {previewRank.text}</span>}
-              </div>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.5"
-                required
-                value={actionForm.diemRenLuyenMoi}
-                onChange={(e) => setActionForm({ ...actionForm, diemRenLuyenMoi: e.target.value })}
-                placeholder="Nhập điểm rèn luyện mới (0 - 100)..."
-                className="w-full px-3.5 py-2 bg-white border border-amber-300 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
-              />
-              {previewHb && (
-                <div className="p-2.5 bg-white/90 rounded-xl border border-amber-200/90 flex items-center justify-between gap-2">
-                  <span className="text-xs text-slate-600 font-semibold">Dự kiến Học bổng sau điều chỉnh:</span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${previewHb.color}`}>{previewHb.text}</span>
-                </div>
-              )}
-              <p className="text-[11px] text-amber-800/90 leading-relaxed">
-                * Với <strong>GPA: {selectedAppeal?.diemTrungBinhHienTai != null ? Number(selectedAppeal.diemTrungBinhHienTai).toFixed(2) : '-'}</strong> và <strong>ĐRL: {actionForm.diemRenLuyenMoi || 0}</strong>, sinh viên đạt chuẩn xét học bổng tự động.
-              </p>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Phản hồi chính thức đến Sinh viên (bắt buộc)</label>
-            <textarea
-              rows="3"
-              required
-              value={actionForm.phanHoi}
-              onChange={(e) => setActionForm({ ...actionForm, phanHoi: e.target.value })}
-              className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-xs font-medium hover:bg-slate-50 cursor-pointer">
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className={`px-4 py-2 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer flex items-center gap-1.5 ${actionForm.accept ? 'bg-emerald-700 hover:bg-emerald-800 shadow-emerald-700/20' : 'bg-rose-700 hover:bg-rose-800 shadow-rose-700/20'}`}
-            >
-              {actionForm.accept ? <><CheckCircle className="w-4 h-4" /> Xác nhận Chấp nhận & Cập nhật ĐRL</> : <><XCircle className="w-4 h-4" /> Xác nhận Từ chối</>}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      <AppealResolveModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        selectedAppeal={selectedAppeal}
+        actionForm={actionForm}
+        setActionForm={setActionForm}
+        previewRank={previewRank}
+        previewHb={previewHb}
+        onSubmit={handleExecuteAction}
+      />
     </div>
   );
 };
