@@ -28,10 +28,10 @@ public class NguoiDung {
     private String soDienThoai;
 
     @Column(name = "vaiTro", nullable = false, length = 50)
-    private String vaiTro; // ROLE_ADMIN, ROLE_CAN_BO_TRUONG, ROLE_CAN_BO_KHOA, ROLE_SINH_VIEN
+    private String vaiTro;
 
     @Column(name = "trangThai", length = 50)
-    private String trangThai; // HOAT_DONG, BI_KHOA
+    private String trangThai;
 
     @Column(name = "ngayTao")
     private LocalDateTime ngayTao;
@@ -68,7 +68,6 @@ public class NguoiDung {
         }
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

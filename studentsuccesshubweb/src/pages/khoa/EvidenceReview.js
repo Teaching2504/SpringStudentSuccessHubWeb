@@ -11,7 +11,6 @@ const EvidenceReview = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
 
-  // Review Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvidence, setSelectedEvidence] = useState(null);
   const [reviewAction, setReviewAction] = useState({ approve: true, lyDo: '' });
@@ -91,7 +90,51 @@ const EvidenceReview = () => {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Pastel KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-blue-50/80 border border-blue-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Tổng minh chứng</span>
+            <span className="p-2 bg-blue-100 text-blue-700 rounded-xl"><FileText className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-slate-800 mt-2">{evidenceList.length}</p>
+          <span className="text-[11px] text-blue-700 font-medium">Toàn bộ hồ sơ hoạt động</span>
+        </div>
+
+        <div className="bg-amber-50/80 border border-amber-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">Chờ phê duyệt</span>
+            <span className="p-2 bg-amber-100 text-amber-700 rounded-xl"><Clock className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-amber-900 mt-2">
+            {evidenceList.filter(m => m.trangThai === 'CHO_DUYET').length}
+          </p>
+          <span className="text-[11px] text-amber-700 font-medium">Cần thẩm định & cộng điểm</span>
+        </div>
+
+        <div className="bg-emerald-50/80 border border-emerald-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Đã phê duyệt</span>
+            <span className="p-2 bg-emerald-100 text-emerald-700 rounded-xl"><CheckCircle className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-emerald-900 mt-2">
+            {evidenceList.filter(m => m.trangThai === 'DA_DUYET').length}
+          </p>
+          <span className="text-[11px] text-emerald-700 font-medium">Đã cộng vào điểm ĐRL kỳ</span>
+        </div>
+
+        <div className="bg-rose-50/80 border border-rose-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-rose-800 uppercase tracking-wider">Đã từ chối</span>
+            <span className="p-2 bg-rose-100 text-rose-700 rounded-xl"><XCircle className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-rose-900 mt-2">
+            {evidenceList.filter(m => m.trangThai === 'TU_CHOI').length}
+          </p>
+          <span className="text-[11px] text-rose-700 font-medium">Không đủ điều kiện minh chứng</span>
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-700">
@@ -187,7 +230,6 @@ const EvidenceReview = () => {
         </div>
       </div>
 
-      {/* Review Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

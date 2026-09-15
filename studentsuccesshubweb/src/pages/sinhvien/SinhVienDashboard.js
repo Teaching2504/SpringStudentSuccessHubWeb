@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axiosClient from '../../api/axiosClient';
-import { Award, BookOpen, CheckSquare, MessageSquare, AlertTriangle, CheckCircle, ChevronRight, Upload, Calendar } from 'lucide-react';
+import { Award, BookOpen, CheckSquare, MessageSquare, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Upload, Calendar, Filter, Layers, Camera } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import { sortSemesters } from '../../utils/semesterSort';
 
 const SinhVienDashboard = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [academicData, setAcademicData] = useState(null);
   const [scholarships, setScholarships] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedSemester, setSelectedSemester] = useState('ALL');
+
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState('');
+  const [avatarErr, setAvatarErr] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchStudentData();
@@ -31,6 +37,9 @@ const SinhVienDashboard = () => {
         const d = rAcad.data.data;
         if (d && d.ketQuaHocTap) {
           d.ketQuaHocTap = sortSemesters(d.ketQuaHocTap.map(k => ({ ...k, maHocKy: k.hocKy?.maHocKy, namHoc: k.hocKy?.namHoc, tenHocKy: k.hocKy?.tenHocKy })));
+        }
+        if (d && d.bangDiemChiTiet) {
+          d.bangDiemChiTiet = sortSemesters(d.bangDiemChiTiet);
         }
         setAcademicData(d);
       }
@@ -56,14 +65,126 @@ const SinhVienDashboard = () => {
 
   const isWarned = profile?.canhBao && profile?.canhBao !== 'Bình thường';
 
+  const allSemesters = academicData?.bangDiemChiTiet || [];
+  const displayedSemesters = selectedSemester === 'ALL'
+    ? allSemesters
+    : allSemesters.filter(s => s.maHocKy === selectedSemester || s.tenHocKy === selectedSemester);
+
+  const handlePrevSemester = () => {
+    if (allSemesters.length === 0) return;
+    if (selectedSemester === 'ALL') {
+      setSelectedSemester(allSemesters[allSemesters.length - 1].maHocKy);
+      return;
+    }
+    const idx = allSemesters.findIndex(s => s.maHocKy === selectedSemester || s.tenHocKy === selectedSemester);
+    if (idx > 0) {
+      setSelectedSemester(allSemesters[idx - 1].maHocKy);
+    } else {
+      setSelectedSemester('ALL');
+    }
+  };
+
+  const handleNextSemester = () => {
+    if (allSemesters.length === 0) return;
+    if (selectedSemester === 'ALL') {
+      setSelectedSemester(allSemesters[0].maHocKy);
+      return;
+    }
+    const idx = allSemesters.findIndex(s => s.maHocKy === selectedSemester || s.tenHocKy === selectedSemester);
+    if (idx >= 0 && idx < allSemesters.length - 1) {
+      setSelectedSemester(allSemesters[idx + 1].maHocKy);
+    } else {
+      setSelectedSemester('ALL');
+    }
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn một tệp hình ảnh hợp lệ (PNG, JPG, JPEG)!');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Dung lượng ảnh không được vượt quá 5MB!');
+      return;
+    }
+
+    try {
+      setUploadingAvatar(true);
+      setAvatarMsg('');
+      setAvatarErr('');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await axiosClient.post('/api/auth/avatar', formData);
+      setUploadingAvatar(false);
+
+      if (res.data?.success) {
+        setAvatarMsg('Cập nhật ảnh đại diện thành công!');
+        const newAvatar = res.data?.data?.avatar;
+        if (newAvatar) {
+          setProfile(prev => prev ? ({ ...prev, avatar: newAvatar }) : prev);
+        }
+        await refreshUser();
+        setTimeout(() => setAvatarMsg(''), 4000);
+      } else {
+        setAvatarErr(res.data?.message || 'Không thể cập nhật ảnh đại diện');
+      }
+    } catch (err) {
+      setUploadingAvatar(false);
+      setAvatarErr(err.response?.data?.message || 'Lỗi khi tải ảnh đại diện lên');
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Profile Banner */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-primary-100 text-primary-700 font-bold text-2xl flex items-center justify-center shadow-inner">
-            {profile?.hoTen?.charAt(0) || 'S'}
+          <div 
+            className="relative group cursor-pointer shrink-0" 
+            onClick={() => fileInputRef.current?.click()} 
+            title="Nhấp để tải lên / thay đổi ảnh đại diện"
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleAvatarChange}
+              accept="image/*"
+              className="hidden"
+            />
+            {profile?.avatar || user?.avatar ? (
+              <img
+                src={profile?.avatar || user?.avatar}
+                alt="Avatar"
+                className="w-16 h-16 rounded-2xl object-cover shadow-sm border border-slate-200 group-hover:opacity-90 transition"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-primary-100 text-primary-700 font-bold text-2xl flex items-center justify-center shadow-inner group-hover:bg-primary-200 transition">
+                {profile?.hoTen?.charAt(0) || 'S'}
+              </div>
+            )}
+
+            {/* Hover / Camera overlay */}
+            <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-xs">
+              <Camera className="w-6 h-6 text-white" />
+            </div>
+
+            {/* Small camera badge icon at bottom corner */}
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full shadow-md border border-slate-200 flex items-center justify-center text-slate-700 group-hover:bg-primary-600 group-hover:text-white transition">
+              <Camera className="w-3.5 h-3.5" />
+            </div>
+
+            {uploadingAvatar && (
+              <div className="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
+
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-slate-800">{profile?.hoTen}</h1>
@@ -72,10 +193,11 @@ const SinhVienDashboard = () => {
             <p className="text-xs text-slate-500 font-mono mt-1">
               MSSV: <strong>{profile?.mssv}</strong> | Lớp: <strong>{profile?.maLop}</strong> | Khoa: <strong>{profile?.tenKhoa}</strong>
             </p>
+            {avatarMsg && <p className="text-xs font-semibold text-emerald-600 mt-1 animate-fade-in">{avatarMsg}</p>}
+            {avatarErr && <p className="text-xs font-semibold text-rose-600 mt-1 animate-fade-in">{avatarErr}</p>}
           </div>
         </div>
 
-        {/* Warning Indicator */}
         <div>
           {isWarned ? (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800 flex items-center gap-2">
@@ -90,8 +212,6 @@ const SinhVienDashboard = () => {
           )}
         </div>
       </div>
-
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="p-3.5 bg-blue-50 text-blue-600 rounded-xl">
@@ -146,36 +266,49 @@ const SinhVienDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           to="/sinh-vien/scholarships"
-          className="p-5 bg-gradient-to-r from-primary-900 to-primary-700 text-white rounded-2xl shadow-lg flex items-center justify-between group cursor-pointer hover:shadow-xl transition"
+          className="p-5 bg-gradient-to-r from-blue-50/90 to-sky-50/80 hover:from-blue-100/90 hover:to-sky-100/80 border border-blue-200/90 rounded-2xl shadow-xs hover:shadow-md transition-all flex items-center justify-between group cursor-pointer"
         >
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Award className="w-5 h-5" /> Tra cứu Kết quả Học bổng & Khiếu nại
-            </h3>
-            <p className="text-xs text-primary-200">
-              Xem danh sách dự kiến / chính thức và nộp đơn kiến nghị nếu có thắc mắc
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-500/10 text-blue-700 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <Award className="w-6 h-6" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-900 transition-colors">
+                Tra cứu Kết quả Học bổng & Khiếu nại
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Xem danh sách dự kiến / chính thức và nộp đơn kiến nghị nếu có thắc mắc
+              </p>
+            </div>
           </div>
-          <ChevronRight className="w-6 h-6 transform group-hover:translate-x-1 transition" />
+          <div className="w-8 h-8 rounded-full bg-white/80 border border-blue-200 flex items-center justify-center text-blue-700 group-hover:bg-blue-700 group-hover:text-white group-hover:border-blue-700 transition-all shrink-0 ml-2">
+            <ChevronRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition" />
+          </div>
         </Link>
 
         <Link
           to="/sinh-vien/evidence"
-          className="p-5 bg-gradient-to-r from-amber-700 to-amber-600 text-white rounded-2xl shadow-lg flex items-center justify-between group cursor-pointer hover:shadow-xl transition"
+          className="p-5 bg-gradient-to-r from-amber-50/90 to-yellow-50/80 hover:from-amber-100/90 hover:to-yellow-100/80 border border-amber-200/90 rounded-2xl shadow-xs hover:shadow-md transition-all flex items-center justify-between group cursor-pointer"
         >
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Upload className="w-5 h-5" /> Nộp Minh chứng Hoạt động Rèn luyện
-            </h3>
-            <p className="text-xs text-amber-100">
-              Gửi chứng chỉ ngoại khóa, NCKH, tình nguyện để được cộng điểm ĐRL
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-amber-500/10 text-amber-700 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <Upload className="w-6 h-6" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-amber-950 transition-colors">
+                Nộp Minh chứng Hoạt động Rèn luyện
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Gửi chứng chỉ ngoại khóa, NCKH, tình nguyện để được cộng điểm ĐRL
+              </p>
+            </div>
           </div>
-          <ChevronRight className="w-6 h-6 transform group-hover:translate-x-1 transition" />
+          <div className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600 transition-all shrink-0 ml-2">
+            <ChevronRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition" />
+          </div>
         </Link>
       </div>
 
-      {/* Academic Results History */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
           <div>
@@ -230,9 +363,9 @@ const SinhVienDashboard = () => {
       </div>
 
       {/* Detailed Course Breakdown from Official Curriculum */}
-      {academicData?.bangDiemChiTiet && academicData.bangDiemChiTiet.length > 0 && (
+      {allSemesters.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary-600" />
@@ -242,9 +375,88 @@ const SinhVienDashboard = () => {
                 Theo Chương trình đào tạo Quyết định 561/QĐ-ĐHM - Khoa Công nghệ Thông tin
               </p>
             </div>
+
+            {/* Bộ điều hướng & Lọc học kỳ */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+                <button
+                  type="button"
+                  onClick={handlePrevSemester}
+                  title="Học kỳ trước"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-white hover:shadow-xs transition flex items-center gap-1 cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline">Kỳ trước</span>
+                </button>
+                <div className="h-4 w-px bg-slate-300 mx-1"></div>
+                <button
+                  type="button"
+                  onClick={handleNextSemester}
+                  title="Học kỳ sau"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-white hover:shadow-xs transition flex items-center gap-1 cursor-pointer"
+                >
+                  <span className="hidden sm:inline">Kỳ sau</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="relative flex items-center">
+                <Filter className="w-4 h-4 absolute left-3 text-slate-400 pointer-events-none" />
+                <select
+                  value={selectedSemester}
+                  onChange={(e) => setSelectedSemester(e.target.value)}
+                  className="pl-9 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                >
+                  <option value="ALL">Tất cả các học kỳ ({allSemesters.length} kỳ)</option>
+                  {allSemesters.map((hk, i) => (
+                    <option key={i} value={hk.maHocKy}>
+                      {hk.tenHocKy || hk.maHocKy} (GPA: {hk.gpaHe4 != null ? Number(hk.gpaHe4).toFixed(2) : '-'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
-          {academicData.bangDiemChiTiet.map((hkScore, idx) => (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+            <button
+              type="button"
+              onClick={() => setSelectedSemester('ALL')}
+              className={`px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                selectedSemester === 'ALL'
+                  ? 'bg-primary-700 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" /> Tất cả ({allSemesters.length} kỳ)
+            </button>
+            {allSemesters.map((hk, i) => {
+              const isSelected = selectedSemester === hk.maHocKy;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedSemester(hk.maHocKy)}
+                  className={`px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-primary-700 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <span>{hk.tenHocKy || hk.maHocKy}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                    isSelected
+                      ? 'bg-primary-800 text-white'
+                      : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {hk.gpaHe4 != null ? Number(hk.gpaHe4).toFixed(2) : '-'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {displayedSemesters.map((hkScore, idx) => (
             <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
               <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">

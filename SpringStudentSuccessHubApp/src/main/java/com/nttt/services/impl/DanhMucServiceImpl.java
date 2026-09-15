@@ -136,7 +136,7 @@ public class DanhMucServiceImpl implements DanhMucService {
     @Override
     public List<HocKy> getAllHocKy() {
         List<HocKy> list = hocKyRepository.findAll();
-        // Sắp xếp thứ tự thời gian: Năm học -> Học kỳ 1 -> Học kỳ 2 -> Học kỳ 3
+
         list.sort(Comparator.comparingInt(this::getSemesterOrderKey));
         return list;
     }

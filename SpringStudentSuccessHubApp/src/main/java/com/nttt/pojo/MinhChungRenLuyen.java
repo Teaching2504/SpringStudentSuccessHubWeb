@@ -25,7 +25,7 @@ public class MinhChungRenLuyen {
     private String moTa;
 
     @Column(name = "trangThai", length = 50)
-    private String trangThai; // CHO_DUYET, DA_DUYET, TU_CHOI
+    private String trangThai;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maHoSo", nullable = true)

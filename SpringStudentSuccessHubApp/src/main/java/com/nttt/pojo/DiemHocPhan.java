@@ -9,7 +9,7 @@ public class DiemHocPhan {
 
     @Id
     @Column(name = "id", length = 60)
-    private String id; // e.g. DHP_2351010216_COSC1301_HK1_2025_2026
+    private String id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mssv", nullable = false)
@@ -24,31 +24,31 @@ public class DiemHocPhan {
     private HocKy hocKy;
 
     @Column(name = "diemChuyenCan", precision = 4, scale = 2)
-    private BigDecimal diemChuyenCan; // 10%
+    private BigDecimal diemChuyenCan;
 
     @Column(name = "diemGiuaKy", precision = 4, scale = 2)
-    private BigDecimal diemGiuaKy; // 30%
+    private BigDecimal diemGiuaKy;
 
     @Column(name = "diemCuoiKy", precision = 4, scale = 2)
-    private BigDecimal diemCuoiKy; // 60%
+    private BigDecimal diemCuoiKy;
 
     @Column(name = "diemTongKet10", precision = 4, scale = 2)
-    private BigDecimal diemTongKet10; // Thang 10: 0.1 * CC + 0.3 * GK + 0.6 * CK
+    private BigDecimal diemTongKet10;
 
     @Column(name = "diemHe4", precision = 4, scale = 2)
-    private BigDecimal diemHe4; // Thang 4: 4.0 (A), 3.5 (B+), 3.0 (B), 2.5 (C+), 2.0 (C), 1.5 (D+), 1.0 (D), 0.0 (F)
+    private BigDecimal diemHe4;
 
     @Column(name = "diemChu", length = 5)
-    private String diemChu; // "A+", "A", "B+", "B", "C+", "C", "D+", "D", "F"
+    private String diemChu;
 
     @Column(name = "soTinChi", nullable = false)
     private Integer soTinChi;
 
     @Column(name = "hocPhiMon", precision = 12, scale = 2)
-    private BigDecimal hocPhiMon; // soTinChi * donGiaTinChi
+    private BigDecimal hocPhiMon;
 
     @Column(name = "dat")
-    private Boolean dat; // true nếu diemTongKet10 >= 5.0 (không rớt)
+    private Boolean dat;
 
     public DiemHocPhan() {}
 

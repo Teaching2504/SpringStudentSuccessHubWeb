@@ -17,7 +17,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/truong/dashboard}" class="sidebar-link">
@@ -32,11 +32,47 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <div class="mb-4">
                 <h3 class="fw-bold text-dark mb-1">Báo cáo & Thống kê Học bổng Toàn trường</h3>
                 <p class="text-muted small">Phân tích tỷ lệ giải ngân ngân sách, phân bố loại học bổng và danh sách khen thưởng theo đợt</p>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 border border-primary-subtle bg-primary-subtle bg-opacity-10 shadow-sm d-flex align-items-center gap-3">
+                        <div class="bg-primary-subtle text-primary p-3 rounded-3 fs-3">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Ngân sách trích lập</span>
+                            <h4 class="fw-bold text-dark mb-0">8% Học phí</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 border border-success-subtle bg-success-subtle bg-opacity-10 shadow-sm d-flex align-items-center gap-3">
+                        <div class="bg-success-subtle text-success p-3 rounded-3 fs-3">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Học bổng Xuất sắc / Giỏi</span>
+                            <h4 class="fw-bold text-dark mb-0">100% & 70%</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 border border-warning-subtle bg-warning-subtle bg-opacity-10 shadow-sm d-flex align-items-center gap-3">
+                        <div class="bg-warning-subtle text-warning p-3 rounded-3 fs-3">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small fw-semibold text-uppercase">Đơn vị Khoa tham gia</span>
+                            <h4 class="fw-bold text-dark mb-0">12 Khoa</h4>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="bg-white p-4 rounded-4 border shadow-sm">

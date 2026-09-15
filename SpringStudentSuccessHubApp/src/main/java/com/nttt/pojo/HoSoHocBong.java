@@ -18,13 +18,13 @@ public class HoSoHocBong {
     private Integer thuHang;
 
     @Column(name = "loaiHocBong", length = 50)
-    private String loaiHocBong; // XUAT_SAC, GIOI, KHA
+    private String loaiHocBong;
 
     @Column(name = "mucHocBong", precision = 15, scale = 2)
     private BigDecimal mucHocBong;
 
     @Column(name = "trangThai", length = 50)
-    private String trangThai; // DU_KIEN, CHINH_THUC, KHONG_DAT, BI_LOAI
+    private String trangThai;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mssv", nullable = false)

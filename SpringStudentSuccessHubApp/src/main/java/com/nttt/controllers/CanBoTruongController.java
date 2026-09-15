@@ -30,7 +30,6 @@ public class CanBoTruongController {
         this.thongKeService = thongKeService;
     }
 
-    // --- Campaign Management (UC05) ---
     @GetMapping("/campaigns")
     public ResponseEntity<ApiResponse<List<DotXetHocBongDTO>>> getAllCampaigns() {
         return ResponseEntity.ok(ApiResponse.ok(dotXetHocBongService.getAllDotXet()));
@@ -69,7 +68,6 @@ public class CanBoTruongController {
         }
     }
 
-    // --- Dynamic Rule Engine Configuration & Versioning (UC06) ---
     @GetMapping("/campaigns/{id}/rules")
     public ResponseEntity<ApiResponse<List<QuyTacHocBongDTO>>> getRuleHistory(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.ok(dotXetHocBongService.getQuyTacHistory(id)));
@@ -90,7 +88,6 @@ public class CanBoTruongController {
         }
     }
 
-    // --- Faculty Sub-Campaigns & Quota Distribution ---
     @GetMapping("/campaigns/{id}/faculties")
     public ResponseEntity<ApiResponse<List<DotXetHbKhoaDTO>>> getFacultyCampaigns(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.ok(dotXetHocBongService.getDotKhoaByMaDot(id)));
@@ -124,7 +121,6 @@ public class CanBoTruongController {
         }
     }
 
-    // --- Review & Approve Faculty List (UC10) ---
     @PostMapping("/campaigns/faculty-campaigns/{dkId}/review")
     public ResponseEntity<ApiResponse<DotXetHbKhoaDTO>> reviewFacultyList(
             @PathVariable String dkId,
@@ -141,7 +137,6 @@ public class CanBoTruongController {
         }
     }
 
-    // --- Official Publication (UC10) ---
     @PostMapping("/campaigns/{id}/publish-official")
     public ResponseEntity<ApiResponse<DotXetHocBongDTO>> publishOfficial(@PathVariable String id) {
         try {
@@ -151,7 +146,6 @@ public class CanBoTruongController {
         }
     }
 
-    // --- Export Excel Report ---
     @GetMapping("/campaigns/faculty-campaigns/{dkId}/export-excel")
     public ResponseEntity<InputStreamResource> exportFacultyExcel(@PathVariable String dkId) {
         List<HoSoHocBongDTO> dossiers = dotXetHocBongService.getHoSoByDotKhoa(dkId);
@@ -169,7 +163,6 @@ public class CanBoTruongController {
                 .body(new InputStreamResource(in));
     }
 
-    // --- Stats ---
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<DashboardStatsDTO>> getStats() {
         return ResponseEntity.ok(ApiResponse.ok(thongKeService.getGlobalDashboardStats()));

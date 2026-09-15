@@ -50,7 +50,6 @@ const TruongDashboard = () => {
         </p>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="p-3.5 bg-blue-50 text-blue-600 rounded-xl">
@@ -93,40 +92,53 @@ const TruongDashboard = () => {
         </div>
       </div>
 
-      {/* Action shortcuts */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           to="/truong/campaigns"
-          className="p-5 bg-gradient-to-r from-primary-900 to-primary-700 text-white rounded-2xl shadow-lg flex items-center justify-between group cursor-pointer hover:shadow-xl transition"
+          className="p-5 bg-gradient-to-r from-blue-50/90 to-sky-50/80 hover:from-blue-100/90 hover:to-sky-100/80 border border-blue-200/90 rounded-2xl shadow-xs hover:shadow-md transition-all flex items-center justify-between group cursor-pointer"
         >
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Sliders className="w-5 h-5" /> Quản lý Đợt xét & Cấu hình Quy tắc
-            </h3>
-            <p className="text-xs text-primary-200">
-              Thiết lập chỉ tiêu, ngân sách, điều kiện điểm GPA/ĐRL & phiên bản quy tắc
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-500/10 text-blue-700 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <Sliders className="w-6 h-6" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-950 transition-colors">
+                Quản lý Đợt xét & Cấu hình Quy tắc
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Thiết lập chỉ tiêu, ngân sách, điều kiện điểm GPA/ĐRL & phiên bản quy tắc
+              </p>
+            </div>
           </div>
-          <ChevronRight className="w-6 h-6 transform group-hover:translate-x-1 transition" />
+          <div className="w-8 h-8 rounded-full bg-white/80 border border-blue-200 flex items-center justify-center text-blue-700 group-hover:bg-blue-700 group-hover:text-white group-hover:border-blue-700 transition-all shrink-0 ml-2">
+            <ChevronRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition" />
+          </div>
         </Link>
 
         <Link
           to="/truong/stats"
-          className="p-5 bg-gradient-to-r from-slate-800 to-slate-700 text-white rounded-2xl shadow-lg flex items-center justify-between group cursor-pointer hover:shadow-xl transition"
+          className="p-5 bg-gradient-to-r from-amber-50/90 to-yellow-50/80 hover:from-amber-100/90 hover:to-yellow-100/80 border border-amber-200/90 rounded-2xl shadow-xs hover:shadow-md transition-all flex items-center justify-between group cursor-pointer"
         >
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <FileText className="w-5 h-5" /> Báo cáo Thống kê & Phân tích
-            </h3>
-            <p className="text-xs text-slate-300">
-              Biểu đồ phân bổ ngân sách, học bổng theo khoa và xếp hạng sinh viên
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-amber-500/10 text-amber-700 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <FileText className="w-6 h-6" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-amber-950 transition-colors">
+                Báo cáo Thống kê & Phân tích
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Biểu đồ phân bổ ngân sách, học bổng theo khoa và xếp hạng sinh viên
+              </p>
+            </div>
           </div>
-          <ChevronRight className="w-6 h-6 transform group-hover:translate-x-1 transition" />
+          <div className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600 transition-all shrink-0 ml-2">
+            <ChevronRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition" />
+          </div>
         </Link>
       </div>
 
-      {/* Campaigns list preview */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Các đợt xét học bổng gần đây</h2>

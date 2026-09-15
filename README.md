@@ -1,144 +1,172 @@
-# OU-SSH: Hệ Thống Quản Lý Kết Quả Học Tập - Rèn Luyện & Tự Động Hóa Xét Duyệt Học Bổng
+# OU-SSH Hub: He Thong Quan Ly Ket Qua Hoc Tap & Ren Luyen Ho Tro Xet Hoc Bong Sinh Vien
 
-<p align="center">
-  <img src="studentsuccesshubweb/public/logo.png" alt="Trường Đại học Mở TP.HCM" width="220" />
-</p>
+Trường Đại học Mở Thành phố Hồ Chí Minh  
+Khoa Công nghệ Thông tin  
+Đồ án Ngành Công nghệ Thông tin
 
-> **ĐỀ TÀI ĐỒ ÁN TỐT NGHIỆP ĐẠI HỌC**  
-> **Sinh viên thực hiện**: NGUYỄN THỊ TUYẾT TRINH (MSSV: `2351010216`)  
-> **Giảng viên hướng dẫn**: Th.S NGUYỄN TRUNG HẬU  
-> **Đơn vị đào tạo**: Trường Đại học Mở Thành phố Hồ Chí Minh (OU)
-
----
-
-## 📌 1. Giới thiệu Đề tài
-**OU-SSH (Open University Student Success Hub)** là hệ thống quản lý học vụ và hỗ trợ sinh viên thế hệ mới, giải quyết trọn vẹn bài toán theo dõi kết quả học tập (GPA), điểm rèn luyện (ĐRL), tiếp nhận minh chứng, xử lý kiến nghị và **tự động hóa toàn diện quy trình xét duyệt Học bổng Khuyến khích học tập (HB KKHT)** dựa trên **Dynamic Rule Engine & Versioning**.
-
-Hệ thống hỗ trợ 2 mô hình trải nghiệm:
-1. **Cổng Web Quản trị Thymeleaf (SSR)**: Dành cho công tác quản trị và báo cáo nhanh (`http://localhost:8080/login`).
-2. **Cổng Ứng dụng Single Page App (ReactJS + Tailwind CSS)**: Giao diện trực quan, hiện đại, mượt mà cho cả 4 vai trò (`http://localhost:8000`).
+- **Sinh viên thực hiện**: Nguyễn Thị Tuyết Trinh
+- **Mã số sinh viên**: 2351010216
+- **Lớp**: DH23CS01 (Khóa 2023 - 2027)
+- **Giảng viên hướng dẫn**: ThS. Nguyễn Trung Hậu
 
 ---
 
-## 🏛️ 2. Quy Chế & Thuật Toán Xét Học Bổng Khuyến Khích Học Tập (OU)
+## 1. Giới thiệu tổng quan
 
-Hệ thống được thiết kế bám sát chặt chẽ theo **Quy chế Học bổng Khuyến khích Học tập của Trường Đại học Mở TP.HCM**:
+Hệ thống **OU-SSH Hub (Student Success Hub)** được xây dựng nhằm tin học hóa và tự động hóa công tác quản lý học vụ tại Trường Đại học Mở TP.HCM, tập trung vào hai mảng trọng tâm:
+1. **Quản lý kết quả học tập và rèn luyện**: Theo dõi điểm trung bình học kỳ (GPA), điểm rèn luyện (ĐRL), cảnh báo học vụ, lưu trữ và thẩm định minh chứng hoạt động phong trào trực tuyến.
+2. **Tự động hóa quy trình xét học bổng Khuyến khích học tập (HB KKHT)**: Áp dụng công cụ xếp hạng (Rule Engine) phân bổ theo quỹ 8% học phí, xếp hạng sinh viên từ trên xuống, tiếp nhận và xử lý khiếu nại trước khi phê duyệt danh sách chính thức.
 
-### ⏳ Thời gian & Điều kiện Xét duyệt:
-- Được xét và cấp theo **từng học kỳ của năm học**, ngay sau khi có đầy đủ điểm học phần và điểm rèn luyện của học kỳ đó.
-- **Điều kiện cần**:
-  1. Không có môn nào bị nợ / rớt trong học kỳ (`coHocPhanRot = false`).
-  2. Tích lũy đủ số tín chỉ tối thiểu theo quy định (mặc định $\ge 14$ tín chỉ).
-  3. Điểm học tập và rèn luyện đạt ngưỡng tối thiểu: $\text{GPA} \ge 2.50$ và $\text{ĐRL} \ge 65$.
-
-### 💰 Quỹ Học Bổng & Mức Chi Trả (% Học phí):
-- **Quỹ Học bổng**: Được trích lập **tối thiểu 8% trên tổng thu học phí** của sinh viên trong học kỳ đó, sau đó phân bổ ngân sách cho từng Khoa/Ngành (`nganSachKhoa`).
-- **Mức Học Bổng theo Tỷ Lệ % Học Phí Bình Quân**:
-  | Phân Loại Học Bổng | Tiêu Chuẩn GPA & ĐRL | Tỷ Lệ Chi Trả (% Học phí) | Mức Mẫu (Chương trình Đại trà) |
-  | :--- | :--- | :---: | :---: |
-  | 🌟 **Xuất sắc** | $\text{GPA} \ge 3.60$ & $\text{ĐRL} \ge 90$ | **100% Học phí** | `10.000.000 VNĐ` |
-  | 🥇 **Giỏi** | $\text{GPA} \ge 3.20$ & $\text{ĐRL} \ge 80$ | **70% Học phí** | `7.000.000 VNĐ` |
-  | 🥈 **Khá** | $\text{GPA} \ge 2.50$ & $\text{ĐRL} \ge 65$ | **50% Học phí** | `5.000.000 VNĐ` |
-
-*(Chương trình Đào tạo Đặc biệt / CLC áp dụng mức học phí theo hệ số riêng của trường).*
-
-### 📊 Cơ Chế Xếp Hạng & Cấp Ngân Sách "Lấy Từ Trên Xuống Đến Khi Hết Quỹ":
-1. **Xếp hạng ưu tiên**: $\text{GPA cao hơn} \rightarrow \text{ĐRL cao hơn} \rightarrow \text{Số tín chỉ nhiều hơn}$.
-2. **Cấp phát quỹ từ trên xuống**: Cấp học bổng cho sinh viên xếp hạng 1, 2, 3... và trừ trực tiếp vào Quỹ ngân sách còn lại.
-3. **Khi Quỹ ngân sách hết tiền hoặc không đủ chi trả**: Các sinh viên tiếp theo sẽ chuyển sang trạng thái `KHONG_DAT (Hết ngân sách)` với mức nhận `0 VNĐ`.
+Hệ thống được thiết kế theo mô hình phân luồng người dùng:
+- **Cổng Quản trị (Thymeleaf Spring MVC)**: Dành cho Ban Giám hiệu, Phòng Công tác Sinh viên (Cấp Trường), Ban Chủ nhiệm và Trợ lý Quản lý Sinh viên (Cấp Khoa) cùng Quản trị viên hệ thống. Địa chỉ truy cập: `http://localhost:8080/login`.
+- **Cổng Sinh viên (React Single Page Application)**: Dành cho sinh viên tra cứu chương trình đào tạo, bảng điểm chi tiết từng học kỳ, nộp minh chứng rèn luyện, theo dõi kết quả xét học bổng và gửi đơn kiến nghị/khiếu nại trực tuyến. Địa chỉ truy cập: `http://localhost:8000/login`.
 
 ---
 
-## 🛠️ 3. Kiến Trúc & Công Nghệ
+## 2. Quy chế và Logic Xét Học bổng Khuyến khích Học tập
 
-- **Backend**:
-  - Java 21 LTS
-  - Spring Boot 3.4.3, Spring Data JPA, Spring Security (BCrypt Password Encoder)
-  - JJWT (0.12.6) Stateless Auth cho REST API & HttpSession cho Thymeleaf View
-  - Apache POI (Nhập / Xuất Excel danh sách sinh viên & kết quả học bổng)
-- **Frontend**:
-  - React 18, Vite 6, Tailwind CSS
-  - Lucide React Icons, React Router DOM v6, Axios Interceptors
-- **Database**:
-  - MySQL 8.x (20 bảng thực thể quan hệ chặt chẽ)
-  - Script SQL mẫu: `ousshdb.sql` (chứa dữ liệu đầy đủ 12 Khoa, 32 Ngành, 9 học kỳ kết quả học tập).
+Hệ thống hiện thực hóa các quy định hiện hành về Học bổng Khuyến khích Học tập của Trường Đại học Mở TP.HCM:
 
----
+### 2.1. Điều kiện tham gia xét học bổng
+- Sinh viên theo học hệ chính quy, có đăng ký và tích lũy đủ số tín chỉ tối thiểu theo quy định trong học kỳ xét (thông thường từ 14 tín chỉ trở lên).
+- Không có học phần nào bị điểm F / rớt môn trong học kỳ (`coHocPhanRot = false`).
+- Điểm trung bình học kỳ (GPA) đạt từ 2.50 trở lên và Điểm rèn luyện (ĐRL) đạt từ 65 điểm trở lên.
 
-## 👥 4. Phân Quyền 4 Vai Trò & Các Chức Năng Cốt Lõi
+### 2.2. Tiêu chuẩn xếp loại và định mức học bổng
+Mức học bổng được tính theo tỷ lệ phần trăm mức học phí thực tế của sinh viên trong học kỳ:
 
-1. **Quản trị viên (Admin)**:
-   - Quản lý tài khoản người dùng, phân quyền, xem/đặt lại mật khẩu (tự động đồng bộ BCrypt), khóa/mở khóa tài khoản với popup xác nhận an toàn.
-   - Quản lý danh mục đào tạo (12 Khoa, 32 Ngành, Học kỳ, Lớp sinh hoạt).
-   - Quản lý hồ sơ sinh viên, nhập dữ liệu hàng loạt bằng file Excel.
-2. **Cán bộ Cấp Trường (Phòng CTSV)**:
-   - Khởi tạo và quản lý Chiến dịch Xét học bổng từng học kỳ.
-   - Cấu hình Dynamic Rule Engine, định mức học bổng, phân bổ quỹ ngân sách và chỉ tiêu cho 12 Khoa.
-   - Thẩm định danh sách đề xuất từ Khoa, Phê duyệt hoặc Trả về kèm lý do, Công bố kết quả chính thức toàn trường.
-3. **Cán bộ Cấp Khoa (12 Khoa)**:
-   - Kích hoạt Rule Engine xếp hạng tự động sinh viên trong khoa theo quỹ ngân sách.
-   - Công bố danh sách dự kiến, tiếp nhận và giải quyết khiếu nại/kiến nghị của sinh viên.
-   - Chốt danh sách cuối cùng gửi về Cấp Trường phê duyệt.
-   - Thẩm định và duyệt điểm minh chứng hoạt động rèn luyện.
-4. **Sinh viên**:
-   - Đăng nhập hệ thống (Mật khẩu khởi tạo là Số CCCD).
-   - Tra cứu điểm GPA, ĐRL, kết quả học bổng cá nhân & Gửi khiếu nại trực tuyến.
-   - Nộp minh chứng hoạt động rèn luyện (file PDF, hình ảnh, link Google Drive).
-   - Đổi mật khẩu cá nhân (tự động lưu vào CSDL và cập nhật trên hệ thống).
+| Xếp loại học bổng | Điểm GPA (Hệ 4) | Điểm Rèn luyện | Tỷ lệ chi trả (% Học phí) |
+| :--- | :--- | :--- | :--- |
+| Xuất sắc | GPA >= 3.60 | ĐRL >= 90 (Xuất sắc) | 100% học phí |
+| Giỏi | GPA >= 3.20 | ĐRL >= 80 (Tốt) | 70% học phí |
+| Khá | GPA >= 2.50 | ĐRL >= 65 (Khá) | 50% học phí |
+
+*Quy tắc kết hợp*: Loại học bổng lấy theo mức của điểm thấp hơn giữa Điểm học tập và Điểm rèn luyện. Ví dụ, sinh viên có GPA 3.65 (đủ mức Xuất sắc) nhưng ĐRL 82 (mức Giỏi) thì xếp loại học bổng là Giỏi.
+
+### 2.3. Quy tắc phân bổ Quỹ 8% và cơ chế xếp hạng
+- **Quỹ học bổng**: Được trích bằng 8% tổng học phí thực tế thu được của nhóm sinh viên (theo Khoa / Ngành / Khóa).
+- **Thứ tự ưu tiên xếp hạng**: Điểm GPA cao hơn -> Điểm Rèn luyện cao hơn -> Số tín chỉ tích lũy nhiều hơn -> MSSV.
+- **Quy tắc không để tồn dư ngân sách**: Hệ thống phân bổ học bổng lần lượt từ trên xuống theo thứ hạng. Nếu số tiền còn lại trong quỹ lớn hơn 0 nhưng không đủ một suất trọn vẹn, hệ thống vẫn tiếp tục xét trao thêm 1 suất học bổng nữa cho sinh viên đủ điều kiện kế tiếp nhằm tối ưu hóa ngân sách hỗ trợ sinh viên.
+- **Xử lý khiếu nại**: Sinh viên có quyền gửi đơn rà soát kết quả trong thời hạn công bố dự kiến. Sau khi Cán bộ Khoa thẩm định và phê duyệt điều chỉnh, hệ thống cập nhật lại kết quả trước khi Phòng CTSV duyệt chính thức.
 
 ---
 
-## 🚀 5. Hướng Dẫn Cài Đặt & Chạy
+## 3. Kiến trúc Công nghệ
 
-### Bước 1: Chạy Backend Spring Boot
+### 3.1. Backend (Spring Boot)
+- **Ngôn ngữ**: Java 21 LTS.
+- **Framework**: Spring Boot 3.4.3 (Spring MVC, Spring Data JPA, Spring Security).
+- **Xác thực & Bảo mật**: JWT (JSON Web Token) cho REST API và Form Login / HttpSession cho Cổng Quản trị Thymeleaf; mật khẩu mã hóa chuẩn BCrypt.
+- **Lưu trữ tệp & media**: Tích hợp Cloudinary SDK để lưu trữ ảnh đại diện, ảnh giấy chứng nhận minh chứng rèn luyện và tệp đính kèm khiếu nại.
+- **Xử lý dữ liệu bảng tính**: Apache POI phục vụ xuất/nhập danh sách sinh viên và kết quả học bổng.
+
+### 3.2. Frontend (React)
+- **Công nghệ nền tảng**: React 18, Vite 6, Tailwind CSS.
+- **Thư viện giao diện**: Lucide React Icons, React Router DOM v6, Axios Interceptors (tự động đính kèm Bearer token và xử lý lỗi mạng).
+- **Bảng điểm đa học kỳ**: Hỗ trợ bộ lọc Dropdown, nút điều hướng mũi tên (Kỳ trước / Kỳ sau) và thanh tab chuyển học kỳ 1 chạm.
+
+### 3.3. Cơ sở dữ liệu (MySQL)
+- Hệ quản trị CSDL: MySQL 8.x / MySQL 9.x.
+- Tên cơ sở dữ liệu: `ousshdb`.
+- Cấu trúc gồm 20 bảng quan hệ chuẩn hóa: Người dùng, Nhân viên, Sinh viên, Khoa, Ngành, Lớp sinh hoạt, Môn học, CTĐT, Điểm học phần, Kết quả học tập, Kết quả rèn luyện, Minh chứng rèn luyện, Đợt xét học bổng, Hồ sơ học bổng, Kiến nghị khiếu nại...
+
+---
+
+## 4. Phân quyền và Chức năng theo Vai trò
+
+### 4.1. Quản trị viên (Admin)
+- Quản lý danh sách người dùng, cấp phát tài khoản, đổi mật khẩu và khóa/mở khóa tài khoản.
+- Quản lý danh mục đào tạo (Khoa, Ngành, Học kỳ, Lớp sinh hoạt, Môn học theo QĐ 561/QĐ-ĐHM).
+- Quản lý thông tin hồ sơ sinh viên, nhập dữ liệu hàng loạt từ Excel.
+
+### 4.2. Cán bộ Cấp Trường (Phòng Công tác Sinh viên)
+- Khởi tạo và quản lý các đợt xét học bổng KKHT theo từng học kỳ.
+- Thiết lập định mức, phân bổ ngân sách quỹ học bổng cho các Khoa.
+- Tiếp nhận danh sách đề xuất từ các Khoa, phê duyệt hoặc yêu cầu điều chỉnh, công bố quyết định khen thưởng chính thức toàn trường.
+
+### 4.3. Cán bộ Cấp Khoa
+- Kích hoạt Rule Engine tự động lọc và xếp hạng học bổng sinh viên trong Khoa.
+- Công bố danh sách dự kiến, tiếp nhận đơn khiếu nại của sinh viên và gửi phản hồi giải trình.
+- Thẩm định và duyệt minh chứng hoạt động rèn luyện (cộng điểm ĐRL trực tiếp).
+- Trình danh sách học bổng hoàn chỉnh lên Cấp Trường.
+
+### 4.4. Sinh viên
+- Tra cứu bảng điểm học phần chi tiết của các học kỳ, điểm GPA và điểm ĐRL.
+- Theo dõi kết quả xét học bổng, số tiền được nhận và trạng thái hồ sơ.
+- Gửi đơn kiến nghị/khiếu nại trực tuyến khi có thắc mắc về điểm hoặc kết quả xét.
+- Tải lên minh chứng tham gia hoạt động phong trào/tình nguyện (ảnh/PDF qua Cloudinary).
+
+---
+
+## 5. Hướng dẫn Cài đặt và Chạy Hệ thống
+
+### 5.1. Yêu cầu môi trường
+- Java Development Kit (JDK): Phiên bản 21 trở lên.
+- Apache Maven: Phiên bản 3.8+.
+- Node.js: Phiên bản 18+ và npm.
+- MySQL Server: Phiên bản 8.0+.
+
+### 5.2. Cấu hình Cơ sở Dữ liệu
+1. Tạo cơ sở dữ liệu MySQL:
+   ```sql
+   CREATE DATABASE ousshdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+2. Kiểm tra cấu hình kết nối trong tệp `SpringStudentSuccessHubApp/src/main/resources/application.properties`:
+   ```properties
+   spring.datasource.url=jdbc:mysql://localhost:3306/ousshdb?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+   spring.datasource.username=root
+   spring.datasource.password=root
+   ```
+
+### 5.3. Khởi chạy Backend (Spring Boot)
+Mở terminal tại thư mục backend:
 ```bash
 cd SpringStudentSuccessHubApp
 mvn spring-boot:run
 ```
-* Backend khởi chạy tại: **`http://localhost:8080`**
-* Cổng Quản trị Thymeleaf: **`http://localhost:8080/login`**
-* REST API Base URL: **`http://localhost:8080/api`**
+- Server backend lắng nghe tại: `http://localhost:8080`
+- Cổng Quản trị Thymeleaf: `http://localhost:8080/login`
+- REST API Base URL: `http://localhost:8080/api`
 
-### Bước 2: Chạy Frontend ReactJS
+### 5.4. Khởi chạy Frontend (React SPA)
+Mở terminal tại thư mục frontend:
 ```bash
 cd studentsuccesshubweb
 npm install
 npm start
 ```
-* Cổng Ứng dụng React: **`http://localhost:8000`**
+- Ứng dụng React chạy tại: `http://localhost:8000`
 
 ---
 
-## 🔑 6. Danh Sách Tài Khoản Mẫu Kiểm Thử Toàn Hệ Thống
+## 6. Danh sách Tài khoản Kiểm thử Mẫu
 
-| Vai Trò | Tên Đăng Nhập | Mật Khẩu Khởi Tạo | Ghi Chú |
+### 6.1. Tài khoản Quản trị và Cán bộ
+| Vai trò | Tên đăng nhập | Mật khẩu | Ghi chú |
 | :--- | :--- | :--- | :--- |
-| 👑 **Quản trị viên (Admin)** | `admin` | `admin123` | Toàn quyền hệ thống |
-| 🏛️ **Cán bộ Cấp Trường (P.CTSV)** | `captruong` | `truong123` | ThS. Phạm Minh Tuấn (Trưởng phòng CTSV) |
-| 🏢 **Khoa Công nghệ Thông tin** | `cbk_it` | `khoa123` | ThS. Lê Hoàng Nam |
-| 🏢 **Khoa Công nghệ Sinh học** | `cbk_bio` | `khoa123` | ThS. Nguyễn Thị Thu Trang |
-| 🏢 **Khoa Kế toán - Kiểm toán** | `cbk_acc` | `khoa123` | ThS. Trần Văn Hưng |
-| 🏢 **Khoa Kinh tế & Quản lý Công** | `cbk_eco` | `khoa123` | ThS. Phạm Ngọc Mai |
-| 🏢 **Khoa Xã hội học - CTXH - ĐNTH**| `cbk_soc` | `khoa123` | ThS. Đỗ Minh Quân |
-| 🏢 **Khoa Khoa học Cơ bản** | `cbk_bas` | `khoa123` | ThS. Huỳnh Quốc Bảo |
-| 🏢 **Khoa Luật** | `cbk_law` | `khoa123` | ThS. Vũ Thị Bích Ngọc |
-| 🏢 **Khoa Ngoại ngữ** | `cbk_fl` | `khoa123` | ThS. Bùi Đình Trọng |
-| 🏢 **Khoa Quản trị Kinh doanh** | `cbk_ba` | `khoa123` | ThS. Phan Thanh Tùng |
-| 🏢 **Khoa Tài chính - Ngân hàng** | `cbk_bf` | `khoa123` | ThS. Trương Hoài Phương |
-| 🏢 **Khoa Xây dựng** | `cbk_ce` | `khoa123` | ThS. Nguyễn Đức Long |
-| 🏢 **Khoa Đào tạo Đặc biệt (CLC)** | `cbk_spe` | `khoa123` | ThS. Hoàng Diễm My |
-| 🎓 **Khóa 2023 - Tuyết Trinh** | `2351010216` | **`092305006276`** *(CCCD)* | Nguyễn Thị Tuyết Trinh (`DH23CS01` - GPA 3.95, ĐRL 96) |
-| 🎓 **Khóa 2023 - Bảo An** | `2351010001` | **`079205001111`** *(CCCD)* | Trần Bảo An (`DH23CS01` - K23 (2023-2027)) |
-| 🎓 **Khóa 2023 - Khánh Bình** | `2351010002` | **`079305002222`** *(CCCD)* | Lê Khánh Bình (`DH23IT01` - K23 (2023-2027)) |
-| 🎓 **Khóa 2023 - Quốc Cường** | `2351010003` | **`079205003333`** *(CCCD)* | Phạm Quốc Cường (`DH23IT01` - K23 (2023-2027)) |
-| 🎓 **Khóa 2023 - Nam Hùng** | `2351020001` | **`079205005555`** *(CCCD)* | Vũ Nam Hùng (`DH23CS01C` - Đặc biệt CLC) |
-| 🎓 **Khóa 2024 - Nhật Nam** | `2451010001` | **`079206001111`** *(CCCD)* | Hoàng Nhật Nam (`DH24CS01` - K24 (2024-2028)) |
-| 🎓 **Khóa 2024 - Minh Đăng** | `2451010002` | **`079206002222`** *(CCCD)* | Trương Minh Đăng (`DH24IT01` - K24 (2024-2028)) |
-| 🎓 **Khóa 2024 - Mỹ Linh** | `2451010003` | **`079306003333`** *(CCCD)* | Hoàng Mỹ Linh (`DH24IT02` - K24 (2024-2028)) |
-| 🎓 **Khóa 2024 - Hải Yến** | `2451010004` | **`079306004444`** *(CCCD)* | Lê Hải Yến (`DH24CS01C` - Đặc biệt CLC) |
-| 🎓 **Khóa 2025 - Gia Hưng** | `2551010001` | **`079207001111`** *(CCCD)* | Trần Gia Hưng (`DH25CS01` - K25 (2025-2029)) |
-| 🎓 **Khóa 2025 - Thục Quyên** | `2551010002` | **`079307002222`** *(CCCD)* | Võ Thục Quyên (`DH25IT01` - K25 (2025-2029)) |
-| 🎓 **Khóa 2025 - Hoàng Long** | `2551010003` | **`079207003333`** *(CCCD)* | Đỗ Hoàng Long (`DH25SE01` - K25 (2025-2029)) |
-| 🎓 **Khóa 2025 - Ngọc Ánh** | `2551010004` | **`079307004444`** *(CCCD)* | Phạm Ngọc Ánh (`DH25CS01C` - Đặc biệt CLC) |
+| Quản trị viên (Admin) | `admin` | `admin123` | Toàn quyền quản trị danh mục & tài khoản |
+| Cán bộ Trường (P.CTSV) | `captruong` | `truong123` | ThS. Phạm Minh Tuấn - Trưởng phòng CTSV |
+| Cán bộ Khoa CNTT | `cbk_it` | `khoa123` | ThS. Lê Hoàng Nam - Cán bộ phụ trách HB Khoa |
+| Cán bộ Khoa CNSH | `cbk_bio` | `khoa123` | ThS. Nguyễn Thị Thu Trang |
+| Cán bộ Khoa Kế toán | `cbk_acc` | `khoa123` | ThS. Trần Văn Hưng |
+| Cán bộ Khoa Kinh tế | `cbk_eco` | `khoa123` | ThS. Phạm Ngọc Mai |
+| Cán bộ Khoa Luật | `cbk_law` | `khoa123` | ThS. Vũ Thị Bích Ngọc |
+| Cán bộ Khoa Ngoại ngữ | `cbk_fl` | `khoa123` | ThS. Bùi Đình Trọng |
+| Cán bộ Khoa QTKD | `cbk_ba` | `khoa123` | ThS. Phan Thanh Tùng |
+| Cán bộ ĐT Đặc biệt (CLC) | `cbk_spe` | `khoa123` | ThS. Hoàng Diễm My |
 
-*(Tất cả sinh viên đều có thể đăng nhập bằng **MSSV** kết hợp với **Mật khẩu là Số CCCD**).*
+### 6.2. Tài khoản Sinh viên Mẫu
+Mật khẩu mặc định cho tài khoản sinh viên là Số CCCD (hoặc có thể dùng `sv123`):
+
+| Khóa | MSSV | Họ và tên | Lớp sinh hoạt | Số CCCD (Mật khẩu) | Ghi chú |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| K23 | `2351010216` | Nguyễn Thị Tuyết Trinh | DH23CS01 | `092305006276` | HK2 GPA 3.65, ĐRL 82 - Có đơn khiếu nại |
+| K23 | `2351010001` | Trần Bảo An | DH23CS01 | `079205001111` | HK2 GPA 3.82, ĐRL 95 - Học bổng Xuất sắc |
+| K23 | `2351010011` | Lê Hoàng Phúc | DH23IT01 | `079305002222` | HK2 GPA 3.45, ĐRL 88 - Học bổng Giỏi |
+| K23 | `2351010012` | Phạm Minh Khôi | DH23IT01 | `079205003333` | HK2 GPA 3.10, ĐRL 78 - Học bổng Khá |
+| K23 | `2351020001` | Vũ Nam Hùng | DH23CS01C | `079205005555` | Hệ Chất lượng cao |
+| K24 | `2451010001` | Hoàng Nhật Nam | DH24CS01 | `079206001111` | Khóa 2024 - 2028 |
+| K24 | `2451010002` | Trương Minh Đăng | DH24IT01 | `079206002222` | Khóa 2024 - 2028 |
+| K25 | `2551010001` | Trần Gia Hưng | DH25CS01 | `079207001111` | Khóa 2025 - 2029 |
+| K25 | `2551010002` | Võ Thục Quyên | DH25IT01 | `079307002222` | Khóa 2025 - 2029 |
+

@@ -59,12 +59,10 @@ const LoginPage = () => {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">
           TRƯỜNG ĐẠI HỌC MỞ TP. HỒ CHÍ MINH
         </h1>
-        <p className="text-primary-700 font-semibold text-sm sm:text-base mt-1">
-          HỆ THỐNG QUẢN LÝ KẾT QUẢ HỌC TẬP - RÈN LUYỆN VÀ XÉT DUYỆT HỌC BỔNG (OU-SSH)
+        <p className="text-primary-700 font-semibold text-sm sm:text-base mt-1 uppercase">
+          Hệ thống quản lý kết quả học tập và rèn luyện hỗ trợ xét học bổng sinh viên
         </p>
       </div>
-
-      {/* Login Card */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200/90 p-8">
         <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-slate-100">
           <Shield className="w-6 h-6 text-primary-700" />
@@ -139,7 +137,6 @@ const LoginPage = () => {
         </form>
       </div>
 
-      {/* Footer */}
       <footer className="mt-8 w-full max-w-2xl px-5 py-3 ou-footer rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 text-xs shadow-md">
         <div className="flex items-center gap-2 font-medium">
           <span className="ou-footer-icon-circle text-white">

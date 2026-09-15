@@ -10,7 +10,6 @@
         <div class="d-flex align-items-center gap-3">
             <span class="badge bg-light text-primary px-3 py-2 rounded-pill fw-semibold" th:text="${session.userRole}">ROLE_ADMIN</span>
 
-            <!-- User Avatar & Profile Modal Trigger -->
             <div class="d-flex align-items-center gap-2 text-decoration-none text-white cursor-pointer"
                  data-bs-toggle="modal" data-bs-target="#profileAvatarModal" role="button" title="Nhấp để đổi Avatar / Xem hồ sơ">
                 <div class="position-relative">
@@ -39,7 +38,6 @@
         </div>
     </div>
 
-    <!-- Modal Change Avatar / User Profile -->
     <div class="modal fade text-start" id="profileAvatarModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">

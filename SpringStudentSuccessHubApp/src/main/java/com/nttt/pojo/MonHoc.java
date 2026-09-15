@@ -24,7 +24,7 @@ public class MonHoc {
     private Integer soTietThucHanh;
 
     @Column(name = "donGiaTinChi", precision = 12, scale = 2)
-    private BigDecimal donGiaTinChi; // Mặc định: 650.000đ (Chuẩn) hoặc 1.450.000đ (CLC)
+    private BigDecimal donGiaTinChi;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "maKhoa")

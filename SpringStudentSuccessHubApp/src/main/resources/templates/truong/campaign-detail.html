@@ -21,7 +21,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/truong/dashboard}" class="sidebar-link">
@@ -36,9 +36,8 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
-            <!-- Header -->
+
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center gap-3">
                     <a th:href="@{/web/truong/campaigns}" class="btn btn-outline-secondary btn-sm rounded-circle p-2" style="width: 36px; height: 36px;">
@@ -58,7 +57,6 @@
                 </div>
             </div>
 
-            <!-- Tab Navigation -->
             <div class="d-flex gap-2 border-bottom pb-3 mb-4">
                 <a th:href="@{'/web/truong/campaigns/' + ${campaign.maDot} + '?tab=review'}"
                    th:classappend="${activeTab == 'review' or activeTab == null ? 'active-primary' : 'inactive'}"
@@ -72,9 +70,8 @@
                 </a>
             </div>
 
-            <!-- TAB 2: BUDGET 8% ALLOCATION -->
             <div th:if="${activeTab == 'budget'}">
-                <!-- Summary KPIs -->
+
                 <div class="row g-3 mb-4">
                     <div class="col-md-3">
                         <div class="bg-white p-3 rounded-4 border shadow-sm">
@@ -118,7 +115,6 @@
                     </div>
                 </div>
 
-                <!-- Sync Action Card -->
                 <div class="bg-white p-4 rounded-4 border shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
                     <div>
                         <h5 class="fw-bold text-dark mb-1"><i class="fa-solid fa-bolt text-warning me-2"></i>Cơ chế Tự động Phân bổ Ngân sách 8% theo Khoa, Ngành & Khóa</h5>
@@ -131,7 +127,6 @@
                     </form>
                 </div>
 
-                <!-- Filter Toolbar for Budget Breakdown -->
                 <div class="bg-white p-3 rounded-4 border shadow-sm mb-4">
                     <form method="get" class="row g-2 align-items-center">
                         <input type="hidden" name="tab" value="budget">
@@ -169,7 +164,6 @@
                     </form>
                 </div>
 
-                <!-- Budget Breakdown Table -->
                 <div class="bg-white p-4 rounded-4 border shadow-sm mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-table-list text-success me-2"></i>Bảng Phân rã Quỹ 8% theo Khoa, Ngành & Khóa học</h5>
@@ -214,9 +208,8 @@
                 </div>
             </div>
 
-            <!-- TAB 1: FACULTY REVIEW & RULE ENGINE -->
             <div th:unless="${activeTab == 'budget'}">
-                <!-- Dynamic Rule Engine Form -->
+
                 <div class="bg-white p-4 rounded-4 border shadow-sm mb-4">
                     <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-sliders text-purple me-2"></i>Cấu hình Dynamic Rule Engine</h5>
                     <form th:action="@{'/web/truong/campaigns/' + ${campaign.maDot} + '/rules'}" method="post">
@@ -243,21 +236,36 @@
                         </div>
 
                         <div class="p-3 bg-light rounded-3 mb-3">
-                            <h6 class="small fw-bold text-dark text-uppercase mb-2">Định mức Học bổng (VNĐ)</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="small fw-bold text-dark text-uppercase mb-0">Tỷ lệ Học bổng theo Xếp loại (% Học phí trong kỳ)</h6>
+                                <span class="badge bg-primary-subtle text-primary small">Quỹ HB = 8% Tổng thu học phí</span>
+                            </div>
                             <div class="row g-2">
                                 <div class="col-md-4">
-                                    <label class="small text-success fw-bold">Xuất sắc</label>
-                                    <input type="number" name="mucHocBongXuatSac" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.mucHocBongXuatSac : 10000000}" class="form-control form-control-sm fw-bold text-success">
+                                    <label class="small text-success fw-bold">Xuất sắc (%)</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" name="mucHocBongXuatSac" min="1" max="100" th:value="${campaign.quyTacHienHanh != null ? (campaign.quyTacHienHanh.mucHocBongXuatSac <= 100 ? campaign.quyTacHienHanh.mucHocBongXuatSac : 100) : 100}" class="form-control fw-bold text-success" required>
+                                        <span class="input-group-text fw-bold text-success">%</span>
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="small text-primary fw-bold">Giỏi</label>
-                                    <input type="number" name="mucHocBongGioi" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.mucHocBongGioi : 7000000}" class="form-control form-control-sm fw-bold text-primary">
+                                    <label class="small text-primary fw-bold">Giỏi (%)</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" name="mucHocBongGioi" min="1" max="100" th:value="${campaign.quyTacHienHanh != null ? (campaign.quyTacHienHanh.mucHocBongGioi <= 100 ? campaign.quyTacHienHanh.mucHocBongGioi : 70) : 70}" class="form-control fw-bold text-primary" required>
+                                        <span class="input-group-text fw-bold text-primary">%</span>
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="small text-warning fw-bold">Khá</label>
-                                    <input type="number" name="mucHocBongKha" th:value="${campaign.quyTacHienHanh != null ? campaign.quyTacHienHanh.mucHocBongKha : 5000000}" class="form-control form-control-sm fw-bold text-warning">
+                                    <label class="small text-warning fw-bold">Khá (%)</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" name="mucHocBongKha" min="1" max="100" th:value="${campaign.quyTacHienHanh != null ? (campaign.quyTacHienHanh.mucHocBongKha <= 100 ? campaign.quyTacHienHanh.mucHocBongKha : 50) : 50}" class="form-control fw-bold text-warning" required>
+                                        <span class="input-group-text fw-bold text-warning">%</span>
+                                    </div>
                                 </div>
                             </div>
+                            <p class="text-muted small italic mt-2 mb-0" style="font-size: 0.8rem;">
+                                * Tiền học bổng thực nhận của sinh viên = Học phí thực đóng trong kỳ × Tỷ lệ % tương ứng.
+                            </p>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center">
@@ -269,7 +277,6 @@
                     </form>
                 </div>
 
-                <!-- Khoa Allocations Table -->
                 <div class="bg-white p-4 rounded-4 border shadow-sm">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-building-columns text-primary me-2"></i>Tình trạng Xét duyệt & Phân bổ 12 Khoa</h5>
@@ -305,7 +312,6 @@
                                             <i class="fa-solid fa-pen-to-square me-1"></i> Sửa Hạn mức
                                         </button>
 
-                                        <!-- Modal Quota Adjustment -->
                                         <div class="modal fade text-start" th:id="'modalQuota_' + ${dk.maDotXetHbKhoa}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content rounded-4 border-0 shadow">

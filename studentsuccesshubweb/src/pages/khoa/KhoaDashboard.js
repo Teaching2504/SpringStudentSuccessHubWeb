@@ -45,7 +45,6 @@ const KhoaDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-800">
           Cổng Quản lý Đào tạo & Xét duyệt Học bổng Cấp Khoa
@@ -55,7 +54,6 @@ const KhoaDashboard = () => {
         </p>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="p-3.5 bg-blue-50 text-blue-600 rounded-xl">
@@ -102,32 +100,46 @@ const KhoaDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           to="/khoa/evidence"
-          className="p-5 bg-gradient-to-r from-amber-700 to-amber-600 text-white rounded-2xl shadow-lg flex items-center justify-between group cursor-pointer hover:shadow-xl transition"
+          className="p-5 bg-gradient-to-r from-amber-50/90 to-yellow-50/80 hover:from-amber-100/90 hover:to-yellow-100/80 border border-amber-200/90 rounded-2xl shadow-xs hover:shadow-md transition-all flex items-center justify-between group cursor-pointer"
         >
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <CheckSquare className="w-5 h-5" /> Phê duyệt Minh chứng Rèn luyện
-            </h3>
-            <p className="text-xs text-amber-100">
-              Xem xét giấy tờ hoạt động, đề xuất cộng điểm ĐRL cho sinh viên
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-amber-500/10 text-amber-700 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <CheckSquare className="w-6 h-6" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-amber-950 transition-colors">
+                Phê duyệt Minh chứng Rèn luyện
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Xem xét giấy tờ hoạt động, đề xuất cộng điểm ĐRL cho sinh viên
+              </p>
+            </div>
           </div>
-          <ChevronRight className="w-6 h-6 transform group-hover:translate-x-1 transition" />
+          <div className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600 transition-all shrink-0 ml-2">
+            <ChevronRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition" />
+          </div>
         </Link>
 
         <Link
           to="/khoa/appeals"
-          className="p-5 bg-gradient-to-r from-blue-800 to-blue-700 text-white rounded-2xl shadow-lg flex items-center justify-between group cursor-pointer hover:shadow-xl transition"
+          className="p-5 bg-gradient-to-r from-blue-50/90 to-sky-50/80 hover:from-blue-100/90 hover:to-sky-100/80 border border-blue-200/90 rounded-2xl shadow-xs hover:shadow-md transition-all flex items-center justify-between group cursor-pointer"
         >
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" /> Xử lý Khiếu nại / Kiến nghị
-            </h3>
-            <p className="text-xs text-blue-100">
-              Giải đáp thắc mắc của sinh viên trong thời hạn công bố danh sách dự kiến
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-500/10 text-blue-700 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-950 transition-colors">
+                Xử lý Khiếu nại / Kiến nghị
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Giải đáp thắc mắc của sinh viên trong thời hạn công bố danh sách dự kiến
+              </p>
+            </div>
           </div>
-          <ChevronRight className="w-6 h-6 transform group-hover:translate-x-1 transition" />
+          <div className="w-8 h-8 rounded-full bg-white/80 border border-blue-200 flex items-center justify-center text-blue-700 group-hover:bg-blue-700 group-hover:text-white group-hover:border-blue-700 transition-all shrink-0 ml-2">
+            <ChevronRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition" />
+          </div>
         </Link>
       </div>
 

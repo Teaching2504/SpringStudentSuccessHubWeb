@@ -51,12 +51,11 @@ public class AuthServiceImpl implements AuthService {
         String username = request.getTenDangNhap() != null ? request.getTenDangNhap().trim() : "";
         String password = request.getMatKhau() != null ? request.getMatKhau().trim() : "";
 
-        // Smart user lookup by username, email, or role alias
         Optional<NguoiDung> userOpt = nguoiDungRepository.findByTenDangNhap(username);
         if (userOpt.isEmpty()) {
             userOpt = nguoiDungRepository.findByEmail(username);
         }
-        // Hỗ trợ alias tên đăng nhập
+
         if (userOpt.isEmpty()) {
             if ("captruong".equalsIgnoreCase(username) || "canbotruong".equalsIgnoreCase(username) || "truong.ctsv".equalsIgnoreCase(username)) {
                 userOpt = nguoiDungRepository.findByTenDangNhap("captruong")
@@ -79,7 +78,6 @@ public class AuthServiceImpl implements AuthService {
                 || password.equals(user.getMatKhau())
                 || (user.getMatKhauHienThi() != null && password.equals(user.getMatKhauHienThi()));
 
-        // Mật khẩu dự phòng theo vai trò
         if (!passwordMatches) {
             String role = user.getVaiTro() != null ? user.getVaiTro().toUpperCase() : "";
             if (role.contains("ADMIN") && ("admin123".equals(password) || "admin".equals(password) || "Admin@123456".equals(password))) {
@@ -102,7 +100,6 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Tên đăng nhập hoặc mật khẩu không chính xác");
         }
 
-        // Tự động mã hóa chuẩn BCrypt nếu chưa khớp hash
         if (!passwordEncoder.matches(password, user.getMatKhau())) {
             user.setMatKhau(passwordEncoder.encode(password));
             nguoiDungRepository.save(user);

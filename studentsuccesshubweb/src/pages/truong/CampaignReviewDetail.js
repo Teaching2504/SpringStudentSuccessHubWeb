@@ -42,31 +42,26 @@ const CampaignReviewDetail = () => {
   const [loadingGrades, setLoadingGrades] = useState(false);
   const [showGradesModal, setShowGradesModal] = useState(false);
 
-  // Tab State
   const [activeTab, setActiveTab] = useState(initialTab); // 'FACULTY_REVIEW' | 'BUDGET_8_PERCENT'
   const [budgetBreakdown, setBudgetBreakdown] = useState([]);
   const [loadingBreakdown, setLoadingBreakdown] = useState(false);
   const [syncingBudget, setSyncingBudget] = useState(false);
 
-  // Filter States for Tab 1 (Dossiers)
   const [search, setSearch] = useState('');
   const [selectedKhoaHoc, setSelectedKhoaHoc] = useState('ALL');
   const [selectedNganh, setSelectedNganh] = useState('ALL');
   const [selectedHeDaoTao, setSelectedHeDaoTao] = useState('ALL');
   const [selectedLoaiHb, setSelectedLoaiHb] = useState('ALL');
 
-  // Filter States for Tab 2 (Budget 8% Breakdown)
   const [budgetSearch, setBudgetSearch] = useState('');
   const [budgetSelectedKhoa, setBudgetSelectedKhoa] = useState('ALL');
   const [budgetSelectedKhoaHoc, setBudgetSelectedKhoaHoc] = useState('ALL');
   const [budgetSelectedNganh, setBudgetSelectedNganh] = useState('ALL');
   const [budgetSelectedHeDaoTao, setBudgetSelectedHeDaoTao] = useState('ALL');
 
-  // Quota modal
   const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
   const [quotaForm, setQuotaForm] = useState({ chiTieu: 9, nganSach: 105300000 });
 
-  // Reject / Review modal
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewAction, setReviewAction] = useState({ approve: true, lyDo: '' });
 
@@ -285,11 +280,11 @@ const CampaignReviewDetail = () => {
     }
   };
 
-  // Unique filter lists for Tab 1
+
   const uniqueKhoaHoc = Array.from(new Set(dossiers.map((d) => d.khoaHoc).filter(Boolean)));
   const uniqueNganh = Array.from(new Set(dossiers.map((d) => d.tenNganh).filter(Boolean)));
 
-  // Unique filter lists for Tab 2 (Budget Breakdown)
+
   const uniqueBudgetKhoas = Array.from(
     new Map(budgetBreakdown.map((item) => [item.maKhoa, { maKhoa: item.maKhoa, tenKhoa: item.tenKhoa }])).values()
   );
@@ -304,7 +299,7 @@ const CampaignReviewDetail = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link to="/truong/campaigns" className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
@@ -334,7 +329,7 @@ const CampaignReviewDetail = () => {
         </div>
       </div>
 
-      {/* Main Tabs Navigation */}
+
       <div className="flex items-center gap-3 border-b border-slate-200 pb-2">
         <button
           onClick={() => setActiveTab('FACULTY_REVIEW')}
@@ -362,9 +357,9 @@ const CampaignReviewDetail = () => {
       </div>
 
       {activeTab === 'BUDGET_8_PERCENT' ? (
-        /* TAB 2: PHÂN BỔ QUỸ 8% THEO KHOA, NGÀNH & KHÓA */
+
         <div className="space-y-6 animate-fade-in">
-          {/* Summary KPIs */}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase">
@@ -403,7 +398,7 @@ const CampaignReviewDetail = () => {
             </div>
           </div>
 
-          {/* Action Sync Button & Description */}
+
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
@@ -429,7 +424,7 @@ const CampaignReviewDetail = () => {
             </button>
           </div>
 
-          {/* Filter Toolbar for Budget Breakdown (Khoa, Khóa, Ngành, CTĐT) */}
+
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
@@ -521,7 +516,7 @@ const CampaignReviewDetail = () => {
             </div>
           </div>
 
-          {/* Table Breakdown */}
+
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <h3 className="font-bold text-slate-800 text-sm">
@@ -595,7 +590,7 @@ const CampaignReviewDetail = () => {
           </div>
         </div>
       ) : (
-        /* TAB 1: DUYỆT HỒ SƠ & DANH SÁCH CÁC KHOA */
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left Column: Faculty Sub-Campaign List */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
@@ -681,7 +676,7 @@ const CampaignReviewDetail = () => {
                   )}
                 </div>
 
-                {/* Filter Toolbar for Students */}
+
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
@@ -771,7 +766,6 @@ const CampaignReviewDetail = () => {
                   </div>
                 </div>
 
-                {/* Dossiers List Table */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                     <h3 className="font-bold text-slate-800 text-sm">
@@ -888,7 +882,6 @@ const CampaignReviewDetail = () => {
         </div>
       )}
 
-      {/* Modal Adjust Quota / Budget */}
       <Modal
         isOpen={isQuotaModalOpen}
         onClose={() => setIsQuotaModalOpen(false)}
@@ -935,7 +928,7 @@ const CampaignReviewDetail = () => {
         </form>
       </Modal>
 
-      {/* Modal Review / Approve / Reject */}
+
       <Modal
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
@@ -984,7 +977,6 @@ const CampaignReviewDetail = () => {
         </form>
       </Modal>
 
-      {/* Modal Popup Chi tiết Bảng điểm Môn học */}
       <Modal
         isOpen={showGradesModal}
         onClose={() => {

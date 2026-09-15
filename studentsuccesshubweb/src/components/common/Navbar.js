@@ -33,17 +33,15 @@ export const Navbar = () => {
               Đại học Mở TP.HCM
             </span>
           </div>
-          <p className="text-xs text-blue-100/90 font-medium">Hệ Thống Quản Lý Kết Quả Học Tập & Xét Học Bổng</p>
+          <p className="text-xs text-blue-100/90 font-medium">Hệ thống quản lý kết quả học tập và rèn luyện hỗ trợ xét học bổng sinh viên</p>
         </div>
       </div>
 
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Role Pill Badge */}
         <span className="ou-navbar-role-pill hidden md:inline-flex">
           {getRoleLabel()}
         </span>
 
-        {/* User Profile info */}
         <div className="flex items-center gap-3 pl-3 border-l border-white/20">
           <Link
             to="/profile"
@@ -66,7 +64,6 @@ export const Navbar = () => {
             </div>
           </Link>
 
-          {/* Logout Button in Thymeleaf pill outline style */}
           <button
             onClick={logout}
             title="Đăng xuất"

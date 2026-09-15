@@ -2,35 +2,31 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Common Components
 import Navbar from './components/common/Navbar';
 import Sidebar from './components/common/Sidebar';
 import Footer from './components/common/Footer';
 
-// Pages
 import LoginPage from './pages/auth/LoginPage';
 import ProfilePage from './pages/auth/ProfilePage';
 
-// Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
 import StudentManagement from './pages/admin/StudentManagement';
 
-// Trường
 import TruongDashboard from './pages/truong/TruongDashboard';
 import CampaignManagement from './pages/truong/CampaignManagement';
 import CampaignReviewDetail from './pages/truong/CampaignReviewDetail';
 import TruongStats from './pages/truong/TruongStats';
 
-// Khoa
 import KhoaDashboard from './pages/khoa/KhoaDashboard';
+import FacultyScholarshipList from './pages/khoa/FacultyScholarshipList';
 import KhoaStudentList from './pages/khoa/KhoaStudentList';
 import EvidenceReview from './pages/khoa/EvidenceReview';
 import KhoaCampaignDetail from './pages/khoa/KhoaCampaignDetail';
 import KhoaAppeals from './pages/khoa/KhoaAppeals';
 
-// Sinh viên
+
 import SinhVienDashboard from './pages/sinhvien/SinhVienDashboard';
 import SinhVienGrades from './pages/sinhvien/SinhVienGrades';
 import SinhVienCurriculum from './pages/sinhvien/SinhVienCurriculum';
@@ -127,6 +123,7 @@ function App() {
             {/* Cấp Khoa Routes */}
             <Route element={<RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_CAN_BO_KHOA']} />}>
               <Route path="/khoa" element={<KhoaDashboard />} />
+              <Route path="/khoa/scholarships" element={<FacultyScholarshipList />} />
               <Route path="/khoa/students" element={<KhoaStudentList />} />
               <Route path="/khoa/evidence" element={<EvidenceReview />} />
               <Route path="/khoa/campaigns/:id" element={<KhoaCampaignDetail />} />

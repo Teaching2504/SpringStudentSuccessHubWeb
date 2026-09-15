@@ -1,9 +1,4 @@
-/**
- * Utility to sort semesters chronologically by Year then Semester:
- * HK1 (2023-2024) -> HK2 (2023-2024) -> HK3 (2023-2024)
- * -> HK1 (2024-2025) -> HK2 (2024-2025) -> HK3 (2024-2025)
- * -> HK1 (2025-2026) -> HK2 (2025-2026) -> HK3 (2025-2026)
- */
+
 export const getSemesterOrderKey = (hk) => {
   if (!hk) return 0;
   const str = (typeof hk === 'string' ? hk : (hk.maHocKy || hk.tenHocKy || '')).toUpperCase();

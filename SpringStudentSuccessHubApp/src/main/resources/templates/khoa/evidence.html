@@ -17,7 +17,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/khoa/dashboard}" class="sidebar-link">
@@ -38,7 +38,6 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -50,7 +49,6 @@
                 </button>
             </div>
 
-            <!-- Flash Alerts -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 py-2 px-3 mb-3 small d-flex align-items-center shadow-sm" role="alert">
                 <i class="fa-solid fa-circle-check me-2 fs-6"></i>
                 <span th:text="${successMessage}"></span>
@@ -62,7 +60,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.75rem;"></button>
             </div>
 
-            <!-- Evidence Table -->
             <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
                 <table class="table table-hover align-middle mb-0 small">
                     <thead class="table-light">
@@ -99,7 +96,7 @@
                             <td class="text-center fw-bold text-success fs-6" th:text="${'+' + mc.diemDeXuat + ' đ'}">+5 đ</td>
                             <td>
                                 <div th:if="${mc.fileUrl != null and !mc.fileUrl.isEmpty()}" class="d-flex align-items-center gap-2">
-                                    <!-- Image Thumbnail with Lightbox trigger -->
+
                                     <a th:href="${mc.fileUrl}" target="_blank" class="text-decoration-none position-relative group d-inline-block" title="Nhấp để xem ảnh phóng to">
                                         <img th:src="${mc.fileUrl}"
                                              class="rounded-3 border shadow-sm"
@@ -150,7 +147,6 @@
     </div>
 </div>
 
-<!-- Modal Add Evidence with Cloudinary Upload -->
 <div class="modal fade" id="addEvidenceModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">

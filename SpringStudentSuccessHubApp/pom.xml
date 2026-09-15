@@ -16,7 +16,7 @@
 	<artifactId>SpringStudentSuccessHubApp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SpringStudentSuccessHubApp</name>
-	<description>Student Success Hub - Scholarship &amp; Academic Management System</description>
+	<description>Hệ thống Quản lý kết quả Học tập và Rèn luyện hỗ trợ xét Học bổng sinh viên OU-SSH Hub</description>
 
 	<properties>
 		<java.version>21</java.version>

@@ -30,11 +30,11 @@ public class UploadController {
         try {
             String fileUrl;
             try {
-                // Ưu tiên lưu trữ đám mây Cloudinary
+
                 Map<String, Object> uploadResult = cloudinaryService.uploadFile(file, "evidence");
                 fileUrl = (String) uploadResult.get("secure_url");
             } catch (Exception cloudEx) {
-                // Fallback lưu trữ máy chủ nội bộ
+
                 fileUrl = fileStorageService.storeFile(file);
             }
             Map<String, String> data = new HashMap<>();

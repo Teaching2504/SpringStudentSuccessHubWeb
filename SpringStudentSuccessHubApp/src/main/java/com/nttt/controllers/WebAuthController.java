@@ -54,7 +54,6 @@ public class WebAuthController {
             userOpt = nguoiDungRepository.findByEmail(username.trim());
         }
 
-        // Hỗ trợ alias tên đăng nhập
         if (userOpt.isEmpty()) {
             if ("captruong".equalsIgnoreCase(username) || "canbotruong".equalsIgnoreCase(username) || "truong.ctsv".equalsIgnoreCase(username)) {
                 userOpt = nguoiDungRepository.findByTenDangNhap("captruong")
@@ -67,8 +66,7 @@ public class WebAuthController {
 
         if (userOpt.isPresent()) {
             NguoiDung user = userOpt.get();
-            
-            // Kiểm tra mật khẩu (BCrypt hash, Plain Text, MatKhauHienThi hoặc Mật khẩu chuẩn)
+
             boolean valid = passwordEncoder.matches(password, user.getMatKhau())
                     || password.equals(user.getMatKhau())
                     || (user.getMatKhauHienThi() != null && password.equals(user.getMatKhauHienThi()))
@@ -78,7 +76,7 @@ public class WebAuthController {
                     || password.equals("Admin@123456");
 
             if (valid) {
-                // Tự động mã hóa chuẩn BCrypt và lưu vào CSDL nếu chưa đúng chuẩn
+
                 if (!passwordEncoder.matches(password, user.getMatKhau())) {
                     user.setMatKhau(passwordEncoder.encode(password));
                     nguoiDungRepository.save(user);

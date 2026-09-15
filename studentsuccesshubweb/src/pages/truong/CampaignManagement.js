@@ -11,7 +11,6 @@ const CampaignManagement = () => {
   const [hocKys, setHocKys] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal Campaign
   const [isCampModalOpen, setIsCampModalOpen] = useState(false);
   const [editingCamp, setEditingCamp] = useState(null);
   const [campForm, setCampForm] = useState({
@@ -22,7 +21,6 @@ const CampaignManagement = () => {
     maHocKy: ''
   });
 
-  // Modal Dynamic Rule Engine (UC06)
   const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
   const [selectedCampForRules, setSelectedCampForRules] = useState(null);
   const [ruleHistory, setRuleHistory] = useState([]);
@@ -121,7 +119,7 @@ const CampaignManagement = () => {
     }
   };
 
-  // Open Dynamic Rule Engine Modal
+
   const handleOpenRuleModal = async (c) => {
     setSelectedCampForRules(c);
     setError('');
@@ -171,7 +169,6 @@ const CampaignManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Quản lý Đợt xét & Cấu hình Dynamic Rule Engine</h1>
@@ -187,7 +184,6 @@ const CampaignManagement = () => {
         </button>
       </div>
 
-      {/* Campaign Cards List */}
       <div className="grid grid-cols-1 gap-6">
         {loading ? (
           <div className="text-center py-12 text-slate-400">Đang tải danh sách đợt xét...</div>
@@ -283,7 +279,6 @@ const CampaignManagement = () => {
         )}
       </div>
 
-      {/* Modal Add / Edit Campaign */}
       <Modal
         isOpen={isCampModalOpen}
         onClose={() => setIsCampModalOpen(false)}
@@ -376,7 +371,6 @@ const CampaignManagement = () => {
         </form>
       </Modal>
 
-      {/* Modal Dynamic Rule Engine Configuration & Versioning (UC06) */}
       <Modal
         isOpen={isRuleModalOpen}
         onClose={() => setIsRuleModalOpen(false)}

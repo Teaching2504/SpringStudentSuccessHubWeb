@@ -17,7 +17,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/khoa/dashboard}" class="sidebar-link">
@@ -38,14 +38,12 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <div class="mb-4">
                 <h3 class="fw-bold text-dark mb-1">Xét duyệt Học bổng Phân bổ theo Khoa</h3>
                 <p class="text-muted small">Cán bộ khoa chạy xếp hạng sinh viên tự động dựa trên quy tắc và chỉ tiêu/ngân sách được cấp</p>
             </div>
 
-            <!-- List of Sub-campaigns -->
             <div th:if="${#lists.isEmpty(dotKhoas)}" class="bg-white rounded-4 border p-5 text-center text-muted shadow-sm">
                 <i class="fa-solid fa-award fa-3x text-secondary mb-3"></i>
                 <h5>Chưa có đợt xét học bổng nào được phân bổ cho khoa</h5>
@@ -84,7 +82,7 @@
                                 <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill w-100">
                                     <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Chạy Rule Engine
                                 </button>
-                            </form>    
+                            </form>
                             <a th:href="@{'/web/khoa/scholarships/' + ${dk.maDotXetHbKhoa}}" class="btn btn-primary btn-sm rounded-pill px-4">
                                 Chi tiết Hồ sơ &rarr;
                             </a>

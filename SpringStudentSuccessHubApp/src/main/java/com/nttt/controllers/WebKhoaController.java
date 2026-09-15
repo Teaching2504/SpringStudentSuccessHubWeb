@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ public class WebKhoaController {
     private final CanBoKhoaRepository canBoKhoaRepository;
     private final DotXetHbKhoaRepository dotXetHbKhoaRepository;
     private final KienNghiRepository kienNghiRepository;
+    private final KienNghiService kienNghiService;
     private final CloudinaryService cloudinaryService;
 
     public WebKhoaController(SinhVienService sinhVienService,
@@ -35,6 +37,7 @@ public class WebKhoaController {
                              CanBoKhoaRepository canBoKhoaRepository,
                              DotXetHbKhoaRepository dotXetHbKhoaRepository,
                              KienNghiRepository kienNghiRepository,
+                             KienNghiService kienNghiService,
                              CloudinaryService cloudinaryService) {
         this.sinhVienService = sinhVienService;
         this.danhMucService = danhMucService;
@@ -43,13 +46,14 @@ public class WebKhoaController {
         this.canBoKhoaRepository = canBoKhoaRepository;
         this.dotXetHbKhoaRepository = dotXetHbKhoaRepository;
         this.kienNghiRepository = kienNghiRepository;
+        this.kienNghiService = kienNghiService;
         this.cloudinaryService = cloudinaryService;
     }
 
     private String getKhoaCode(HttpSession session) {
         NguoiDung u = (NguoiDung) session.getAttribute("currentUser");
         if (u == null) return null;
-        if ("ROLE_ADMIN".equals(u.getVaiTro())) return "IT"; // Default for admin preview
+        if ("ROLE_ADMIN".equals(u.getVaiTro())) return "IT";
         return canBoKhoaRepository.findByNhanVien_NguoiDung_TenDangNhap(u.getTenDangNhap())
                 .map(cb -> cb.getKhoa().getMaKhoa())
                 .orElse("IT");
@@ -137,7 +141,13 @@ public class WebKhoaController {
         DotXetHbKhoaDTO dk = dotXetHocBongService.getDotKhoaById(maDotXetHbKhoa);
         List<HoSoHocBongDTO> allDossiers = dotXetHocBongService.getHoSoByDotKhoa(maDotXetHbKhoa);
 
-        // Apply filtering if provided
+        if (allDossiers == null || allDossiers.isEmpty()) {
+            try {
+                allDossiers = dotXetHocBongService.runAutoRanking(maDotXetHbKhoa);
+            } catch (Exception ignored) {}
+            if (allDossiers == null) allDossiers = Collections.emptyList();
+        }
+
         List<HoSoHocBongDTO> filtered = allDossiers.stream().filter(d -> {
             if (search != null && !search.isBlank()) {
                 String q = search.toLowerCase();
@@ -169,7 +179,6 @@ public class WebKhoaController {
             return true;
         }).toList();
 
-        // Unique filter options
         List<String> uniqueKhoaHoc = allDossiers.stream().map(HoSoHocBongDTO::getKhoaHoc).filter(k -> k != null && !k.isBlank()).distinct().toList();
         List<Nganh> uniqueNganh = danhMucService.getNganhByKhoa(getKhoaCode(session));
 
@@ -274,7 +283,38 @@ public class WebKhoaController {
         if (!checkKhoa(session)) return "redirect:/web/login";
 
         String maKhoa = getKhoaCode(session);
-        model.addAttribute("appeals", kienNghiRepository.findByDotXetHbKhoa_Khoa_MaKhoa(maKhoa));
+        List<KienNghi> appeals = kienNghiRepository.findByDotXetHbKhoa_Khoa_MaKhoa(maKhoa);
+        model.addAttribute("appeals", appeals);
+
+        long totalAppeals = appeals.size();
+        long pendingAppeals = appeals.stream().filter(a -> "CHO_XU_LY".equalsIgnoreCase(a.getTrangThai())).count();
+        long approvedAppeals = appeals.stream().filter(a -> "DA_CHAP_NHAN".equalsIgnoreCase(a.getTrangThai())).count();
+        long rejectedAppeals = appeals.stream().filter(a -> "DA_TU_CHOI".equalsIgnoreCase(a.getTrangThai())).count();
+
+        model.addAttribute("totalAppeals", totalAppeals);
+        model.addAttribute("pendingAppeals", pendingAppeals);
+        model.addAttribute("approvedAppeals", approvedAppeals);
+        model.addAttribute("rejectedAppeals", rejectedAppeals);
         return "khoa/appeals";
+    }
+
+    @PostMapping("/appeals/{maKienNghi}/resolve")
+    public String resolveAppeal(@PathVariable("maKienNghi") String maKienNghi,
+                                @RequestParam("trangThai") String trangThai,
+                                @RequestParam("phanHoi") String phanHoi,
+                                @RequestParam(value = "diemRenLuyenMoi", required = false) BigDecimal diemRenLuyenMoi,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+        if (!checkKhoa(session)) return "redirect:/web/login";
+        try {
+            NguoiDung u = (NguoiDung) session.getAttribute("currentUser");
+            boolean accept = "DA_CHAP_NHAN".equalsIgnoreCase(trangThai) || "true".equalsIgnoreCase(trangThai) || "ACCEPT".equalsIgnoreCase(trangThai);
+            kienNghiService.resolveKienNghi(maKienNghi, u != null ? u.getTenDangNhap() : "cbk_it", accept, phanHoi, diemRenLuyenMoi);
+            String extraMsg = (accept && diemRenLuyenMoi != null) ? " (Đã cập nhật ĐRL thành " + diemRenLuyenMoi + " điểm)" : "";
+            redirectAttributes.addFlashAttribute("successMessage", (accept ? "Đã chấp nhận khiếu nại và gửi phản hồi" + extraMsg : "Đã từ chối khiếu nại") + " thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xử lý khiếu nại: " + e.getMessage());
+        }
+        return "redirect:/web/khoa/appeals";
     }
 }

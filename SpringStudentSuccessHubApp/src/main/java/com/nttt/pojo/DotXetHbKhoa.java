@@ -22,7 +22,7 @@ public class DotXetHbKhoa {
     private LocalDate hanPhanHoi;
 
     @Column(name = "trangThai", length = 50)
-    private String trangThai; // CHUA_XET, DA_CONG_BO_DU_KIEN, DA_CHOT_GUI_TRUONG, DA_PHE_DUYET, BI_TRA_VE
+    private String trangThai;
 
     @Column(name = "lyDoTraVe", columnDefinition = "TEXT")
     private String lyDoTraVe;

@@ -16,13 +16,13 @@ public class QuyTacHocBong {
     private DotXetHocBong dotXetHocBong;
 
     @Column(name = "diemTbDuoiThieu", precision = 4, scale = 2)
-    private BigDecimal diemTbDuoiThieu; // Ví dụ 2.50 hoặc 3.20
+    private BigDecimal diemTbDuoiThieu;
 
     @Column(name = "diemRlToiThieu", precision = 5, scale = 2)
-    private BigDecimal diemRlToiThieu; // Ví dụ 65.00 hoặc 80.00
+    private BigDecimal diemRlToiThieu;
 
     @Column(name = "soTinChiToiThieu")
-    private Integer soTinChiToiThieu; // Ví dụ 14 hoặc 15
+    private Integer soTinChiToiThieu;
 
     @Column(name = "khongNoMon")
     private Boolean khongNoMon;

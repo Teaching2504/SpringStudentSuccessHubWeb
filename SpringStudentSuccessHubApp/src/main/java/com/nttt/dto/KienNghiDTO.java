@@ -1,12 +1,13 @@
 package com.nttt.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class KienNghiDTO {
     private String maKienNghi;
     private String noiDung;
     private String tepMinhChung;
-    private String trangThai; // CHO_XU_LY, DA_CHAP_NHAN, DA_TU_CHOI
+    private String trangThai;
     private String maDotXetHbKhoa;
     private String tenDot;
     private String maKhoa;
@@ -20,9 +21,15 @@ public class KienNghiDTO {
     private String phanHoi;
     private LocalDate ngayGui;
 
+    private String maHocKy;
+    private BigDecimal diemRenLuyenHienTai;
+    private BigDecimal diemTrungBinhHienTai;
+    private String loaiHocBongHienTai;
+    private BigDecimal diemRenLuyenMoi;
+
     public KienNghiDTO() {}
 
-    public KienNghiDTO(String maKienNghi, String noiDung, String tepMinhChung, String trangThai, String maDotXetHbKhoa, String tenDot, String maKhoa, String tenKhoa, String maHoSo, String mssv, String hoTenSinhVien, String maLop, String maNvXuLy, String hoTenNhanVien, String phanHoi, LocalDate ngayGui) {
+    public KienNghiDTO(String maKienNghi, String noiDung, String tepMinhChung, String trangThai, String maDotXetHbKhoa, String tenDot, String maKhoa, String tenKhoa, String maHoSo, String mssv, String hoTenSinhVien, String maLop, String maNvXuLy, String hoTenNhanVien, String phanHoi, LocalDate ngayGui, String maHocKy, BigDecimal diemRenLuyenHienTai, BigDecimal diemTrungBinhHienTai, String loaiHocBongHienTai, BigDecimal diemRenLuyenMoi) {
         this.maKienNghi = maKienNghi;
         this.noiDung = noiDung;
         this.tepMinhChung = tepMinhChung;
@@ -39,6 +46,11 @@ public class KienNghiDTO {
         this.hoTenNhanVien = hoTenNhanVien;
         this.phanHoi = phanHoi;
         this.ngayGui = ngayGui;
+        this.maHocKy = maHocKy;
+        this.diemRenLuyenHienTai = diemRenLuyenHienTai;
+        this.diemTrungBinhHienTai = diemTrungBinhHienTai;
+        this.loaiHocBongHienTai = loaiHocBongHienTai;
+        this.diemRenLuyenMoi = diemRenLuyenMoi;
     }
 
     public String getMaKienNghi() { return maKienNghi; }
@@ -89,6 +101,21 @@ public class KienNghiDTO {
     public LocalDate getNgayGui() { return ngayGui; }
     public void setNgayGui(LocalDate ngayGui) { this.ngayGui = ngayGui; }
 
+    public String getMaHocKy() { return maHocKy; }
+    public void setMaHocKy(String maHocKy) { this.maHocKy = maHocKy; }
+
+    public BigDecimal getDiemRenLuyenHienTai() { return diemRenLuyenHienTai; }
+    public void setDiemRenLuyenHienTai(BigDecimal diemRenLuyenHienTai) { this.diemRenLuyenHienTai = diemRenLuyenHienTai; }
+
+    public BigDecimal getDiemTrungBinhHienTai() { return diemTrungBinhHienTai; }
+    public void setDiemTrungBinhHienTai(BigDecimal diemTrungBinhHienTai) { this.diemTrungBinhHienTai = diemTrungBinhHienTai; }
+
+    public String getLoaiHocBongHienTai() { return loaiHocBongHienTai; }
+    public void setLoaiHocBongHienTai(String loaiHocBongHienTai) { this.loaiHocBongHienTai = loaiHocBongHienTai; }
+
+    public BigDecimal getDiemRenLuyenMoi() { return diemRenLuyenMoi; }
+    public void setDiemRenLuyenMoi(BigDecimal diemRenLuyenMoi) { this.diemRenLuyenMoi = diemRenLuyenMoi; }
+
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
@@ -108,6 +135,11 @@ public class KienNghiDTO {
         private String hoTenNhanVien;
         private String phanHoi;
         private LocalDate ngayGui;
+        private String maHocKy;
+        private BigDecimal diemRenLuyenHienTai;
+        private BigDecimal diemTrungBinhHienTai;
+        private String loaiHocBongHienTai;
+        private BigDecimal diemRenLuyenMoi;
 
         public Builder maKienNghi(String maKienNghi) { this.maKienNghi = maKienNghi; return this; }
         public Builder noiDung(String noiDung) { this.noiDung = noiDung; return this; }
@@ -125,9 +157,14 @@ public class KienNghiDTO {
         public Builder hoTenNhanVien(String hoTenNhanVien) { this.hoTenNhanVien = hoTenNhanVien; return this; }
         public Builder phanHoi(String phanHoi) { this.phanHoi = phanHoi; return this; }
         public Builder ngayGui(LocalDate ngayGui) { this.ngayGui = ngayGui; return this; }
+        public Builder maHocKy(String maHocKy) { this.maHocKy = maHocKy; return this; }
+        public Builder diemRenLuyenHienTai(BigDecimal diemRenLuyenHienTai) { this.diemRenLuyenHienTai = diemRenLuyenHienTai; return this; }
+        public Builder diemTrungBinhHienTai(BigDecimal diemTrungBinhHienTai) { this.diemTrungBinhHienTai = diemTrungBinhHienTai; return this; }
+        public Builder loaiHocBongHienTai(String loaiHocBongHienTai) { this.loaiHocBongHienTai = loaiHocBongHienTai; return this; }
+        public Builder diemRenLuyenMoi(BigDecimal diemRenLuyenMoi) { this.diemRenLuyenMoi = diemRenLuyenMoi; return this; }
 
         public KienNghiDTO build() {
-            return new KienNghiDTO(maKienNghi, noiDung, tepMinhChung, trangThai, maDotXetHbKhoa, tenDot, maKhoa, tenKhoa, maHoSo, mssv, hoTenSinhVien, maLop, maNvXuLy, hoTenNhanVien, phanHoi, ngayGui);
+            return new KienNghiDTO(maKienNghi, noiDung, tepMinhChung, trangThai, maDotXetHbKhoa, tenDot, maKhoa, tenKhoa, maHoSo, mssv, hoTenSinhVien, maLop, maNvXuLy, hoTenNhanVien, phanHoi, ngayGui, maHocKy, diemRenLuyenHienTai, diemTrungBinhHienTai, loaiHocBongHienTai, diemRenLuyenMoi);
         }
     }
 }

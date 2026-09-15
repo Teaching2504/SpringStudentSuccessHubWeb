@@ -10,8 +10,8 @@ public class HoSoHocBongDTO {
     private String maLop;
     private String maNganh;
     private String tenNganh;
-    private String heDaoTao; // CHUAN, DAC_BIET, CHAT_LUONG_CAO
-    private String tenHeDaoTao; // Chương trình Chuẩn (Đại trà), Chương trình Đặc biệt (CLC)
+    private String heDaoTao;
+    private String tenHeDaoTao;
     private String maKhoa;
     private String tenKhoa;
     private String khoaHoc;
@@ -23,20 +23,19 @@ public class HoSoHocBongDTO {
 
     private BigDecimal diemXet;
     private Integer thuHang;
-    private String loaiHocBong; // XUAT_SAC, GIOI, KHA
+    private String loaiHocBong;
     private BigDecimal mucHocBong;
-    private String trangThai; // DU_KIEN, CHINH_THUC, KHONG_DAT, BI_LOAI
+    private String trangThai;
 
     private String maDotXetHbKhoa;
     private String maDot;
     private String tenDot;
     private String maHocKy;
 
-    // Các trường mới hỗ trợ tính toán Quỹ 8% và Bảng điểm môn học
     private BigDecimal tongHocPhiKy;
-    private Integer tyLeHocBong; // 100, 70, 50, 0
+    private Integer tyLeHocBong;
     private BigDecimal soTienNhanDuoc;
-    private String trangThaiCapQuy; // "TRONG_QUY", "HET_QUY", "KHONG_DAT"
+    private String trangThaiCapQuy;
     private List<DiemHocPhanDTO> danhSachDiemMonHoc;
 
     public HoSoHocBongDTO() {}

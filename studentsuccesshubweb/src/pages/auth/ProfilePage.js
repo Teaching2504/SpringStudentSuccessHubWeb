@@ -8,7 +8,6 @@ const ProfilePage = () => {
   const { user, refreshUser } = useAuth();
   const fileInputRef = useRef(null);
 
-  // Password state
   const [matKhauCu, setMatKhauCu] = useState('');
   const [matKhauMoi, setMatKhauMoi] = useState('');
   const [xacNhanMk, setXacNhanMk] = useState('');
@@ -16,7 +15,6 @@ const ProfilePage = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Avatar upload state
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -27,7 +25,6 @@ const ProfilePage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate type and size (5MB max)
     if (!file.type.startsWith('image/')) {
       setAvatarErr('Vui lòng chọn file hình ảnh (JPG, PNG, WEBP, GIF)');
       return;
@@ -141,10 +138,8 @@ const ProfilePage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card with Avatar Upload */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
           <div className="flex flex-col items-center text-center">
-            {/* Avatar Circle with Camera Overlay */}
             <div className="relative group mb-3">
               <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary-500 shadow-md flex items-center justify-center bg-primary-100 text-primary-700 font-bold text-3xl">
                 {currentAvatarSrc ? (
@@ -176,8 +171,6 @@ const ProfilePage = () => {
                 className="hidden"
               />
             </div>
-
-            {/* Avatar Action buttons when file selected */}
             {avatarFile && (
               <div className="mb-3 p-3 bg-primary-50 border border-primary-200 rounded-xl space-y-2 w-full">
                 <p className="text-xs text-primary-800 font-medium truncate">

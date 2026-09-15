@@ -87,7 +87,6 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
                 .build();
         dot = dotXetHocBongRepository.save(dot);
 
-        // Auto-create default rule for this campaign
         QuyTacHocBong defaultRule = QuyTacHocBong.builder()
                 .maQuyTac("QT_" + dot.getMaDot() + "_V1")
                 .dotXetHocBong(dot)
@@ -103,7 +102,6 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
                 .build();
         quyTacHocBongRepository.save(defaultRule);
 
-        // Auto-create faculty sub-campaigns for all faculties
         List<Khoa> khoas = khoaRepository.findAll();
         for (Khoa k : khoas) {
             DotXetHbKhoa dk = DotXetHbKhoa.builder()
@@ -118,7 +116,6 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
             dotXetHbKhoaRepository.save(dk);
         }
 
-        // Immediately auto-calculate and sync exact 8% tuition budget for all faculties
         try {
             autoSyncFacultyBudgets(dot.getMaDot());
         } catch (Exception ignored) {}
@@ -174,9 +171,9 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
                 .khongNoMon(dto.getKhongNoMon() != null ? dto.getKhongNoMon() : true)
                 .phienBan(nextVersion)
                 .ghiChu(dto.getGhiChu() != null ? dto.getGhiChu() : "Phiên bản " + nextVersion)
-                .mucHocBongXuatSac(dto.getMucHocBongXuatSac() != null ? dto.getMucHocBongXuatSac() : BigDecimal.valueOf(10000000))
-                .mucHocBongGioi(dto.getMucHocBongGioi() != null ? dto.getMucHocBongGioi() : BigDecimal.valueOf(7000000))
-                .mucHocBongKha(dto.getMucHocBongKha() != null ? dto.getMucHocBongKha() : BigDecimal.valueOf(5000000))
+                .mucHocBongXuatSac(dto.getMucHocBongXuatSac() != null ? dto.getMucHocBongXuatSac() : BigDecimal.valueOf(100))
+                .mucHocBongGioi(dto.getMucHocBongGioi() != null ? dto.getMucHocBongGioi() : BigDecimal.valueOf(70))
+                .mucHocBongKha(dto.getMucHocBongKha() != null ? dto.getMucHocBongKha() : BigDecimal.valueOf(50))
                 .build();
 
         return mapToQuyTacDTO(quyTacHocBongRepository.save(rule));
@@ -197,9 +194,7 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
     @Override
     public List<DotXetHbKhoaDTO> getDotKhoaByMaDot(String maDot) {
         List<DotXetHbKhoa> list = dotXetHbKhoaRepository.findByDotXetHocBong_MaDot(maDot);
-        boolean needSync = list.stream().anyMatch(dk -> dk.getNganSachKhoa() == null 
-                || dk.getNganSachKhoa().compareTo(BigDecimal.ZERO) == 0 
-                || dk.getNganSachKhoa().compareTo(new BigDecimal("50000000")) == 0);
+        boolean needSync = list.stream().anyMatch(dk -> dk.getNganSachKhoa() == null);
         if (needSync) {
             try {
                 autoSyncFacultyBudgets(maDot);
@@ -221,9 +216,7 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
         if (list.isEmpty()) {
             list = dotXetHbKhoaRepository.findAll();
         }
-        boolean needSync = list.stream().anyMatch(dk -> dk.getNganSachKhoa() == null 
-                || dk.getNganSachKhoa().compareTo(BigDecimal.ZERO) == 0 
-                || dk.getNganSachKhoa().compareTo(new BigDecimal("50000000")) == 0);
+        boolean needSync = list.stream().anyMatch(dk -> dk.getNganSachKhoa() == null);
         if (needSync) {
             for (DotXetHbKhoa dk : list) {
                 try {
@@ -242,9 +235,7 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
     public DotXetHbKhoaDTO getDotKhoaById(String maDotXetHbKhoa) {
         DotXetHbKhoa dk = dotXetHbKhoaRepository.findById(maDotXetHbKhoa)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt xét học bổng cấp khoa"));
-        if (dk.getNganSachKhoa() == null 
-                || dk.getNganSachKhoa().compareTo(BigDecimal.ZERO) == 0 
-                || dk.getNganSachKhoa().compareTo(new BigDecimal("50000000")) == 0) {
+        if (dk.getNganSachKhoa() == null) {
             try {
                 autoSyncFacultyBudgets(dk.getDotXetHocBong().getMaDot());
                 dk = dotXetHbKhoaRepository.findById(maDotXetHbKhoa).orElse(dk);
@@ -355,10 +346,56 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
     }
 
     @Override
+    public List<HoSoHocBongDTO> getHoSoByKhoa(String maKhoa) {
+        String targetKhoa = ("CNTT".equalsIgnoreCase(maKhoa)) ? "IT" : (maKhoa != null ? maKhoa : "IT");
+        List<HoSoHocBong> list = hoSoHocBongRepository.findByDotXetHbKhoa_Khoa_MaKhoaOrderByThuHangAsc(targetKhoa);
+        if (list.isEmpty() && maKhoa != null && !maKhoa.equalsIgnoreCase(targetKhoa)) {
+            list = hoSoHocBongRepository.findByDotXetHbKhoa_Khoa_MaKhoaOrderByThuHangAsc(maKhoa);
+        }
+        if (list.isEmpty()) {
+            list = hoSoHocBongRepository.findAll();
+        }
+
+        list.sort(Comparator.comparingInt((HoSoHocBong hs) -> {
+            if (hs.getDotXetHbKhoa() != null && hs.getDotXetHbKhoa().getDotXetHocBong() != null) {
+                return getCampaignOrderKey(hs.getDotXetHbKhoa().getDotXetHocBong());
+            }
+            return 0;
+        }).reversed().thenComparing(hs -> hs.getThuHang() != null ? hs.getThuHang() : 999));
+
+        return list.stream()
+                .map(hs -> ruleEngineService.mapToHoSoDTO(hs, hs.getDotXetHbKhoa() != null && hs.getDotXetHbKhoa().getDotXetHocBong() != null ? hs.getDotXetHbKhoa().getDotXetHocBong().getHocKy() : null))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<HoSoHocBongDTO> getHoSoByKhoaAndFilters(String maKhoa, String maDot, String loaiHb, String trangThai, String search) {
+        List<HoSoHocBongDTO> all = getHoSoByKhoa(maKhoa);
+        return all.stream().filter(h -> {
+            if (maDot != null && !maDot.isBlank() && !"ALL".equalsIgnoreCase(maDot) && !maDot.equalsIgnoreCase(h.getMaDot())) {
+                return false;
+            }
+            if (loaiHb != null && !loaiHb.isBlank() && !"ALL".equalsIgnoreCase(loaiHb) && !loaiHb.equalsIgnoreCase(h.getLoaiHocBong())) {
+                return false;
+            }
+            if (trangThai != null && !trangThai.isBlank() && !"ALL".equalsIgnoreCase(trangThai) && !trangThai.equalsIgnoreCase(h.getTrangThai())) {
+                return false;
+            }
+            if (search != null && !search.isBlank()) {
+                String kw = search.toLowerCase().trim();
+                boolean mssvMatch = h.getMssv() != null && h.getMssv().toLowerCase().contains(kw);
+                boolean nameMatch = h.getHoTen() != null && h.getHoTen().toLowerCase().contains(kw);
+                boolean lopMatch = h.getMaLop() != null && h.getMaLop().toLowerCase().contains(kw);
+                if (!mssvMatch && !nameMatch && !lopMatch) return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<QuyHocBongNganhDTO> getBudgetBreakdown(String maDot) {
         List<QuyHocBongNganhDTO> list = ruleEngineService.calculateAllMajorBudgets(maDot);
 
-        // Bổ sung ngân sách khoa hiện tại vào từng DTO
         List<DotXetHbKhoa> dotKhoas = dotXetHbKhoaRepository.findByDotXetHocBong_MaDot(maDot);
         Map<String, BigDecimal> currentBudgetMap = dotKhoas.stream()
                 .collect(Collectors.toMap(dk -> dk.getKhoa().getMaKhoa(), DotXetHbKhoa::getNganSachKhoa, (b1, b2) -> b1));
@@ -377,7 +414,6 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
     public List<DotXetHbKhoaDTO> autoSyncFacultyBudgets(String maDot) {
         List<QuyHocBongNganhDTO> breakdown = ruleEngineService.calculateAllMajorBudgets(maDot);
 
-        // Group sum of 8% budget by maKhoa
         Map<String, BigDecimal> budgetByKhoa = breakdown.stream()
                 .collect(Collectors.groupingBy(
                         QuyHocBongNganhDTO::getMaKhoa,
@@ -390,23 +426,11 @@ public class DotXetHocBongServiceImpl implements DotXetHocBongService {
                         Collectors.summingInt(q -> q.getSoSinhVienDatHocBong() != null ? q.getSoSinhVienDatHocBong() : 0)
                 ));
 
-        Map<String, Long> groupCountByKhoa = breakdown.stream()
-                .collect(Collectors.groupingBy(QuyHocBongNganhDTO::getMaKhoa, Collectors.counting()));
-
         List<DotXetHbKhoa> dotKhoas = dotXetHbKhoaRepository.findByDotXetHocBong_MaDot(maDot);
         for (DotXetHbKhoa dk : dotKhoas) {
             String maKhoa = dk.getKhoa().getMaKhoa();
             BigDecimal budget8Percent = budgetByKhoa.getOrDefault(maKhoa, BigDecimal.ZERO);
-            int groupCount = groupCountByKhoa.getOrDefault(maKhoa, 5L).intValue();
-            if ("IT".equalsIgnoreCase(maKhoa) && groupCount < 9) groupCount = 9;
-
-            Integer quota = quotaByKhoa.getOrDefault(maKhoa, groupCount);
-            if (quota < groupCount) quota = groupCount;
-
-            BigDecimal expectedMinBudget = BigDecimal.valueOf(quota).multiply(new BigDecimal("11700000"));
-            if (budget8Percent.compareTo(expectedMinBudget) < 0) {
-                budget8Percent = expectedMinBudget;
-            }
+            Integer quota = quotaByKhoa.getOrDefault(maKhoa, 0);
 
             dk.setNganSachKhoa(budget8Percent);
             dk.setChiTieu(quota);

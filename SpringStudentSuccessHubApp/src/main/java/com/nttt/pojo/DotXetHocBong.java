@@ -25,7 +25,7 @@ public class DotXetHocBong {
     private HocKy hocKy;
 
     @Column(name = "trangThai", length = 50)
-    private String trangThai; // DANG_MO, DANG_XET_DUYET, DA_CONG_BO, DONG
+    private String trangThai;
 
     public DotXetHocBong() {}
 

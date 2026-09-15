@@ -17,7 +17,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/khoa/dashboard}" class="sidebar-link">
@@ -38,7 +38,6 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -57,47 +56,45 @@
                 </div>
             </div>
 
-            <!-- Summary Metrics Cards -->
             <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                    <div class="bg-white p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center">
+                    <div class="p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center" style="background-color: #ecfdf5; border-color: #a7f3d0 !important;">
                         <div>
-                            <span class="text-muted small fw-semibold">Xuất sắc (100% HP)</span>
-                            <h4 class="fw-bold text-success mb-0" th:text="${countXuatSac != null ? countXuatSac + ' SV' : '0 SV'}">0 SV</h4>
+                            <span class="small fw-bold" style="color: #047857;">Xuất sắc (100% HP)</span>
+                            <h4 class="fw-bold mb-0" style="color: #065f46;" th:text="${countXuatSac != null ? countXuatSac + ' SV' : '0 SV'}">0 SV</h4>
                         </div>
-                        <span class="badge bg-success-subtle text-success fs-6">100%</span>
+                        <span class="badge rounded-pill fs-6" style="background-color: #10b981; color: #ffffff;">100%</span>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="bg-white p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center">
+                    <div class="p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center" style="background-color: #eff6ff; border-color: #bfdbfe !important;">
                         <div>
-                            <span class="text-muted small fw-semibold">Giỏi (70% HP)</span>
-                            <h4 class="fw-bold text-primary mb-0" th:text="${countGioi != null ? countGioi + ' SV' : '0 SV'}">0 SV</h4>
+                            <span class="small fw-bold" style="color: #1d4ed8;">Giỏi (70% HP)</span>
+                            <h4 class="fw-bold mb-0" style="color: #1e40af;" th:text="${countGioi != null ? countGioi + ' SV' : '0 SV'}">0 SV</h4>
                         </div>
-                        <span class="badge bg-primary-subtle text-primary fs-6">70%</span>
+                        <span class="badge rounded-pill fs-6" style="background-color: #3b82f6; color: #ffffff;">70%</span>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="bg-white p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center">
+                    <div class="p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center" style="background-color: #fffbeb; border-color: #fde68a !important;">
                         <div>
-                            <span class="text-muted small fw-semibold">Khá (50% HP)</span>
-                            <h4 class="fw-bold text-warning mb-0" th:text="${countKha != null ? countKha + ' SV' : '0 SV'}">0 SV</h4>
+                            <span class="small fw-bold" style="color: #b45309;">Khá (50% HP)</span>
+                            <h4 class="fw-bold mb-0" style="color: #92400e;" th:text="${countKha != null ? countKha + ' SV' : '0 SV'}">0 SV</h4>
                         </div>
-                        <span class="badge bg-warning-subtle text-warning fs-6">50%</span>
+                        <span class="badge rounded-pill fs-6" style="background-color: #f59e0b; color: #ffffff;">50%</span>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="bg-white p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center">
+                    <div class="p-3 rounded-4 border shadow-sm d-flex justify-content-between align-items-center" style="background-color: #f8fafc; border-color: #e2e8f0 !important;">
                         <div>
-                            <span class="text-muted small fw-semibold">Tổng hồ sơ xét</span>
+                            <span class="text-muted small fw-bold">Tổng hồ sơ xét</span>
                             <h4 class="fw-bold text-dark mb-0" th:text="${totalDossiersCount != null ? totalDossiersCount + ' SV' : '0 SV'}">0 SV</h4>
                         </div>
-                        <span class="badge bg-secondary-subtle text-secondary fs-6"><i class="fa-solid fa-users"></i></span>
+                        <span class="badge rounded-pill bg-secondary-subtle text-secondary fs-6"><i class="fa-solid fa-users"></i></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Major & Cohort 8% Fund Breakdown Section -->
             <div th:if="${facultyBreakdown != null and !facultyBreakdown.isEmpty()}" class="bg-white p-4 rounded-4 border shadow-sm mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-dark mb-0">
@@ -122,7 +119,6 @@
                 </div>
             </div>
 
-            <!-- Filter Toolbar -->
             <div class="bg-white p-3 rounded-4 border shadow-sm mb-4">
                 <form method="get" class="row g-2 align-items-center">
                     <div class="col-md-3">
@@ -162,7 +158,6 @@
                 </form>
             </div>
 
-            <!-- Dossier Table -->
             <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
                 <table class="table table-hover align-middle mb-0 small">
                     <thead class="table-light">
@@ -208,6 +203,12 @@
                                 <span th:if="${d.trangThai == 'CHINH_THUC'}" class="badge bg-success">Chính thức</span>
                                 <span th:if="${d.trangThai == 'DU_KIEN'}" class="badge bg-info text-dark">Dự kiến</span>
                                 <span th:if="${d.trangThai == 'KHONG_DAT'}" class="badge bg-secondary">Không đạt</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(dossiers)}">
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-folder-open fa-2x mb-2 d-block text-secondary"></i>
+                                <span>Không có hồ sơ nào phù hợp với bộ lọc hiện tại</span>
                             </td>
                         </tr>
                     </tbody>

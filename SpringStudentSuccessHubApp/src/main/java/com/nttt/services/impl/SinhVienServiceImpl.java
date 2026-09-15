@@ -23,14 +23,16 @@ public class SinhVienServiceImpl implements SinhVienService {
     private final LopSinhHoatRepository lopSinhHoatRepository;
     private final KetQuaHocTapRepository ketQuaHocTapRepository;
     private final KetQuaRenLuyenRepository ketQuaRenLuyenRepository;
+    private final HocKyRepository hocKyRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public SinhVienServiceImpl(SinhVienRepository sinhVienRepository, NguoiDungRepository nguoiDungRepository, LopSinhHoatRepository lopSinhHoatRepository, KetQuaHocTapRepository ketQuaHocTapRepository, KetQuaRenLuyenRepository ketQuaRenLuyenRepository, PasswordEncoder passwordEncoder) {
+    public SinhVienServiceImpl(SinhVienRepository sinhVienRepository, NguoiDungRepository nguoiDungRepository, LopSinhHoatRepository lopSinhHoatRepository, KetQuaHocTapRepository ketQuaHocTapRepository, KetQuaRenLuyenRepository ketQuaRenLuyenRepository, HocKyRepository hocKyRepository, PasswordEncoder passwordEncoder) {
         this.sinhVienRepository = sinhVienRepository;
         this.nguoiDungRepository = nguoiDungRepository;
         this.lopSinhHoatRepository = lopSinhHoatRepository;
         this.ketQuaHocTapRepository = ketQuaHocTapRepository;
         this.ketQuaRenLuyenRepository = ketQuaRenLuyenRepository;
+        this.hocKyRepository = hocKyRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -67,7 +69,6 @@ public class SinhVienServiceImpl implements SinhVienService {
             throw new RuntimeException("Mã số sinh viên đã tồn tại!");
         }
 
-        // Create linked User account
         NguoiDung user = NguoiDung.builder()
                 .tenDangNhap(dto.getMssv())
                 .matKhau(passwordEncoder.encode(dto.getCccd() != null ? dto.getCccd() : "123456"))
@@ -116,7 +117,6 @@ public class SinhVienServiceImpl implements SinhVienService {
             sv.setLopSinhHoat(lop);
         }
 
-        // Update user account
         NguoiDung user = sv.getNguoiDung();
         if (user != null) {
             if (dto.getHoTen() != null) user.setHoTen(dto.getHoTen());
@@ -164,6 +164,43 @@ public class SinhVienServiceImpl implements SinhVienService {
         ketQuaRenLuyenRepository.save(kq);
     }
 
+    @Override
+    @Transactional
+    public KetQuaRenLuyen updateTrainingScore(String mssv, String maHocKy, BigDecimal diemRenLuyen, String lyDo) {
+        if (mssv == null || mssv.isBlank()) {
+            throw new RuntimeException("Mã số sinh viên không được để trống");
+        }
+        if (maHocKy == null || maHocKy.isBlank()) {
+            throw new RuntimeException("Mã học kỳ không được để trống");
+        }
+        if (diemRenLuyen == null || diemRenLuyen.compareTo(BigDecimal.ZERO) < 0 || diemRenLuyen.compareTo(BigDecimal.valueOf(100.0)) > 0) {
+            throw new RuntimeException("Điểm rèn luyện phải nằm trong khoảng từ 0 đến 100");
+        }
+
+        SinhVien sv = sinhVienRepository.findById(mssv)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sinh viên có MSSV: " + mssv));
+
+        HocKy hk = hocKyRepository.findById(maHocKy)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy học kỳ: " + maHocKy));
+
+        Optional<KetQuaRenLuyen> drlOpt = ketQuaRenLuyenRepository.findBySinhVien_MssvAndHocKy_MaHocKy(mssv, maHocKy);
+        KetQuaRenLuyen drl = drlOpt.orElseGet(() -> KetQuaRenLuyen.builder()
+                .id("DRL_" + mssv + "_" + maHocKy)
+                .sinhVien(sv)
+                .hocKy(hk)
+                .build());
+
+        drl.setDiemRenLuyen(diemRenLuyen);
+
+        if (diemRenLuyen.compareTo(BigDecimal.valueOf(90.0)) >= 0) drl.setXepLoai("Xuat sac");
+        else if (diemRenLuyen.compareTo(BigDecimal.valueOf(80.0)) >= 0) drl.setXepLoai("Tot");
+        else if (diemRenLuyen.compareTo(BigDecimal.valueOf(65.0)) >= 0) drl.setXepLoai("Kha");
+        else if (diemRenLuyen.compareTo(BigDecimal.valueOf(50.0)) >= 0) drl.setXepLoai("Trung binh");
+        else drl.setXepLoai("Yeu");
+
+        return ketQuaRenLuyenRepository.save(drl);
+    }
+
     private SinhVienDTO mapToDTO(SinhVien sv, String maHocKy) {
         SinhVienDTO dto = SinhVienDTO.builder()
                 .mssv(sv.getMssv())
@@ -179,6 +216,7 @@ public class SinhVienServiceImpl implements SinhVienService {
             dto.setHoTen(sv.getNguoiDung().getHoTen());
             dto.setEmail(sv.getNguoiDung().getEmail());
             dto.setSoDienThoai(sv.getNguoiDung().getSoDienThoai());
+            dto.setAvatar(sv.getNguoiDung().getAvatar());
         }
 
         if (sv.getLopSinhHoat() != null) {
@@ -195,7 +233,6 @@ public class SinhVienServiceImpl implements SinhVienService {
             }
         }
 
-        // Attach GPA and DRL if maHocKy is present, or take latest
         List<KetQuaHocTap> gpaList = ketQuaHocTapRepository.findBySinhVien_Mssv(sv.getMssv());
         List<KetQuaRenLuyen> drlList = ketQuaRenLuyenRepository.findBySinhVien_Mssv(sv.getMssv());
 
@@ -204,7 +241,7 @@ public class SinhVienServiceImpl implements SinhVienService {
 
         Optional<KetQuaHocTap> gpaOpt = (maHocKy != null && !maHocKy.isBlank()) ?
                 gpaList.stream().filter(g -> g.getHocKy().getMaHocKy().equals(maHocKy)).findFirst() :
-                (gpaList.isEmpty() ? Optional.empty() : Optional.of(gpaList.get(gpaList.size() - 1))); // lấy kỳ mới nhất
+                (gpaList.isEmpty() ? Optional.empty() : Optional.of(gpaList.get(gpaList.size() - 1)));
 
         Optional<KetQuaRenLuyen> drlOpt = (maHocKy != null && !maHocKy.isBlank()) ?
                 drlList.stream().filter(d -> d.getHocKy().getMaHocKy().equals(maHocKy)).findFirst() :

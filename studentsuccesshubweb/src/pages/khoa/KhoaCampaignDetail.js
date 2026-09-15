@@ -43,7 +43,6 @@ const KhoaCampaignDetail = () => {
     }
   };
 
-  // Trigger Dynamic Rule Engine Execution
   const handleRunRuleEngine = async () => {
     try {
       setRunningEngine(true);
@@ -59,7 +58,6 @@ const KhoaCampaignDetail = () => {
     }
   };
 
-  // Publish preliminary list to students
   const handlePublishDuKien = async () => {
     if (window.confirm('Xác nhận CÔNG BỐ DỰ KIẾN? Sinh viên sẽ có thể xem kết quả xếp hạng và nộp kiến nghị/khiếu nại nếu có sai sót.')) {
       try {
@@ -72,7 +70,6 @@ const KhoaCampaignDetail = () => {
     }
   };
 
-  // Finalize & submit to university
   const handleChotDanhSach = async () => {
     if (window.confirm('Xác nhận CHỐT DANH SÁCH & GỬI LÊN CẤP TRƯỜNG? Hãy chắc chắn rằng bạn đã xử lý hết các kiến nghị của sinh viên.')) {
       try {
@@ -144,13 +141,12 @@ const KhoaCampaignDetail = () => {
     return matchSearch && matchKhoaHoc && matchNganh && matchHeDaoTao && matchLoaiHb;
   });
 
-  // Statistics
+
   const countXuatSac = dossiers.filter((d) => d.loaiHocBong === 'XUAT_SAC' && d.mucHocBong > 0).length;
   const countGioi = dossiers.filter((d) => d.loaiHocBong === 'GIOI' && d.mucHocBong > 0).length;
   const countKha = dossiers.filter((d) => d.loaiHocBong === 'KHA' && d.mucHocBong > 0).length;
   const totalAllocated = dossiers.reduce((acc, cur) => acc + (parseFloat(cur.mucHocBong) || 0), 0);
 
-  // Group dossiers by Major & Cohort to show 8% fund details
   const cohortMajorGroups = Object.values(
     dossiers.reduce((acc, d) => {
       const key = `${d.tenNganh || 'Ngành khác'} - ${d.khoaHoc || 'Khóa khác'}`;
@@ -178,7 +174,6 @@ const KhoaCampaignDetail = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link to="/khoa" className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
@@ -193,7 +188,6 @@ const KhoaCampaignDetail = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Button 1: Run Engine */}
           <button
             onClick={handleRunRuleEngine}
             disabled={runningEngine || subCamp?.trangThai === 'DA_CHOT_GUI_TRUONG' || subCamp?.trangThai === 'DA_PHE_DUYET'}
@@ -207,7 +201,6 @@ const KhoaCampaignDetail = () => {
             Chạy Dynamic Rule Engine
           </button>
 
-          {/* Button 2: Publish Preliminary */}
           {subCamp?.trangThai === 'CHUA_XET' && (
             <button
               onClick={handlePublishDuKien}
@@ -218,7 +211,6 @@ const KhoaCampaignDetail = () => {
             </button>
           )}
 
-          {/* Button 3: Finalize & Submit */}
           {subCamp?.trangThai === 'DA_CONG_BO_DU_KIEN' && (
             <button
               onClick={handleChotDanhSach}
@@ -239,7 +231,6 @@ const KhoaCampaignDetail = () => {
         </div>
       </div>
 
-      {/* Info Status Banner */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-5 gap-4">
         <div>
           <span className="text-slate-400 text-xs block">Trạng thái đợt xét</span>
@@ -317,7 +308,6 @@ const KhoaCampaignDetail = () => {
         </div>
       </div>
 
-      {/* Quỹ Học Bổng 8% Phân bổ theo từng Ngành & Khóa học */}
       {cohortMajorGroups.length > 0 && (
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -360,7 +350,6 @@ const KhoaCampaignDetail = () => {
         </div>
       )}
 
-      {/* Filter Toolbar: Cohort, Major, Training Program, Tier */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
@@ -381,7 +370,6 @@ const KhoaCampaignDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-          {/* Search Box */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Tìm kiếm sinh viên</label>
             <input
@@ -393,7 +381,6 @@ const KhoaCampaignDetail = () => {
             />
           </div>
 
-          {/* Filter by Cohort (Khóa học) */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Khóa học</label>
             <select
@@ -410,7 +397,6 @@ const KhoaCampaignDetail = () => {
             </select>
           </div>
 
-          {/* Filter by Major (Ngành học) */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Ngành học</label>
             <select
@@ -427,7 +413,6 @@ const KhoaCampaignDetail = () => {
             </select>
           </div>
 
-          {/* Filter by Program (Chương trình đào tạo / Hệ đào tạo) */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Chương trình Đào tạo</label>
             <select
@@ -441,7 +426,6 @@ const KhoaCampaignDetail = () => {
             </select>
           </div>
 
-          {/* Filter by Scholarship Tier */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Phân loại Học bổng</label>
             <select
@@ -459,7 +443,6 @@ const KhoaCampaignDetail = () => {
         </div>
       </div>
 
-      {/* Dossiers List Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -585,7 +568,6 @@ const KhoaCampaignDetail = () => {
         </div>
       </div>
 
-      {/* Modal Popup Chi tiết Bảng điểm Môn học */}
       <Modal
         isOpen={showGradesModal}
         onClose={() => {
@@ -605,7 +587,7 @@ const KhoaCampaignDetail = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Sinh viên Header Card */}
+
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>
                 <span className="text-slate-500 block font-semibold">Sinh viên:</span>
@@ -624,8 +606,6 @@ const KhoaCampaignDetail = () => {
                 <span className="font-bold text-emerald-700 text-sm">{formatCurrency(studentGrades.tongHocPhiHocKy)}</span>
               </div>
             </div>
-
-            {/* Subject Table */}
             <div className="overflow-x-auto border border-slate-200 rounded-xl">
               <table className="w-full text-left text-xs">
                 <thead>

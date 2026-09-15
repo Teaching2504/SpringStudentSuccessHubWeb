@@ -17,7 +17,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/khoa/dashboard}" class="sidebar-link">
@@ -38,14 +38,12 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <div class="mb-4">
                 <h3 class="fw-bold text-dark mb-1">Danh sách Sinh viên & Kết quả Học tập Khoa (<span th:text="${maKhoa}">CNTT</span>)</h3>
                 <p class="text-muted small">Tra cứu kết quả học kỳ, cảnh báo điểm GPA và học phần rớt</p>
             </div>
 
-            <!-- Filter Card -->
             <div class="bg-white p-3 rounded-4 border shadow-sm mb-4">
                 <form th:action="@{/web/khoa/students}" method="get" class="row g-2">
                     <div class="col-md-4">
@@ -68,7 +66,6 @@
                 </form>
             </div>
 
-            <!-- Table -->
             <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
                 <table class="table table-hover align-middle mb-0 small">
                     <thead class="table-light">

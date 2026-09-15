@@ -4,6 +4,7 @@ import com.nttt.dto.SinhVienDTO;
 import com.nttt.pojo.KetQuaHocTap;
 import com.nttt.pojo.KetQuaRenLuyen;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface SinhVienService {
@@ -18,4 +19,5 @@ public interface SinhVienService {
     List<KetQuaRenLuyen> getTrainingHistory(String mssv);
     void saveAcademicResult(KetQuaHocTap kq);
     void saveTrainingResult(KetQuaRenLuyen kq);
+    KetQuaRenLuyen updateTrainingScore(String mssv, String maHocKy, BigDecimal diemRenLuyen, String lyDo);
 }

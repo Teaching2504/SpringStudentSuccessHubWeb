@@ -15,11 +15,13 @@ public class ChuongTrinhDaoTaoDTO {
     private BigDecimal hocPhiDuKien;
     private Integer hocKyGoiY;
     private String loaiHocPhan;
+    private String chuyenNganh;
+    private String nhomTuChon;
     private String heDaoTao;
 
     public ChuongTrinhDaoTaoDTO() {}
 
-    public ChuongTrinhDaoTaoDTO(Long id, String maNganh, String tenNganh, String maMon, String tenMon, Integer soTinChi, Integer soTietLyThuyet, Integer soTietThucHanh, BigDecimal donGiaTinChi, BigDecimal hocPhiDuKien, Integer hocKyGoiY, String loaiHocPhan, String heDaoTao) {
+    public ChuongTrinhDaoTaoDTO(Long id, String maNganh, String tenNganh, String maMon, String tenMon, Integer soTinChi, Integer soTietLyThuyet, Integer soTietThucHanh, BigDecimal donGiaTinChi, BigDecimal hocPhiDuKien, Integer hocKyGoiY, String loaiHocPhan, String chuyenNganh, String nhomTuChon, String heDaoTao) {
         this.id = id;
         this.maNganh = maNganh;
         this.tenNganh = tenNganh;
@@ -32,6 +34,8 @@ public class ChuongTrinhDaoTaoDTO {
         this.hocPhiDuKien = hocPhiDuKien;
         this.hocKyGoiY = hocKyGoiY;
         this.loaiHocPhan = loaiHocPhan;
+        this.chuyenNganh = chuyenNganh;
+        this.nhomTuChon = nhomTuChon;
         this.heDaoTao = heDaoTao;
     }
 
@@ -71,6 +75,12 @@ public class ChuongTrinhDaoTaoDTO {
     public String getLoaiHocPhan() { return loaiHocPhan; }
     public void setLoaiHocPhan(String loaiHocPhan) { this.loaiHocPhan = loaiHocPhan; }
 
+    public String getChuyenNganh() { return chuyenNganh; }
+    public void setChuyenNganh(String chuyenNganh) { this.chuyenNganh = chuyenNganh; }
+
+    public String getNhomTuChon() { return nhomTuChon; }
+    public void setNhomTuChon(String nhomTuChon) { this.nhomTuChon = nhomTuChon; }
+
     public String getHeDaoTao() { return heDaoTao; }
     public void setHeDaoTao(String heDaoTao) { this.heDaoTao = heDaoTao; }
 
@@ -89,6 +99,8 @@ public class ChuongTrinhDaoTaoDTO {
         private BigDecimal hocPhiDuKien;
         private Integer hocKyGoiY;
         private String loaiHocPhan;
+        private String chuyenNganh;
+        private String nhomTuChon;
         private String heDaoTao;
 
         public Builder id(Long id) { this.id = id; return this; }
@@ -103,10 +115,12 @@ public class ChuongTrinhDaoTaoDTO {
         public Builder hocPhiDuKien(BigDecimal hocPhiDuKien) { this.hocPhiDuKien = hocPhiDuKien; return this; }
         public Builder hocKyGoiY(Integer hocKyGoiY) { this.hocKyGoiY = hocKyGoiY; return this; }
         public Builder loaiHocPhan(String loaiHocPhan) { this.loaiHocPhan = loaiHocPhan; return this; }
+        public Builder chuyenNganh(String chuyenNganh) { this.chuyenNganh = chuyenNganh; return this; }
+        public Builder nhomTuChon(String nhomTuChon) { this.nhomTuChon = nhomTuChon; return this; }
         public Builder heDaoTao(String heDaoTao) { this.heDaoTao = heDaoTao; return this; }
 
         public ChuongTrinhDaoTaoDTO build() {
-            return new ChuongTrinhDaoTaoDTO(id, maNganh, tenNganh, maMon, tenMon, soTinChi, soTietLyThuyet, soTietThucHanh, donGiaTinChi, hocPhiDuKien, hocKyGoiY, loaiHocPhan, heDaoTao);
+            return new ChuongTrinhDaoTaoDTO(id, maNganh, tenNganh, maMon, tenMon, soTinChi, soTietLyThuyet, soTietThucHanh, donGiaTinChi, hocPhiDuKien, hocKyGoiY, loaiHocPhan, chuyenNganh, nhomTuChon, heDaoTao);
         }
     }
 }

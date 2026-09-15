@@ -14,5 +14,7 @@ public interface HoSoHocBongRepository extends JpaRepository<HoSoHocBong, String
     List<HoSoHocBong> findBySinhVien_Mssv(String mssv);
     Optional<HoSoHocBong> findBySinhVien_MssvAndDotXetHbKhoa_MaDotXetHbKhoa(String mssv, String maDotXetHbKhoa);
     Optional<HoSoHocBong> findBySinhVien_MssvAndDotXetHbKhoa_DotXetHocBong_MaDot(String mssv, String maDot);
+    List<HoSoHocBong> findByDotXetHbKhoa_Khoa_MaKhoa(String maKhoa);
+    List<HoSoHocBong> findByDotXetHbKhoa_Khoa_MaKhoaOrderByThuHangAsc(String maKhoa);
     List<HoSoHocBong> findBySinhVien_MssvAndTrangThai(String mssv, String trangThai);
 }

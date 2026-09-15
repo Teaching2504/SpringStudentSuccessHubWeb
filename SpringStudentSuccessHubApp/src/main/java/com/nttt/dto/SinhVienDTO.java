@@ -22,17 +22,17 @@ public class SinhVienDTO {
     private String maKhoa;
     private String tenKhoa;
 
-    // Academic performance summary
     private BigDecimal diemTrungBinh;
     private Integer soTinChi;
     private Boolean coHocPhanRot;
     private BigDecimal diemRenLuyen;
     private String xepLoaiRenLuyen;
-    private String canhBao; // "Bình thường", "Cảnh báo GPA thấp", "Cảnh báo DRL thấp", "Cảnh báo nợ môn"
+    private String canhBao;
+    private String avatar;
 
     public SinhVienDTO() {}
 
-    public SinhVienDTO(String mssv, String cccd, Long nguoiDungId, String hoTen, String email, String soDienThoai, LocalDate ngaySinh, String gioiTinh, String diaChi, String trangThaiHoc, String maLop, String tenLop, String khoaHoc, String maNganh, String tenNganh, String maKhoa, String tenKhoa, BigDecimal diemTrungBinh, Integer soTinChi, Boolean coHocPhanRot, BigDecimal diemRenLuyen, String xepLoaiRenLuyen, String canhBao) {
+    public SinhVienDTO(String mssv, String cccd, Long nguoiDungId, String hoTen, String email, String soDienThoai, LocalDate ngaySinh, String gioiTinh, String diaChi, String trangThaiHoc, String maLop, String tenLop, String khoaHoc, String maNganh, String tenNganh, String maKhoa, String tenKhoa, BigDecimal diemTrungBinh, Integer soTinChi, Boolean coHocPhanRot, BigDecimal diemRenLuyen, String xepLoaiRenLuyen, String canhBao, String avatar) {
         this.mssv = mssv;
         this.cccd = cccd;
         this.nguoiDungId = nguoiDungId;
@@ -56,6 +56,7 @@ public class SinhVienDTO {
         this.diemRenLuyen = diemRenLuyen;
         this.xepLoaiRenLuyen = xepLoaiRenLuyen;
         this.canhBao = canhBao;
+        this.avatar = avatar;
     }
 
     public String getMssv() { return mssv; }
@@ -127,6 +128,9 @@ public class SinhVienDTO {
     public String getCanhBao() { return canhBao; }
     public void setCanhBao(String canhBao) { this.canhBao = canhBao; }
 
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }
+
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
@@ -153,6 +157,7 @@ public class SinhVienDTO {
         private BigDecimal diemRenLuyen;
         private String xepLoaiRenLuyen;
         private String canhBao;
+        private String avatar;
 
         public Builder mssv(String mssv) { this.mssv = mssv; return this; }
         public Builder cccd(String cccd) { this.cccd = cccd; return this; }
@@ -177,9 +182,10 @@ public class SinhVienDTO {
         public Builder diemRenLuyen(BigDecimal diemRenLuyen) { this.diemRenLuyen = diemRenLuyen; return this; }
         public Builder xepLoaiRenLuyen(String xepLoaiRenLuyen) { this.xepLoaiRenLuyen = xepLoaiRenLuyen; return this; }
         public Builder canhBao(String canhBao) { this.canhBao = canhBao; return this; }
+        public Builder avatar(String avatar) { this.avatar = avatar; return this; }
 
         public SinhVienDTO build() {
-            return new SinhVienDTO(mssv, cccd, nguoiDungId, hoTen, email, soDienThoai, ngaySinh, gioiTinh, diaChi, trangThaiHoc, maLop, tenLop, khoaHoc, maNganh, tenNganh, maKhoa, tenKhoa, diemTrungBinh, soTinChi, coHocPhanRot, diemRenLuyen, xepLoaiRenLuyen, canhBao);
+            return new SinhVienDTO(mssv, cccd, nguoiDungId, hoTen, email, soDienThoai, ngaySinh, gioiTinh, diaChi, trangThaiHoc, maLop, tenLop, khoaHoc, maNganh, tenNganh, maKhoa, tenKhoa, diemTrungBinh, soTinChi, coHocPhanRot, diemRenLuyen, xepLoaiRenLuyen, canhBao, avatar);
         }
     }
 }

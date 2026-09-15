@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axiosClient from '../../api/axiosClient';
-import { Search, Filter, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
+import { Search, Filter, AlertTriangle, CheckCircle, Eye, Users, BookOpen, GraduationCap } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import { sortSemesters } from '../../utils/semesterSort';
 
@@ -59,6 +59,13 @@ const KhoaStudentList = () => {
     }
   };
 
+  const totalStudents = students.length;
+  const warnedStudents = students.filter(s => s.canhBao && s.canhBao !== 'Bình thường').length;
+  const normalStudents = totalStudents - warnedStudents;
+  const avgGpa = totalStudents > 0
+    ? (students.reduce((sum, s) => sum + (Number(s.diemTrungBinh) || 0), 0) / totalStudents).toFixed(2)
+    : '-';
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -71,7 +78,45 @@ const KhoaStudentList = () => {
         </p>
       </div>
 
-      {/* Filter Bar */}
+      {/* Pastel KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-blue-50/80 border border-blue-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Tổng Sinh viên</span>
+            <span className="p-2 bg-blue-100 text-blue-700 rounded-xl"><Users className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-slate-800 mt-2">{totalStudents} SV</p>
+          <span className="text-[11px] text-blue-700 font-medium">Toàn bộ sinh viên trong khoa</span>
+        </div>
+
+        <div className="bg-purple-50/80 border border-purple-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-purple-800 uppercase tracking-wider">GPA Trung bình</span>
+            <span className="p-2 bg-purple-100 text-purple-700 rounded-xl"><BookOpen className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-purple-900 mt-2">{avgGpa} / 4.0</p>
+          <span className="text-[11px] text-purple-700 font-medium">Theo bộ lọc học kỳ hiện tại</span>
+        </div>
+
+        <div className="bg-emerald-50/80 border border-emerald-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Tình trạng Bình thường</span>
+            <span className="p-2 bg-emerald-100 text-emerald-700 rounded-xl"><CheckCircle className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-emerald-900 mt-2">{normalStudents} SV</p>
+          <span className="text-[11px] text-emerald-700 font-medium">Đạt chuẩn tiến độ đào tạo</span>
+        </div>
+
+        <div className="bg-amber-50/80 border border-amber-200/80 p-4 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">Cảnh báo Học vụ</span>
+            <span className="p-2 bg-amber-100 text-amber-700 rounded-xl"><AlertTriangle className="w-4 h-4" /></span>
+          </div>
+          <p className="text-2xl font-black text-amber-900 mt-2">{warnedStudents} SV</p>
+          <span className="text-[11px] text-amber-700 font-medium">GPA &lt; 2.0 hoặc nợ môn</span>
+        </div>
+      </div>
+
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -114,8 +159,6 @@ const KhoaStudentList = () => {
           </select>
         </div>
       </div>
-
-      {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-700">

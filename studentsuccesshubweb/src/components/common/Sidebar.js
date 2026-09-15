@@ -38,6 +38,7 @@ export const Sidebar = () => {
 
   const khoaLinks = [
     { to: '/khoa', label: `Tổng quan ${user?.tenKhoa || 'Khoa'}`, icon: LayoutDashboard },
+    { to: '/khoa/scholarships', label: 'Xét duyệt Học bổng', icon: Award },
     { to: '/khoa/students', label: 'Danh sách SV & Cảnh báo', icon: AlertTriangle },
     { to: '/khoa/evidence', label: 'Duyệt Minh chứng Rèn luyện', icon: FileCheck },
     { to: '/khoa/appeals', label: 'Xử lý Kiến nghị', icon: HelpCircle },

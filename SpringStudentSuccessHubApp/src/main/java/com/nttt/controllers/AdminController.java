@@ -35,7 +35,6 @@ public class AdminController {
         this.thongKeService = thongKeService;
     }
 
-    // --- User Management (UC02) ---
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<List<NguoiDungDTO>>> getAllUsers() {
         return ResponseEntity.ok(ApiResponse.ok(nguoiDungService.getAllUsers()));
@@ -95,7 +94,6 @@ public class AdminController {
         }
     }
 
-    // --- Student Management (UC04) ---
     @GetMapping("/students")
     public ResponseEntity<ApiResponse<List<SinhVienDTO>>> filterStudents(
             @RequestParam(required = false) String maKhoa,
@@ -136,7 +134,6 @@ public class AdminController {
         }
     }
 
-    // --- Excel Import (UC04) ---
     @PostMapping("/students/import-excel")
     public ResponseEntity<ApiResponse<Map<String, Object>>> importStudents(
             @RequestParam("file") MultipartFile file,
@@ -162,7 +159,6 @@ public class AdminController {
                 .body(new InputStreamResource(in));
     }
 
-    // --- Stats ---
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<DashboardStatsDTO>> getStats() {
         return ResponseEntity.ok(ApiResponse.ok(thongKeService.getGlobalDashboardStats()));

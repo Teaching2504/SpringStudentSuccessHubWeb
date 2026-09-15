@@ -45,13 +45,12 @@ const TruongStats = () => {
         </p>
       </div>
 
-      {/* KPI Highlight */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-gradient-to-br from-primary-900 to-primary-700 text-white p-6 rounded-2xl shadow-lg">
-          <p className="text-xs font-semibold text-primary-200 uppercase tracking-wider">Tổng Kinh phí Đã Duyệt</p>
-          <h2 className="text-2xl font-extrabold mt-1">{formatCurrency(stats?.tongKinhPhiHocBong)}</h2>
-          <p className="text-xs text-primary-200 mt-3 flex items-center gap-1">
-            <TrendingUp className="w-4 h-4" /> Toàn bộ sinh viên đạt điều kiện
+        <div className="bg-gradient-to-br from-blue-50/90 to-sky-100/80 border border-blue-200/90 p-6 rounded-2xl shadow-xs">
+          <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Tổng Kinh phí Đã Duyệt</p>
+          <h2 className="text-2xl font-black text-slate-800 mt-1">{formatCurrency(stats?.tongKinhPhiHocBong)}</h2>
+          <p className="text-xs text-blue-700 mt-3 flex items-center gap-1 font-semibold">
+            <TrendingUp className="w-4 h-4 text-blue-600" /> Toàn bộ sinh viên đạt điều kiện
           </p>
         </div>
 
@@ -72,7 +71,6 @@ const TruongStats = () => {
         </div>
       </div>
 
-      {/* Breakdown by Faculty Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-primary-600" /> Bảng Phân bổ Ngân sách & Số lượng theo Khoa

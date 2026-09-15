@@ -28,7 +28,7 @@ public class SinhVien {
     private String diaChi;
 
     @Column(name = "trangThaiHoc", length = 50)
-    private String trangThaiHoc; // DANG_HOC, BAO_LUU, THOI_HOC, TOT_NGHIEP
+    private String trangThaiHoc;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "maLop", referencedColumnName = "maLop", nullable = false)
@@ -55,6 +55,10 @@ public class SinhVien {
 
     public NguoiDung getNguoiDung() { return nguoiDung; }
     public void setNguoiDung(NguoiDung nguoiDung) { this.nguoiDung = nguoiDung; }
+
+    public String getHoTen() {
+        return nguoiDung != null ? nguoiDung.getHoTen() : "";
+    }
 
     public LocalDate getNgaySinh() { return ngaySinh; }
     public void setNgaySinh(LocalDate ngaySinh) { this.ngaySinh = ngaySinh; }

@@ -28,7 +28,6 @@ public class CanBoKhoaController {
         this.thongKeService = thongKeService;
     }
 
-    // Student Management for Faculty
     @GetMapping("/students")
     public ResponseEntity<ApiResponse<List<SinhVienDTO>>> getFacultyStudents(
             @RequestParam String maKhoa,
@@ -41,7 +40,6 @@ public class CanBoKhoaController {
         return ResponseEntity.ok(ApiResponse.ok(sinhVienService.filterStudents(maKhoa, maNganh, maLop, khoaHoc, search, maHocKy)));
     }
 
-    // Training Evidence Approval (UC11)
     @GetMapping("/minh-chung")
     public ResponseEntity<ApiResponse<List<MinhChungRenLuyenDTO>>> getMinhChung(
             @RequestParam String maKhoa,
@@ -66,7 +64,6 @@ public class CanBoKhoaController {
         }
     }
 
-    // Faculty Campaigns (UC07, UC08, UC09)
     @GetMapping("/campaigns")
     public ResponseEntity<ApiResponse<List<DotXetHbKhoaDTO>>> getFacultyCampaigns(@RequestParam String maKhoa) {
         return ResponseEntity.ok(ApiResponse.ok(dotXetHocBongService.getDotKhoaByMaKhoa(maKhoa)));
@@ -82,7 +79,19 @@ public class CanBoKhoaController {
         return ResponseEntity.ok(ApiResponse.ok(dotXetHocBongService.getHoSoByDotKhoa(id)));
     }
 
-    // Run Dynamic Rule Engine (UC07)
+    @GetMapping("/scholarships")
+    public ResponseEntity<ApiResponse<List<HoSoHocBongDTO>>> getFacultyScholarshipAwards(
+            @RequestParam String maKhoa,
+            @RequestParam(required = false) String maDot,
+            @RequestParam(required = false) String loaiHocBong,
+            @RequestParam(required = false) String trangThai,
+            @RequestParam(required = false) String search
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                dotXetHocBongService.getHoSoByKhoaAndFilters(maKhoa, maDot, loaiHocBong, trangThai, search)
+        ));
+    }
+
     @PostMapping("/campaigns/{id}/run-ranking")
     public ResponseEntity<ApiResponse<List<HoSoHocBongDTO>>> runAutoRanking(@PathVariable String id) {
         try {
@@ -93,7 +102,6 @@ public class CanBoKhoaController {
         }
     }
 
-    // Publish preliminary list (UC08)
     @PostMapping("/campaigns/{id}/publish-du-kien")
     public ResponseEntity<ApiResponse<DotXetHbKhoaDTO>> publishDuKien(@PathVariable String id) {
         try {
@@ -103,7 +111,6 @@ public class CanBoKhoaController {
         }
     }
 
-    // Finalize and submit to university level (UC09)
     @PostMapping("/campaigns/{id}/chot-danh-sach")
     public ResponseEntity<ApiResponse<DotXetHbKhoaDTO>> chotDanhSachKhoa(@PathVariable String id) {
         try {
@@ -113,7 +120,6 @@ public class CanBoKhoaController {
         }
     }
 
-    // Handle Student Appeals (UC08)
     @GetMapping("/kien-nghi")
     public ResponseEntity<ApiResponse<List<KienNghiDTO>>> getFacultyAppeals(
             @RequestParam String maKhoa,
@@ -130,15 +136,18 @@ public class CanBoKhoaController {
     ) {
         boolean accept = Boolean.parseBoolean(String.valueOf(payload.get("accept")));
         String phanHoi = (String) payload.get("phanHoi");
+        java.math.BigDecimal diemRenLuyenMoi = null;
+        if (payload.get("diemRenLuyenMoi") != null && !payload.get("diemRenLuyenMoi").toString().isBlank()) {
+            diemRenLuyenMoi = new java.math.BigDecimal(payload.get("diemRenLuyenMoi").toString());
+        }
         try {
-            KienNghiDTO result = kienNghiService.resolveKienNghi(id, userDetails.getUsername(), accept, phanHoi);
+            KienNghiDTO result = kienNghiService.resolveKienNghi(id, userDetails.getUsername(), accept, phanHoi, diemRenLuyenMoi);
             return ResponseEntity.ok(ApiResponse.ok("Xử lý kiến nghị thành công", result));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
 
-    // Stats
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<DashboardStatsDTO>> getFacultyStats(@RequestParam String maKhoa) {
         return ResponseEntity.ok(ApiResponse.ok(thongKeService.getFacultyDashboardStats(maKhoa)));

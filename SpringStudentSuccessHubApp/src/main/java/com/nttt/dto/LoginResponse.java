@@ -7,8 +7,8 @@ public class LoginResponse {
     private String tenDangNhap;
     private String hoTen;
     private String email;
-    private String vaiTro; // ROLE_ADMIN, ROLE_CAN_BO_TRUONG, ROLE_CAN_BO_KHOA, ROLE_SINH_VIEN
-    private String maDinhDanh; // mssv hoặc maNv
+    private String vaiTro;
+    private String maDinhDanh;
     private String maKhoa;
     private String tenKhoa;
     private String maLop;

@@ -24,7 +24,6 @@ public class DanhMucController {
         this.curriculumService = curriculumService;
     }
 
-    // Khoa
     @GetMapping("/khoa")
     public ResponseEntity<ApiResponse<List<Khoa>>> getAllKhoa() {
         return ResponseEntity.ok(ApiResponse.ok(danhMucService.getAllKhoa()));
@@ -58,7 +57,6 @@ public class DanhMucController {
         }
     }
 
-    // Nganh
     @GetMapping("/nganh")
     public ResponseEntity<ApiResponse<List<Nganh>>> getAllNganh(@RequestParam(required = false) String maKhoa) {
         if (maKhoa != null && !maKhoa.isBlank()) {
@@ -95,7 +93,6 @@ public class DanhMucController {
         }
     }
 
-    // Lop
     @GetMapping("/lop")
     public ResponseEntity<ApiResponse<List<LopSinhHoat>>> getAllLop(@RequestParam(required = false) String maKhoa) {
         if (maKhoa != null && !maKhoa.isBlank()) {
@@ -136,7 +133,6 @@ public class DanhMucController {
         }
     }
 
-    // HocKy
     @GetMapping("/hoc-ky")
     public ResponseEntity<ApiResponse<List<HocKy>>> getAllHocKy() {
         return ResponseEntity.ok(ApiResponse.ok(danhMucService.getAllHocKy()));
@@ -170,7 +166,6 @@ public class DanhMucController {
         }
     }
 
-    // Môn học & Chương trình đào tạo & Bảng điểm
     @GetMapping("/mon-hoc")
     public ResponseEntity<ApiResponse<List<MonHocDTO>>> getAllMonHoc() {
         return ResponseEntity.ok(ApiResponse.ok(curriculumService.getAllMonHoc()));

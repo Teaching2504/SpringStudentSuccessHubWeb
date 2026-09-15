@@ -89,7 +89,7 @@ public class CurriculumServiceImpl implements CurriculumService {
         MonHoc mGENG1315 = getOrCreateMonHoc("GENG1315", "Tiếng Anh Nâng cao 5", 3, 45, 0, donGiaChuan, fl);
         MonHoc mITEC1427 = getOrCreateMonHoc("ITEC1427", "Cấu trúc Dữ liệu và Thuật giải 1", 4, 45, 30, donGiaChuan, it);
         MonHoc mITEC1404 = getOrCreateMonHoc("ITEC1404", "Ứng dụng Web", 3, 30, 30, donGiaChuan, it);
-        MonHoc mITEC2502 = getOrCreateMonHoc("ITEC2502", "Cơ sở Dữ liệu Quan hệ", 4, 45, 30, donGiaChuan, it);
+        MonHoc mITEC2502 = getOrCreateMonHoc("ITEC2502", "Cơ sở Dữ liệu", 4, 45, 30, donGiaChuan, it);
 
         MonHoc mPOLI1304 = getOrCreateMonHoc("POLI1304", "Triết học Mác - Lênin", 3, 45, 0, donGiaChuan, soc);
         MonHoc mITEC1328 = getOrCreateMonHoc("ITEC1328", "Cấu trúc Dữ liệu và Thuật giải 2", 3, 30, 30, donGiaChuan, it);
@@ -98,7 +98,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
         MonHoc mPOLI1205 = getOrCreateMonHoc("POLI1205", "Kinh tế Chính trị Mác - Lênin", 2, 30, 0, donGiaChuan, soc);
         MonHoc mPOLI1206 = getOrCreateMonHoc("POLI1206", "Chủ nghĩa Xã hội Khoa học", 2, 30, 0, donGiaChuan, soc);
-        MonHoc mITEC2504 = getOrCreateMonHoc("ITEC2504", "Lập trình Hướng đối tượng (Java)", 4, 45, 30, donGiaChuan, it);
+        MonHoc mITEC2504 = getOrCreateMonHoc("ITEC2504", "Lập trình Hướng đối tượng Java", 4, 45, 30, donGiaChuan, it);
         MonHoc mITEC3401 = getOrCreateMonHoc("ITEC3401", "Phân tích Thiết kế Hệ thống", 4, 60, 0, donGiaChuan, it);
         MonHoc mITEC3201 = getOrCreateMonHoc("ITEC3201", "Kỹ năng Nghề nghiệp", 2, 30, 0, donGiaChuan, it);
 
@@ -106,16 +106,31 @@ public class CurriculumServiceImpl implements CurriculumService {
         MonHoc mPOLI1208 = getOrCreateMonHoc("POLI1208", "Tư tưởng Hồ Chí Minh", 2, 30, 0, donGiaChuan, soc);
         MonHoc mITEC1311 = getOrCreateMonHoc("ITEC1311", "Mẫu Thiết kế Hướng đối tượng", 3, 30, 30, donGiaChuan, it);
         MonHoc mITEC3413 = getOrCreateMonHoc("ITEC3413", "Trí tuệ Nhân tạo", 3, 30, 30, donGiaChuan, it);
+
         MonHoc mITEC4402 = getOrCreateMonHoc("ITEC4402", "Quản trị Hệ Cơ sở Dữ liệu", 3, 30, 30, donGiaChuan, it);
         MonHoc mITEC4409 = getOrCreateMonHoc("ITEC4409", "Công nghệ Phần mềm", 3, 30, 30, donGiaChuan, it);
         MonHoc mITEC3421 = getOrCreateMonHoc("ITEC3421", "Các Công nghệ Lập trình Hiện đại", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC3418 = getOrCreateMonHoc("ITEC3418", "Cơ sở Dữ liệu Phân tán", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC2303 = getOrCreateMonHoc("ITEC2303", "Phân tích Dữ liệu", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC3411 = getOrCreateMonHoc("ITEC3411", "Phát triển Ứng dụng Di động", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC3408 = getOrCreateMonHoc("ITEC3408", "Hệ thống Thông tin Doanh nghiệp", 3, 30, 30, donGiaChuan, it);
+
         MonHoc mITEC2314 = getOrCreateMonHoc("ITEC2314", "Máy học (Machine Learning)", 3, 30, 30, donGiaChuan, it);
         MonHoc mITEC4415 = getOrCreateMonHoc("ITEC4415", "Kiểm thử Phần mềm", 3, 30, 30, donGiaChuan, it);
         MonHoc mITEC2302 = getOrCreateMonHoc("ITEC2302", "Phát triển Hệ thống Web", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC3406 = getOrCreateMonHoc("ITEC3406", "Lập trình Cơ sở Dữ liệu", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC3417 = getOrCreateMonHoc("ITEC3417", "Khai phá Dữ liệu (Data Mining)", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC3422 = getOrCreateMonHoc("ITEC3422", "Điện toán Đám mây (Cloud Computing)", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC3412 = getOrCreateMonHoc("ITEC3412", "Xử lý Ngôn ngữ Tự nhiên (NLP)", 3, 30, 30, donGiaChuan, it);
+
         MonHoc mGLAW1315 = getOrCreateMonHoc("GLAW1315", "Pháp luật Đại cương", 3, 45, 0, donGiaChuan, law);
         MonHoc mITEC4401 = getOrCreateMonHoc("ITEC4401", "Đồ án Ngành", 4, 0, 120, donGiaChuan, it);
+
         MonHoc mITEC4899 = getOrCreateMonHoc("ITEC4899", "Thực tập Tốt nghiệp", 4, 0, 120, donGiaChuan, it);
+
         MonHoc mITEC4699 = getOrCreateMonHoc("ITEC4699", "Khóa luận Tốt nghiệp", 6, 0, 180, donGiaChuan, it);
+        MonHoc mITEC4319 = getOrCreateMonHoc("ITEC4319", "Môn tự chọn 3", 3, 30, 30, donGiaChuan, it);
+        MonHoc mITEC4320 = getOrCreateMonHoc("ITEC4320", "Môn tự chọn 4", 3, 30, 30, donGiaChuan, it);
 
         MonHoc mCSC101 = getOrCreateMonHoc("CSC101", "Advanced Programming (CLC)", 4, 45, 30, donGiaClc, spe);
         MonHoc mCSC201 = getOrCreateMonHoc("CSC201", "Data Structures & Algorithms (CLC)", 4, 45, 30, donGiaClc, spe);
@@ -128,73 +143,89 @@ public class CurriculumServiceImpl implements CurriculumService {
         Nganh se = nganhRepository.findById("SE").orElseGet(() -> nganhRepository.save(new Nganh("SE", "Kỹ thuật Phần mềm", "CHUAN", it)));
         Nganh csc = nganhRepository.findById("CSC").orElseGet(() -> nganhRepository.save(new Nganh("CSC", "Khoa học Máy tính (Chất lượng cao)", "CHAT_LUONG_CAO", spe)));
 
-        // CS: 11 Học kỳ chuẩn QĐ 561
-        saveCurriculumIfAbsent(cs, mMATH1315, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mGENG1311, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mGENG1312, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1401, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1505, 1, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mMATH1315, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mGENG1311, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mGENG1312, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1401, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1505, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
 
-        saveCurriculumIfAbsent(cs, mMATH1314, 2, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mGENG1313, 2, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mGENG1314, 2, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1504, 2, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1310, 2, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mMATH1314, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mGENG1313, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mGENG1314, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1504, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1310, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
 
-        saveCurriculumIfAbsent(cs, mMATH1313, 3, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mGENG1315, 3, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1427, 3, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1404, 3, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC2502, 3, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mMATH1313, 3, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mGENG1315, 3, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1427, 3, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1404, 3, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC2502, 3, "BAT_BUOC", "CHUNG", null, "CHUAN");
 
-        saveCurriculumIfAbsent(cs, mPOLI1304, 4, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1328, 4, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC2503, 4, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mMATH2402, 4, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mPOLI1304, 4, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1328, 4, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC2503, 4, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mMATH2402, 4, "BAT_BUOC", "CHUNG", null, "CHUAN");
 
-        saveCurriculumIfAbsent(cs, mPOLI1205, 5, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mPOLI1206, 5, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC2504, 5, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC3401, 5, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC3201, 5, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC4402, 5, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mPOLI1205, 5, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mPOLI1206, 5, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC2504, 5, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3401, 5, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3201, 5, "BAT_BUOC", "CHUNG", null, "CHUAN");
 
-        saveCurriculumIfAbsent(cs, mPOLI1207, 6, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mPOLI1208, 6, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC1311, 6, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC3413, 6, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mPOLI1207, 6, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mPOLI1208, 6, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC1311, 6, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3413, 6, "BAT_BUOC", "CHUNG", null, "CHUAN");
 
-        saveCurriculumIfAbsent(cs, mITEC4409, 7, "TU_CHON", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC3421, 7, "TU_CHON", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC2314, 8, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC4415, 8, "TU_CHON", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC2302, 8, "TU_CHON", "CHUAN");
-        saveCurriculumIfAbsent(cs, mGLAW1315, 9, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC4401, 9, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC4899, 10, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(cs, mITEC4699, 11, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC4402, 7, "BAT_BUOC", "CHUNG", null, "CHUAN");
 
-        // IT
-        saveCurriculumIfAbsent(itMajor, mITEC1401, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(itMajor, mITEC1505, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(itMajor, mMATH1315, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(itMajor, mITEC1427, 2, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(itMajor, mITEC2502, 2, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(itMajor, mITEC2503, 3, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(itMajor, mITEC2504, 3, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC4409, 7, "CHUYEN_NGANH", "CONG_NGHE_PHAN_MEM", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3421, 7, "CHUYEN_NGANH", "CONG_NGHE_PHAN_MEM", null, "CHUAN");
 
-        // SE
-        saveCurriculumIfAbsent(se, mITEC1505, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(se, mITEC1504, 1, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(se, mITEC1427, 2, "BAT_BUOC", "CHUAN");
-        saveCurriculumIfAbsent(se, mITEC4409, 2, "BAT_BUOC", "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3418, 7, "CHUYEN_NGANH", "KHOA_HOC_DU_LIEU", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC2303, 7, "CHUYEN_NGANH", "KHOA_HOC_DU_LIEU", null, "CHUAN");
 
-        // CSC
-        saveCurriculumIfAbsent(csc, mCSC101, 1, "BAT_BUOC", "CHAT_LUONG_CAO");
-        saveCurriculumIfAbsent(csc, mCSC201, 2, "BAT_BUOC", "CHAT_LUONG_CAO");
-        saveCurriculumIfAbsent(csc, mCSC301, 3, "BAT_BUOC", "CHAT_LUONG_CAO");
-        saveCurriculumIfAbsent(csc, mCSC401, 4, "BAT_BUOC", "CHAT_LUONG_CAO");
-        saveCurriculumIfAbsent(csc, mCSC501, 5, "BAT_BUOC", "CHAT_LUONG_CAO");
+        saveCurriculumIfAbsent(cs, mITEC3411, 7, "TU_CHON", "TU_CHON", "TC_HK7", "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3408, 7, "TU_CHON", "TU_CHON", "TC_HK7", "CHUAN");
+
+        saveCurriculumIfAbsent(cs, mITEC2314, 8, "BAT_BUOC", "CHUNG", null, "CHUAN");
+
+        saveCurriculumIfAbsent(cs, mITEC4415, 8, "CHUYEN_NGANH", "CONG_NGHE_PHAN_MEM", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC2302, 8, "CHUYEN_NGANH", "CONG_NGHE_PHAN_MEM", null, "CHUAN");
+
+        saveCurriculumIfAbsent(cs, mITEC3406, 8, "CHUYEN_NGANH", "KHOA_HOC_DU_LIEU", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3417, 8, "CHUYEN_NGANH", "KHOA_HOC_DU_LIEU", null, "CHUAN");
+
+        saveCurriculumIfAbsent(cs, mITEC3422, 8, "TU_CHON", "TU_CHON", "TC_HK8", "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC3412, 8, "TU_CHON", "TU_CHON", "TC_HK8", "CHUAN");
+
+        saveCurriculumIfAbsent(cs, mGLAW1315, 9, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC4401, 9, "BAT_BUOC", "CHUNG", null, "CHUAN");
+
+        saveCurriculumIfAbsent(cs, mITEC4899, 10, "BAT_BUOC", "CHUNG", null, "CHUAN");
+
+        saveCurriculumIfAbsent(cs, mITEC4699, 11, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC4319, 11, "TU_CHON", "TU_CHON", "THAY_THE_KLTN", "CHUAN");
+        saveCurriculumIfAbsent(cs, mITEC4320, 11, "TU_CHON", "TU_CHON", "THAY_THE_KLTN", "CHUAN");
+
+        saveCurriculumIfAbsent(itMajor, mITEC1401, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(itMajor, mITEC1505, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(itMajor, mMATH1315, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(itMajor, mITEC1427, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(itMajor, mITEC2502, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(itMajor, mITEC2503, 3, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(itMajor, mITEC2504, 3, "BAT_BUOC", "CHUNG", null, "CHUAN");
+
+        saveCurriculumIfAbsent(se, mITEC1505, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(se, mITEC1504, 1, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(se, mITEC1427, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+        saveCurriculumIfAbsent(se, mITEC4409, 2, "BAT_BUOC", "CHUNG", null, "CHUAN");
+
+        saveCurriculumIfAbsent(csc, mCSC101, 1, "BAT_BUOC", "CHUNG", null, "CHAT_LUONG_CAO");
+        saveCurriculumIfAbsent(csc, mCSC201, 2, "BAT_BUOC", "CHUNG", null, "CHAT_LUONG_CAO");
+        saveCurriculumIfAbsent(csc, mCSC301, 3, "BAT_BUOC", "CHUNG", null, "CHAT_LUONG_CAO");
+        saveCurriculumIfAbsent(csc, mCSC401, 4, "BAT_BUOC", "CHUNG", null, "CHAT_LUONG_CAO");
+        saveCurriculumIfAbsent(csc, mCSC501, 5, "BAT_BUOC", "CHUNG", null, "CHAT_LUONG_CAO");
     }
 
     private MonHoc getOrCreateMonHoc(String maMon, String tenMon, int soTinChi, int lt, int th, BigDecimal donGia, Khoa khoa) {
@@ -203,7 +234,7 @@ public class CurriculumServiceImpl implements CurriculumService {
         });
     }
 
-    private void saveCurriculumIfAbsent(Nganh nganh, MonHoc monHoc, int hocKyGoiY, String loaiHocPhan, String heDaoTao) {
+    private void saveCurriculumIfAbsent(Nganh nganh, MonHoc monHoc, int hocKyGoiY, String loaiHocPhan, String chuyenNganh, String nhomTuChon, String heDaoTao) {
         if (nganh == null || monHoc == null) return;
         List<ChuongTrinhDaoTao> existing = chuongTrinhDaoTaoRepository.findByNganh_MaNganhAndHocKyGoiY(nganh.getMaNganh(), hocKyGoiY);
         boolean exists = existing.stream().anyMatch(c -> c.getMonHoc() != null && monHoc.getMaMon().equalsIgnoreCase(c.getMonHoc().getMaMon()));
@@ -213,6 +244,8 @@ public class CurriculumServiceImpl implements CurriculumService {
                     .monHoc(monHoc)
                     .hocKyGoiY(hocKyGoiY)
                     .loaiHocPhan(loaiHocPhan)
+                    .chuyenNganh(chuyenNganh != null ? chuyenNganh : "CHUNG")
+                    .nhomTuChon(nhomTuChon)
                     .heDaoTao(heDaoTao)
                     .build());
         }
@@ -276,7 +309,14 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     public List<BangDiemHocKyDTO> getAllStudentGrades(String mssv) {
-        List<HocKy> allHocKy = hocKyRepository.findAll();
+        List<HocKy> allHocKy = new ArrayList<>(hocKyRepository.findAll());
+        allHocKy.sort((a, b) -> {
+            int yearA = extractYear(a);
+            int yearB = extractYear(b);
+            if (yearA != yearB) return Integer.compare(yearA, yearB);
+            return Integer.compare(extractHkNum(a), extractHkNum(b));
+        });
+
         List<BangDiemHocKyDTO> results = new ArrayList<>();
         for (HocKy hk : allHocKy) {
             BangDiemHocKyDTO dto = getStudentGradesBySemester(mssv, hk.getMaHocKy());
@@ -287,6 +327,23 @@ public class CurriculumServiceImpl implements CurriculumService {
         return results;
     }
 
+    private int extractYear(HocKy hk) {
+        if (hk == null || hk.getNamHoc() == null) return 2023;
+        try {
+            return Integer.parseInt(hk.getNamHoc().substring(0, 4));
+        } catch (Exception e) {
+            return 2023;
+        }
+    }
+
+    private int extractHkNum(HocKy hk) {
+        if (hk == null || hk.getMaHocKy() == null) return 1;
+        String s = hk.getMaHocKy().toUpperCase();
+        if (s.contains("HK2")) return 2;
+        if (s.contains("HK3")) return 3;
+        return 1;
+    }
+
     @Override
     public QuyHocBongNganhDTO calculateMajorBudget(String maNganh, String maHocKy) {
         Nganh ng = nganhRepository.findById(maNganh).orElse(null);
@@ -294,7 +351,6 @@ public class CurriculumServiceImpl implements CurriculumService {
 
         List<DiemHocPhan> diemList = diemHocPhanRepository.findBySinhVien_LopSinhHoat_Nganh_MaNganhAndHocKy_MaHocKy(maNganh, maHocKy);
 
-        // Map học phí theo sinh viên
         Map<String, BigDecimal> svHocPhiMap = new HashMap<>();
         for (DiemHocPhan d : diemList) {
             if (d.getSinhVien() != null && d.getHocPhiMon() != null) {
@@ -304,7 +360,7 @@ public class CurriculumServiceImpl implements CurriculumService {
         }
 
         BigDecimal tongThuHocPhi = svHocPhiMap.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-        // Quỹ học bổng = 8% Tổng học phí thu được
+
         BigDecimal quyHb8 = tongThuHocPhi.multiply(new BigDecimal("0.08")).setScale(0, RoundingMode.HALF_UP);
 
         return QuyHocBongNganhDTO.builder()
@@ -367,6 +423,8 @@ public class CurriculumServiceImpl implements CurriculumService {
                 .hocPhiDuKien(hocPhi)
                 .hocKyGoiY(c.getHocKyGoiY())
                 .loaiHocPhan(c.getLoaiHocPhan())
+                .chuyenNganh(c.getChuyenNganh() != null ? c.getChuyenNganh() : "CHUNG")
+                .nhomTuChon(c.getNhomTuChon())
                 .heDaoTao(c.getHeDaoTao())
                 .build();
     }

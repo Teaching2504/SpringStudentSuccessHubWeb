@@ -15,7 +15,7 @@ public class KetQuaRenLuyen {
     private BigDecimal diemRenLuyen;
 
     @Column(name = "xepLoai", length = 50)
-    private String xepLoai; // Xuat sac, Tot, Kha, Trung binh, Yeu, Kem
+    private String xepLoai;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mssv", nullable = false)

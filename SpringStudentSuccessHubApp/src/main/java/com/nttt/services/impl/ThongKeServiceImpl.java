@@ -88,15 +88,17 @@ public class ThongKeServiceImpl implements ThongKeService {
         }
 
         for (HoSoHocBong hs : allDossiers) {
-            if ("CHINH_THUC".equalsIgnoreCase(hs.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(hs.getTrangThai())) {
+            if (("CHINH_THUC".equalsIgnoreCase(hs.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(hs.getTrangThai()))
+                    && hs.getMucHocBong() != null && hs.getMucHocBong().compareTo(BigDecimal.ZERO) > 0
+                    && !"KHONG_DAT".equalsIgnoreCase(hs.getLoaiHocBong())) {
                 String tenKhoa = hs.getDotXetHbKhoa().getKhoa().getTenKhoa();
                 hbKhoa.put(tenKhoa, hbKhoa.getOrDefault(tenKhoa, 0L) + 1);
 
                 BigDecimal curTien = kinhPhiKhoa.getOrDefault(tenKhoa, BigDecimal.ZERO);
-                kinhPhiKhoa.put(tenKhoa, curTien.add(hs.getMucHocBong() != null ? hs.getMucHocBong() : BigDecimal.ZERO));
+                kinhPhiKhoa.put(tenKhoa, curTien.add(hs.getMucHocBong()));
 
                 String loai = hs.getLoaiHocBong();
-                if (loai != null) {
+                if (loai != null && loaiHbMap.containsKey(loai)) {
                     loaiHbMap.put(loai, loaiHbMap.getOrDefault(loai, 0L) + 1);
                 }
             }
@@ -132,12 +134,15 @@ public class ThongKeServiceImpl implements ThongKeService {
                 .toList();
 
         long tongDat = allDossiers.stream()
-                .filter(h -> "CHINH_THUC".equalsIgnoreCase(h.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(h.getTrangThai()))
+                .filter(h -> ("CHINH_THUC".equalsIgnoreCase(h.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(h.getTrangThai()))
+                        && h.getMucHocBong() != null && h.getMucHocBong().compareTo(BigDecimal.ZERO) > 0
+                        && !"KHONG_DAT".equalsIgnoreCase(h.getLoaiHocBong()))
                 .count();
 
         BigDecimal tongTien = allDossiers.stream()
-                .filter(h -> "CHINH_THUC".equalsIgnoreCase(h.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(h.getTrangThai()))
-                .map(h -> h.getMucHocBong() != null ? h.getMucHocBong() : BigDecimal.ZERO)
+                .filter(h -> ("CHINH_THUC".equalsIgnoreCase(h.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(h.getTrangThai()))
+                        && h.getMucHocBong() != null && h.getMucHocBong().compareTo(BigDecimal.ZERO) > 0)
+                .map(HoSoHocBong::getMucHocBong)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         long mcChoDuyet = minhChungRepository.findBySinhVien_LopSinhHoat_Khoa_MaKhoaAndTrangThai(targetKhoa, "CHO_DUYET").size();
@@ -158,9 +163,10 @@ public class ThongKeServiceImpl implements ThongKeService {
         loaiHbMap.put("KHA", 0L);
 
         for (HoSoHocBong hs : allDossiers) {
-            if ("CHINH_THUC".equalsIgnoreCase(hs.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(hs.getTrangThai())) {
+            if (("CHINH_THUC".equalsIgnoreCase(hs.getTrangThai()) || "DU_KIEN".equalsIgnoreCase(hs.getTrangThai()))
+                    && hs.getMucHocBong() != null && hs.getMucHocBong().compareTo(BigDecimal.ZERO) > 0) {
                 String loai = hs.getLoaiHocBong();
-                if (loai != null) {
+                if (loai != null && loaiHbMap.containsKey(loai)) {
                     loaiHbMap.put(loai, loaiHbMap.getOrDefault(loai, 0L) + 1);
                 }
             }

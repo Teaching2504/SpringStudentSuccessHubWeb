@@ -71,7 +71,6 @@ public class ScholarshipRuleEngineService {
                         .build()
                 );
 
-        // Lấy tất cả sinh viên thuộc Khoa đang xét
         List<SinhVien> sinhViens = sinhVienRepository.findByLopSinhHoat_Khoa_MaKhoa(maKhoa);
 
         class Candidate {
@@ -82,7 +81,7 @@ public class ScholarshipRuleEngineService {
             BigDecimal tongHocPhiSV = BigDecimal.ZERO;
             boolean eligible = false;
             String loaiHb = "KHONG_DAT";
-            int tyLeHb = 0; // 100, 70, 50
+            int tyLeHb = 0;
             BigDecimal mucTien = BigDecimal.ZERO;
             BigDecimal diemXet = BigDecimal.ZERO;
             String rejectReason = "";
@@ -108,7 +107,15 @@ public class ScholarshipRuleEngineService {
                         this.tenNganh = sv.getLopSinhHoat().getNganh().getTenNganh();
                         this.heDaoTao = sv.getLopSinhHoat().getNganh().getHeDaoTao() != null ? sv.getLopSinhHoat().getNganh().getHeDaoTao() : "CHUAN";
                     }
-                    this.khoaHoc = sv.getLopSinhHoat().getKhoaHoc() != null ? sv.getLopSinhHoat().getKhoaHoc() : "K23 (2023-2027)";
+                    if (sv.getLopSinhHoat().getKhoaHoc() != null) {
+                        String rawK = sv.getLopSinhHoat().getKhoaHoc();
+                        if (rawK.contains("23")) this.khoaHoc = "K23 (2023-2027)";
+                        else if (rawK.contains("24")) this.khoaHoc = "K24 (2024-2028)";
+                        else if (rawK.contains("25")) this.khoaHoc = "K25 (2025-2029)";
+                        else this.khoaHoc = rawK;
+                    } else {
+                        this.khoaHoc = "K23 (2023-2027)";
+                    }
                 }
             }
         }
@@ -116,10 +123,6 @@ public class ScholarshipRuleEngineService {
         List<Candidate> candidateList = new ArrayList<>();
 
         for (SinhVien sv : sinhViens) {
-            if (!"DANG_HOC".equalsIgnoreCase(sv.getTrangThaiHoc())) {
-                continue;
-            }
-
             Optional<KetQuaHocTap> gpaOpt = (hocKy != null) ?
                     ketQuaHocTapRepository.findBySinhVien_MssvAndHocKy_MaHocKy(sv.getMssv(), hocKy.getMaHocKy()) :
                     ketQuaHocTapRepository.findBySinhVien_Mssv(sv.getMssv()).stream().findFirst();
@@ -128,12 +131,24 @@ public class ScholarshipRuleEngineService {
                     ketQuaRenLuyenRepository.findBySinhVien_MssvAndHocKy_MaHocKy(sv.getMssv(), hocKy.getMaHocKy()) :
                     ketQuaRenLuyenRepository.findBySinhVien_Mssv(sv.getMssv()).stream().findFirst();
 
-            if (gpaOpt.isEmpty() || drlOpt.isEmpty()) {
+            if (gpaOpt.isEmpty() && drlOpt.isEmpty()) {
                 continue;
             }
 
-            KetQuaHocTap gpa = gpaOpt.get();
-            KetQuaRenLuyen drl = drlOpt.get();
+            KetQuaHocTap gpa = gpaOpt.orElseGet(() -> KetQuaHocTap.builder()
+                    .sinhVien(sv)
+                    .hocKy(hocKy)
+                    .diemTrungBinh(BigDecimal.ZERO)
+                    .soTinChi(0)
+                    .coHocPhanRot(false)
+                    .build());
+
+            KetQuaRenLuyen drl = drlOpt.orElseGet(() -> KetQuaRenLuyen.builder()
+                    .sinhVien(sv)
+                    .hocKy(hocKy)
+                    .diemRenLuyen(BigDecimal.ZERO)
+                    .xepLoai("Kém")
+                    .build());
 
             List<DiemHocPhan> diemList = (hocKy != null) ?
                     diemHocPhanRepository.findBySinhVien_MssvAndHocKy_MaHocKy(sv.getMssv(), hocKy.getMaHocKy()) :
@@ -141,7 +156,6 @@ public class ScholarshipRuleEngineService {
 
             Candidate cand = new Candidate(sv, gpa, drl, diemList);
 
-            // 1. Tính tổng học phí sinh viên đóng trong học kỳ này
             BigDecimal hocPhiSV = BigDecimal.ZERO;
             boolean coMonRot = false;
 
@@ -155,8 +169,7 @@ public class ScholarshipRuleEngineService {
                     }
                 }
             } else {
-                // Fallback nếu chưa có DiemHocPhan chi tiết: tính từ số tín chỉ * đơn giá hệ
-                int credits = gpa.getSoTinChi() != null ? gpa.getSoTinChi() : 18;
+                int credits = gpa.getSoTinChi() != null ? gpa.getSoTinChi() : 0;
                 BigDecimal donGia = ("DAC_BIET".equalsIgnoreCase(cand.heDaoTao) || "CHAT_LUONG_CAO".equalsIgnoreCase(cand.heDaoTao)) ?
                         new BigDecimal("1450000") : new BigDecimal("650000");
                 hocPhiSV = donGia.multiply(BigDecimal.valueOf(credits));
@@ -165,25 +178,37 @@ public class ScholarshipRuleEngineService {
 
             cand.tongHocPhiSV = hocPhiSV;
 
-            // 2. Kiểm tra điều kiện xét học bổng (Validation Rules)
             boolean passed = true;
             BigDecimal diemTb = gpa.getDiemTrungBinh() != null ? gpa.getDiemTrungBinh() : BigDecimal.ZERO;
             BigDecimal diemRl = drl.getDiemRenLuyen() != null ? drl.getDiemRenLuyen() : BigDecimal.ZERO;
             int credits = gpa.getSoTinChi() != null ? gpa.getSoTinChi() : 0;
 
-            if (Boolean.TRUE.equals(quyTac.getKhongNoMon()) && coMonRot) {
+            if (!"DANG_HOC".equalsIgnoreCase(sv.getTrangThaiHoc())) {
+                passed = false;
+                if ("CANH_CAO_HOC_VU".equalsIgnoreCase(sv.getTrangThaiHoc())) {
+                    cand.rejectReason = "Bị Cảnh cáo học vụ";
+                } else if ("BAO_LUU".equalsIgnoreCase(sv.getTrangThaiHoc())) {
+                    cand.rejectReason = "Đang Bảo lưu kết quả học tập";
+                } else if ("THOI_HOC".equalsIgnoreCase(sv.getTrangThaiHoc())) {
+                    cand.rejectReason = "Đã thôi học";
+                } else {
+                    cand.rejectReason = "Trạng thái học tập không hợp lệ (" + sv.getTrangThaiHoc() + ")";
+                }
+            }
+
+            if (passed && Boolean.TRUE.equals(quyTac.getKhongNoMon()) && (coMonRot || Boolean.TRUE.equals(gpa.getCoHocPhanRot()))) {
                 passed = false;
                 cand.rejectReason = "Nợ học phần trong kỳ";
             }
-            if (credits < (quyTac.getSoTinChiToiThieu() != null ? quyTac.getSoTinChiToiThieu() : 14)) {
+            if (passed && credits < (quyTac.getSoTinChiToiThieu() != null ? quyTac.getSoTinChiToiThieu() : 14)) {
                 passed = false;
                 cand.rejectReason = "Không đủ số tín chỉ tối thiểu (" + credits + " < " + quyTac.getSoTinChiToiThieu() + ")";
             }
-            if (quyTac.getDiemTbDuoiThieu() != null && diemTb.compareTo(quyTac.getDiemTbDuoiThieu()) < 0) {
+            if (passed && quyTac.getDiemTbDuoiThieu() != null && diemTb.compareTo(quyTac.getDiemTbDuoiThieu()) < 0) {
                 passed = false;
                 cand.rejectReason = "Điểm TB học tập thấp hơn ngưỡng (" + diemTb + " < " + quyTac.getDiemTbDuoiThieu() + ")";
             }
-            if (quyTac.getDiemRlToiThieu() != null && diemRl.compareTo(quyTac.getDiemRlToiThieu()) < 0) {
+            if (passed && quyTac.getDiemRlToiThieu() != null && diemRl.compareTo(quyTac.getDiemRlToiThieu()) < 0) {
                 passed = false;
                 cand.rejectReason = "Điểm rèn luyện thấp hơn ngưỡng (" + diemRl + " < " + quyTac.getDiemRlToiThieu() + ")";
             }
@@ -192,22 +217,29 @@ public class ScholarshipRuleEngineService {
                 cand.eligible = true;
                 cand.diemXet = diemTb;
 
-                // 3. Phân loại Học bổng Khuyến khích Học tập theo tỷ lệ % học phí thực tế của kỳ:
-                // - Xuất sắc: 100% Học phí (GPA >= 3.60 và ĐRL >= 90)
-                // - Giỏi:      70% Học phí (GPA >= 3.20 và ĐRL >= 80)
-                // - Khá:       50% Học phí (GPA >= 2.50 và ĐRL >= 65)
+                BigDecimal pctXuatSac = (quyTac.getMucHocBongXuatSac() != null && quyTac.getMucHocBongXuatSac().compareTo(BigDecimal.valueOf(200)) <= 0) ?
+                        quyTac.getMucHocBongXuatSac() : new BigDecimal("100");
+                BigDecimal pctGioi = (quyTac.getMucHocBongGioi() != null && quyTac.getMucHocBongGioi().compareTo(BigDecimal.valueOf(200)) <= 0) ?
+                        quyTac.getMucHocBongGioi() : new BigDecimal("70");
+                BigDecimal pctKha = (quyTac.getMucHocBongKha() != null && quyTac.getMucHocBongKha().compareTo(BigDecimal.valueOf(200)) <= 0) ?
+                        quyTac.getMucHocBongKha() : new BigDecimal("50");
+
+                BigDecimal rateXuatSac = pctXuatSac.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                BigDecimal rateGioi = pctGioi.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                BigDecimal rateKha = pctKha.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+
                 if (diemTb.compareTo(BigDecimal.valueOf(3.60)) >= 0 && diemRl.compareTo(BigDecimal.valueOf(90.0)) >= 0) {
                     cand.loaiHb = "XUAT_SAC";
-                    cand.tyLeHb = 100;
-                    cand.mucTien = cand.tongHocPhiSV.multiply(BigDecimal.valueOf(1.00));
+                    cand.tyLeHb = pctXuatSac.intValue();
+                    cand.mucTien = cand.tongHocPhiSV.multiply(rateXuatSac).setScale(0, RoundingMode.HALF_UP);
                 } else if (diemTb.compareTo(BigDecimal.valueOf(3.20)) >= 0 && diemRl.compareTo(BigDecimal.valueOf(80.0)) >= 0) {
                     cand.loaiHb = "GIOI";
-                    cand.tyLeHb = 70;
-                    cand.mucTien = cand.tongHocPhiSV.multiply(BigDecimal.valueOf(0.70)).setScale(0, RoundingMode.HALF_UP);
+                    cand.tyLeHb = pctGioi.intValue();
+                    cand.mucTien = cand.tongHocPhiSV.multiply(rateGioi).setScale(0, RoundingMode.HALF_UP);
                 } else if (diemTb.compareTo(BigDecimal.valueOf(2.50)) >= 0 && diemRl.compareTo(BigDecimal.valueOf(65.0)) >= 0) {
                     cand.loaiHb = "KHA";
-                    cand.tyLeHb = 50;
-                    cand.mucTien = cand.tongHocPhiSV.multiply(BigDecimal.valueOf(0.50)).setScale(0, RoundingMode.HALF_UP);
+                    cand.tyLeHb = pctKha.intValue();
+                    cand.mucTien = cand.tongHocPhiSV.multiply(rateKha).setScale(0, RoundingMode.HALF_UP);
                 } else {
                     cand.eligible = false;
                     cand.loaiHb = "KHONG_DAT";
@@ -219,8 +251,6 @@ public class ScholarshipRuleEngineService {
             candidateList.add(cand);
         }
 
-        // 4. Phân chia học bổng theo từng NGÀNH và từng KHÓA (Cohort & Major)
-        // Group key: maNganh + "___" + khoaHoc (VD: "CS___K23 (2023-2027)")
         Map<String, List<Candidate>> candidatesByMajorAndCohort = candidateList.stream()
                 .collect(Collectors.groupingBy(c -> (c.maNganh != null ? c.maNganh : "UNKNOWN") + "___" + (c.khoaHoc != null ? c.khoaHoc : "UNKNOWN")));
 
@@ -229,16 +259,22 @@ public class ScholarshipRuleEngineService {
         for (Map.Entry<String, List<Candidate>> entry : candidatesByMajorAndCohort.entrySet()) {
             List<Candidate> cohortCandidates = entry.getValue();
 
-            // Tính Tổng thu học phí của riêng Nhóm (Ngành, Khóa) này
             BigDecimal tongThuHocPhiNhom = cohortCandidates.stream()
                     .map(c -> c.tongHocPhiSV)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            // Quỹ học bổng = 8% Tổng thu học phí của Nhóm (Tối thiểu 15 triệu nếu dữ liệu mẫu ít sinh viên)
             BigDecimal quy8PhanTram = tongThuHocPhiNhom.multiply(new BigDecimal("0.08")).setScale(0, RoundingMode.HALF_UP);
-            BigDecimal cohortBudget = quy8PhanTram.compareTo(new BigDecimal("15000000")) > 0 ? quy8PhanTram : new BigDecimal("25000000");
+            BigDecimal cohortBudget = quy8PhanTram;
 
-            // Sắp xếp thứ hạng trong nhóm (Ngành, Khóa): Đủ điều kiện xếp trước, sau đó giảm dần theo GPA -> ĐRL -> Số tín chỉ
+            if (dotKhoa.getNganSachKhoa() != null && dotKhoa.getNganSachKhoa().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal facultyBudget = dotKhoa.getNganSachKhoa();
+                BigDecimal ratio = BigDecimal.valueOf(cohortCandidates.size()).divide(BigDecimal.valueOf(Math.max(1, candidateList.size())), 4, RoundingMode.HALF_UP);
+                BigDecimal allocated = facultyBudget.multiply(ratio).setScale(0, RoundingMode.HALF_UP);
+                if (allocated.compareTo(cohortBudget) > 0) {
+                    cohortBudget = allocated;
+                }
+            }
+
             cohortCandidates.sort((c1, c2) -> {
                 if (c1.eligible != c2.eligible) {
                     return c1.eligible ? -1 : 1;
@@ -256,7 +292,6 @@ public class ScholarshipRuleEngineService {
                 return c1.sv.getMssv().compareTo(c2.sv.getMssv());
             });
 
-            // Phân bổ quỹ từ trên xuống dưới cho từng (Ngành, Khóa)
             BigDecimal remainingBudget = cohortBudget;
             int rank = 1;
 
@@ -278,13 +313,21 @@ public class ScholarshipRuleEngineService {
                     hoSo.setLoaiHocBong(c.loaiHb);
                     hoSo.setMucHocBong(c.mucTien);
                     hoSo.setTrangThai("DU_KIEN");
-                    remainingBudget = remainingBudget.subtract(c.mucTien); // Trừ vào quỹ học bổng 8% của nhóm
+                    remainingBudget = remainingBudget.subtract(c.mucTien);
+                    rank++;
+                } else if (c.eligible && remainingBudget.compareTo(BigDecimal.ZERO) > 0) {
+                    // Nếu ngân sách còn dư một khoản (ví dụ 1 triệu), chỉ cấp DUY NHẤT cho 1 sinh viên xếp liền sau
+                    hoSo.setThuHang(rank);
+                    hoSo.setLoaiHocBong(c.loaiHb);
+                    hoSo.setMucHocBong(remainingBudget); // Cấp đúng số tiền còn dư
+                    hoSo.setTrangThai("DU_KIEN");
+                    remainingBudget = BigDecimal.ZERO;   // Hết ngân sách ngay lập tức
                     rank++;
                 } else if (c.eligible) {
                     hoSo.setThuHang(rank);
-                    hoSo.setLoaiHocBong(c.loaiHb);
+                    hoSo.setLoaiHocBong("KHONG_DAT");
                     hoSo.setMucHocBong(BigDecimal.ZERO);
-                    hoSo.setTrangThai("KHONG_DAT"); // Không đạt do hết quỹ 8% của nhóm
+                    hoSo.setTrangThai("KHONG_DAT");
                     rank++;
                 } else {
                     hoSo.setThuHang(null);
@@ -300,9 +343,6 @@ public class ScholarshipRuleEngineService {
         return savedList.stream().map(hs -> mapToHoSoDTO(hs, hocKy)).collect(Collectors.toList());
     }
 
-    /**
-     * Tính toán chi tiết phân rã Quỹ 8% học phí theo từng Khoa, từng Ngành, từng Khóa học cho Cấp Trường
-     */
     @Transactional(readOnly = true)
     public List<QuyHocBongNganhDTO> calculateAllMajorBudgets(String maDot) {
         DotXetHocBong dot = dotXetHocBongRepository.findById(maDot)
@@ -312,7 +352,6 @@ public class ScholarshipRuleEngineService {
 
         List<SinhVien> sinhViens = sinhVienRepository.findAll();
 
-        // Group sinhViens by (maKhoa, maNganh, khoaHoc)
         Map<String, List<SinhVien>> groupMap = sinhViens.stream()
                 .filter(sv -> "DANG_HOC".equalsIgnoreCase(sv.getTrangThaiHoc()) && sv.getLopSinhHoat() != null)
                 .collect(Collectors.groupingBy(sv -> {
@@ -357,8 +396,12 @@ public class ScholarshipRuleEngineService {
             }
 
             BigDecimal quy8 = totalTuition.multiply(new BigDecimal("0.08")).setScale(0, RoundingMode.HALF_UP);
-            int soSuatDuKien = quy8.divide(new BigDecimal("10000000"), 0, RoundingMode.HALF_UP).intValue();
-            if (soSuatDuKien < 1 && quy8.compareTo(BigDecimal.ZERO) > 0) soSuatDuKien = 1;
+            int soSuatDuKien = 0;
+            if (quy8.compareTo(BigDecimal.ZERO) > 0) {
+
+                soSuatDuKien = (int) Math.ceil(quy8.doubleValue() / 8190000.0);
+                if (soSuatDuKien < 1) soSuatDuKien = 1;
+            }
 
             result.add(QuyHocBongNganhDTO.builder()
                     .maKhoa(maKhoa)
@@ -432,7 +475,6 @@ public class ScholarshipRuleEngineService {
                 b.diemRenLuyen(d.getDiemRenLuyen());
             });
 
-            // Lấy danh sách điểm môn học chi tiết và tính tổng học phí
             List<DiemHocPhan> diemList = diemHocPhanRepository.findBySinhVien_MssvAndHocKy_MaHocKy(sv.getMssv(), targetHocKy);
             if (!diemList.isEmpty()) {
                 List<DiemHocPhanDTO> dtoList = diemList.stream().map(d -> DiemHocPhanDTO.builder()
@@ -460,7 +502,7 @@ public class ScholarshipRuleEngineService {
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
                 b.tongHocPhiKy(tongHocPhi);
             } else {
-                // Fallback tính học phí
+
                 BigDecimal donGia = (b.build().getHeDaoTao() != null && ("DAC_BIET".equalsIgnoreCase(b.build().getHeDaoTao()) || "CHAT_LUONG_CAO".equalsIgnoreCase(b.build().getHeDaoTao())))
                         ? new BigDecimal("1450000") : new BigDecimal("650000");
                 int tc = b.build().getSoTinChi() != null ? b.build().getSoTinChi() : 18;
@@ -468,7 +510,6 @@ public class ScholarshipRuleEngineService {
             }
         }
 
-        // Tỷ lệ học bổng và tiền thực nhận
         if ("XUAT_SAC".equalsIgnoreCase(hs.getLoaiHocBong())) {
             b.tyLeHocBong(100);
         } else if ("GIOI".equalsIgnoreCase(hs.getLoaiHocBong())) {

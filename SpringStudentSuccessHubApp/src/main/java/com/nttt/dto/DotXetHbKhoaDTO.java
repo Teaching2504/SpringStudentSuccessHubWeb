@@ -12,7 +12,7 @@ public class DotXetHbKhoaDTO {
     private Integer chiTieu;
     private BigDecimal nganSachKhoa;
     private LocalDate hanPhanHoi;
-    private String trangThai; // CHUA_XET, DA_CONG_BO_DU_KIEN, DA_CHOT_GUI_TRUONG, DA_PHE_DUYET, BI_TRA_VE
+    private String trangThai;
     private String lyDoTraVe;
     private Integer soLuongDuKien;
     private Integer soLuongChinhThuc;

@@ -80,7 +80,6 @@ public class WebTruongController {
         List<DotXetHbKhoaDTO> dotKhoasList = dotXetHocBongService.getDotKhoaByMaDot(maDot);
         List<QuyHocBongNganhDTO> allBreakdown = dotXetHocBongService.getBudgetBreakdown(maDot);
 
-        // Filter budget breakdown
         List<QuyHocBongNganhDTO> filteredBreakdown = allBreakdown.stream().filter(item -> {
             if (filterSearch != null && !filterSearch.isBlank()) {
                 String q = filterSearch.toLowerCase();
@@ -113,12 +112,10 @@ public class WebTruongController {
             return true;
         }).toList();
 
-        // Unique filter items
         List<String> uniqueBudgetKhoas = allBreakdown.stream().map(QuyHocBongNganhDTO::getMaKhoa).filter(k -> k != null && !k.isBlank()).distinct().toList();
         List<String> uniqueBudgetKhoaHocs = allBreakdown.stream().map(QuyHocBongNganhDTO::getKhoaHoc).filter(k -> k != null && !k.isBlank()).distinct().toList();
         List<String> uniqueBudgetNganhs = allBreakdown.stream().map(QuyHocBongNganhDTO::getTenNganh).filter(k -> k != null && !k.isBlank()).distinct().toList();
 
-        // Totals
         int totalStudents = filteredBreakdown.stream().mapToInt(b -> b.getSoSinhVienTong() != null ? b.getSoSinhVienTong() : 0).sum();
         BigDecimal totalTuitionSum = filteredBreakdown.stream().map(b -> b.getTongHocPhiThu() != null ? b.getTongHocPhiThu() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal total8PercentFund = filteredBreakdown.stream().map(b -> b.getQuyHocBong8PhanTram() != null ? b.getQuyHocBong8PhanTram() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -169,9 +166,9 @@ public class WebTruongController {
                               @RequestParam("diemRlToiThieu") BigDecimal diemRlToiThieu,
                               @RequestParam("soTinChiToiThieu") int soTinChiToiThieu,
                               @RequestParam(value = "khongNoMon", defaultValue = "true") boolean khongNoMon,
-                              @RequestParam(value = "mucHocBongXuatSac", defaultValue = "10000000") BigDecimal mucHocBongXuatSac,
-                              @RequestParam(value = "mucHocBongGioi", defaultValue = "7000000") BigDecimal mucHocBongGioi,
-                              @RequestParam(value = "mucHocBongKha", defaultValue = "5000000") BigDecimal mucHocBongKha,
+                              @RequestParam(value = "mucHocBongXuatSac", defaultValue = "100") BigDecimal mucHocBongXuatSac,
+                              @RequestParam(value = "mucHocBongGioi", defaultValue = "70") BigDecimal mucHocBongGioi,
+                              @RequestParam(value = "mucHocBongKha", defaultValue = "50") BigDecimal mucHocBongKha,
                               @RequestParam(value = "ghiChu", required = false) String ghiChu,
                               HttpSession session) {
         if (!checkTruong(session)) return "redirect:/web/login";

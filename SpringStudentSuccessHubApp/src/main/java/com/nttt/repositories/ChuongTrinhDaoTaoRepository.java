@@ -9,4 +9,5 @@ import java.util.List;
 public interface ChuongTrinhDaoTaoRepository extends JpaRepository<ChuongTrinhDaoTao, Long> {
     List<ChuongTrinhDaoTao> findByNganh_MaNganhOrderByHocKyGoiYAsc(String maNganh);
     List<ChuongTrinhDaoTao> findByNganh_MaNganhAndHocKyGoiY(String maNganh, Integer hocKyGoiY);
+    boolean existsByNganh_MaNganhAndMonHoc_MaMon(String maNganh, String maMon);
 }

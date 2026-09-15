@@ -10,7 +10,6 @@ const SubmitEvidence = () => {
   const [hocKys, setHocKys] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     tenHoatDong: '',
@@ -126,7 +125,6 @@ const SubmitEvidence = () => {
         </button>
       </div>
 
-      {/* Table of submitted evidence */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-700">
@@ -198,7 +196,6 @@ const SubmitEvidence = () => {
         </div>
       </div>
 
-      {/* Modal Submit Evidence */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

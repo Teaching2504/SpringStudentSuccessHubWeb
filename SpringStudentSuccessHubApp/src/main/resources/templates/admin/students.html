@@ -17,7 +17,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/admin/dashboard}" class="sidebar-link">
@@ -35,7 +35,6 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                 <div>
@@ -55,7 +54,6 @@
                 </div>
             </div>
 
-            <!-- Flash Alerts -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 py-2 px-3 mb-3 small d-flex align-items-center" role="alert">
                 <i class="fa-solid fa-circle-check me-2 fs-6"></i>
                 <span th:text="${successMessage}"></span>
@@ -67,7 +65,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.75rem;"></button>
             </div>
 
-            <!-- Filter Card -->
             <div class="bg-white p-3 rounded-4 border shadow-sm mb-4">
                 <form th:action="@{/web/admin/students}" method="get" class="row g-2">
                     <div class="col-md-3">
@@ -96,7 +93,6 @@
                 </form>
             </div>
 
-            <!-- Table -->
             <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0 small">
@@ -146,7 +142,6 @@
     </div>
 </div>
 
-<!-- Modal Add Student -->
 <div class="modal fade" id="addStudentModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content rounded-4 border-0 shadow">
@@ -205,7 +200,6 @@
     </div>
 </div>
 
-<!-- Modal Import Excel -->
 <div class="modal fade" id="importExcelModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
@@ -217,7 +211,7 @@
             </div>
             <form th:action="@{/web/admin/students/import-excel}" method="post" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <!-- Template Download Card -->
+
                     <div class="p-3 bg-light rounded-3 border mb-3">
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                             <div>

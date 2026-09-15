@@ -81,7 +81,6 @@ const SinhVienScholarships = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-800">
           Kết quả Học bổng & Khiếu nại / Kiến nghị
@@ -91,7 +90,6 @@ const SinhVienScholarships = () => {
         </p>
       </div>
 
-      {/* Scholarship Results Cards */}
       <div className="space-y-4">
         <h2 className="text-base font-bold text-slate-800">Danh sách các Đợt xét Học bổng của bạn</h2>
 

@@ -9,7 +9,7 @@ public class MinhChungRenLuyenDTO {
     private BigDecimal diemDeXuat;
     private String fileUrl;
     private String moTa;
-    private String trangThai; // CHO_DUYET, DA_DUYET, TU_CHOI
+    private String trangThai;
     private String mssv;
     private String hoTenSinhVien;
     private String maLop;

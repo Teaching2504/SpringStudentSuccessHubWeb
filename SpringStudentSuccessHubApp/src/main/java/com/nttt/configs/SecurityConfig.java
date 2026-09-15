@@ -72,6 +72,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/common/**",
+                                "/api/dot-xet-hoc-bong/**",
                                 "/web/**",
                                 "/login",
                                 "/logout",
@@ -91,7 +93,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/truong/**").hasAnyRole("ADMIN", "CAN_BO_TRUONG")
                         .requestMatchers("/api/khoa/**").hasAnyRole("ADMIN", "CAN_BO_KHOA")
                         .requestMatchers("/api/sinhvien/**").hasAnyRole("ADMIN", "SINH_VIEN", "CAN_BO_KHOA", "CAN_BO_TRUONG")
-                        .requestMatchers("/api/common/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

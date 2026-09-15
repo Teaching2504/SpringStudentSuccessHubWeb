@@ -20,22 +20,30 @@ public class ChuongTrinhDaoTao {
     private MonHoc monHoc;
 
     @Column(name = "hocKyGoiY", nullable = false)
-    private Integer hocKyGoiY; // Học kỳ thứ mấy trong CTĐT (1 -> 8)
+    private Integer hocKyGoiY;
 
     @Column(name = "loaiHocPhan", length = 30)
-    private String loaiHocPhan; // "BAT_BUOC" hoặc "TU_CHON"
+    private String loaiHocPhan;
+
+    @Column(name = "chuyenNganh", length = 50)
+    private String chuyenNganh;
+
+    @Column(name = "nhomTuChon", length = 50)
+    private String nhomTuChon;
 
     @Column(name = "heDaoTao", length = 50)
-    private String heDaoTao; // "CHUAN" hoặc "CHAT_LUONG_CAO"
+    private String heDaoTao;
 
     public ChuongTrinhDaoTao() {}
 
-    public ChuongTrinhDaoTao(Long id, Nganh nganh, MonHoc monHoc, Integer hocKyGoiY, String loaiHocPhan, String heDaoTao) {
+    public ChuongTrinhDaoTao(Long id, Nganh nganh, MonHoc monHoc, Integer hocKyGoiY, String loaiHocPhan, String chuyenNganh, String nhomTuChon, String heDaoTao) {
         this.id = id;
         this.nganh = nganh;
         this.monHoc = monHoc;
         this.hocKyGoiY = hocKyGoiY;
         this.loaiHocPhan = loaiHocPhan;
+        this.chuyenNganh = chuyenNganh;
+        this.nhomTuChon = nhomTuChon;
         this.heDaoTao = heDaoTao;
     }
 
@@ -54,6 +62,12 @@ public class ChuongTrinhDaoTao {
     public String getLoaiHocPhan() { return loaiHocPhan; }
     public void setLoaiHocPhan(String loaiHocPhan) { this.loaiHocPhan = loaiHocPhan; }
 
+    public String getChuyenNganh() { return chuyenNganh; }
+    public void setChuyenNganh(String chuyenNganh) { this.chuyenNganh = chuyenNganh; }
+
+    public String getNhomTuChon() { return nhomTuChon; }
+    public void setNhomTuChon(String nhomTuChon) { this.nhomTuChon = nhomTuChon; }
+
     public String getHeDaoTao() { return heDaoTao; }
     public void setHeDaoTao(String heDaoTao) { this.heDaoTao = heDaoTao; }
 
@@ -65,6 +79,8 @@ public class ChuongTrinhDaoTao {
         private MonHoc monHoc;
         private Integer hocKyGoiY;
         private String loaiHocPhan;
+        private String chuyenNganh;
+        private String nhomTuChon;
         private String heDaoTao;
 
         public Builder id(Long id) { this.id = id; return this; }
@@ -72,10 +88,12 @@ public class ChuongTrinhDaoTao {
         public Builder monHoc(MonHoc monHoc) { this.monHoc = monHoc; return this; }
         public Builder hocKyGoiY(Integer hocKyGoiY) { this.hocKyGoiY = hocKyGoiY; return this; }
         public Builder loaiHocPhan(String loaiHocPhan) { this.loaiHocPhan = loaiHocPhan; return this; }
+        public Builder chuyenNganh(String chuyenNganh) { this.chuyenNganh = chuyenNganh; return this; }
+        public Builder nhomTuChon(String nhomTuChon) { this.nhomTuChon = nhomTuChon; return this; }
         public Builder heDaoTao(String heDaoTao) { this.heDaoTao = heDaoTao; return this; }
 
         public ChuongTrinhDaoTao build() {
-            return new ChuongTrinhDaoTao(id, nganh, monHoc, hocKyGoiY, loaiHocPhan, heDaoTao);
+            return new ChuongTrinhDaoTao(id, nganh, monHoc, hocKyGoiY, loaiHocPhan, chuyenNganh, nhomTuChon, heDaoTao);
         }
     }
 }

@@ -60,7 +60,6 @@ public class ExcelServiceImpl implements ExcelService {
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
 
-            // Skip header
             if (rowIterator.hasNext()) {
                 rowIterator.next();
             }
@@ -90,7 +89,6 @@ public class ExcelServiceImpl implements ExcelService {
                     continue;
                 }
 
-                // Check or create NguoiDung & SinhVien
                 Optional<SinhVien> svOpt = sinhVienRepository.findById(mssv);
                 SinhVien sv;
                 if (svOpt.isEmpty()) {
@@ -134,7 +132,6 @@ public class ExcelServiceImpl implements ExcelService {
 
                 final SinhVien currentSv = sv;
 
-                // Save or update GPA & DRL if semester is present
                 if (hocKy != null) {
                     if (gpaStr != null && !gpaStr.isBlank()) {
                         try {
@@ -278,10 +275,9 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public ByteArrayInputStream generateStudentTemplateExcel() {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            // Sheet 1: Biểu mẫu nhập danh sách sinh viên
+
             Sheet sheet = workbook.createSheet("Mau_Nhap_SinhVien");
 
-            // Header Font & Style
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
             headerFont.setColor(IndexedColors.WHITE.getIndex());
@@ -298,7 +294,6 @@ public class ExcelServiceImpl implements ExcelService {
             headerStyle.setBorderLeft(BorderStyle.THIN);
             headerStyle.setBorderRight(BorderStyle.THIN);
 
-            // Data Cell Styles
             CellStyle dataStyleLeft = workbook.createCellStyle();
             dataStyleLeft.setBorderTop(BorderStyle.THIN);
             dataStyleLeft.setBorderBottom(BorderStyle.THIN);
@@ -315,7 +310,6 @@ public class ExcelServiceImpl implements ExcelService {
             dataStyleCenter.setAlignment(HorizontalAlignment.CENTER);
             dataStyleCenter.setVerticalAlignment(VerticalAlignment.CENTER);
 
-            // Column Headers
             String[] headers = {
                     "MSSV (*)", "Họ và Tên (*)", "Email", "Số Điện Thoại",
                     "Mã Lớp (*)", "Giới Tính", "Điểm GPA", "Điểm Rèn Luyện",
@@ -330,7 +324,6 @@ public class ExcelServiceImpl implements ExcelService {
                 cell.setCellStyle(headerStyle);
             }
 
-            // Sample Data Rows
             String[][] sampleData = {
                     {"2351010001", "Nguyễn Văn An", "2351010001@ou.edu.vn", "0901234567", "DH23CS01", "Nam", "3.65", "85", "18", "Khong"},
                     {"2351010002", "Trần Thị Bình", "2351010002@ou.edu.vn", "0912345678", "DH23CS01", "Nữ", "3.82", "92", "20", "Khong"},
@@ -352,14 +345,12 @@ public class ExcelServiceImpl implements ExcelService {
                 }
             }
 
-            // Auto-size columns with minimum padding
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
                 int currentWidth = sheet.getColumnWidth(i);
                 sheet.setColumnWidth(i, Math.max(currentWidth + 1200, 4200));
             }
 
-            // Sheet 2: Hướng dẫn sử dụng chi tiết
             Sheet guideSheet = workbook.createSheet("Huong_Dan_Su_Dung");
             Font guideTitleFont = workbook.createFont();
             guideTitleFont.setBold(true);

@@ -17,7 +17,7 @@
 
 <div class="container-fluid px-4 py-4 flex-grow-1">
     <div class="row g-4">
-        <!-- Sidebar -->
+
         <div class="col-md-3 col-lg-2">
             <div class="bg-white p-3 rounded-4 border border-slate-200 shadow-sm">
                 <a th:href="@{/web/admin/dashboard}" class="sidebar-link">
@@ -35,7 +35,6 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -47,7 +46,6 @@
                 </button>
             </div>
 
-            <!-- Flash Alerts -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-3 py-2 px-3 mb-3 small d-flex align-items-center shadow-sm" role="alert">
                 <i class="fa-solid fa-circle-check me-2 fs-6"></i>
                 <span th:text="${successMessage}"></span>
@@ -59,7 +57,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 0.75rem;"></button>
             </div>
 
-            <!-- Users Table -->
             <div class="bg-white rounded-4 border shadow-sm overflow-hidden">
                 <table class="table table-hover align-middle mb-0 small">
                     <thead class="table-light">
@@ -118,21 +115,19 @@
                                 <span th:if="${u.trangThai == 'BI_KHOA'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">Bị khóa</span>
                             </td>
                             <td class="text-end pe-3 whitespace-nowrap">
-                                <!-- Edit User Modal Button -->
+
                                 <button type="button" class="btn btn-outline-primary btn-sm rounded-pill me-1"
                                         data-bs-toggle="modal" th:data-bs-target="'#editUserModal_' + ${u.id}"
                                         title="Chỉnh sửa thông tin & Avatar">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
 
-                                <!-- Reset Password Modal Button -->
                                 <button type="button" class="btn btn-outline-warning btn-sm rounded-pill me-1"
                                         data-bs-toggle="modal" th:data-bs-target="'#resetPwdModal_' + ${u.id}"
                                         title="Đặt lại mật khẩu">
                                     <i class="fa-solid fa-key"></i> Đổi MK
                                 </button>
 
-                                <!-- Lock Button (When Active) -->
                                 <a th:if="${u.trangThai == 'HOAT_DONG'}"
                                    th:href="@{'/web/admin/users/' + ${u.id} + '/toggle-status'}"
                                    th:data-username="${u.tenDangNhap}"
@@ -141,7 +136,7 @@
                                    title="Khóa tài khoản">
                                     <i class="fa-solid fa-lock text-warning"></i>
                                 </a>
-                                <!-- Unlock Button (When Locked) -->
+
                                 <a th:if="${u.trangThai != 'HOAT_DONG'}"
                                    th:href="@{'/web/admin/users/' + ${u.id} + '/toggle-status'}"
                                    th:data-username="${u.tenDangNhap}"
@@ -150,7 +145,7 @@
                                    title="Mở khóa tài khoản">
                                     <i class="fa-solid fa-lock-open text-success"></i>
                                 </a>
-                                <!-- Delete -->
+
                                 <a th:href="@{'/web/admin/users/' + ${u.id} + '/delete'}"
                                    th:data-username="${u.tenDangNhap}"
                                    onclick="return confirm('Bạn có chắc chắn muốn XÓA tài khoản ' + this.getAttribute('data-username') + ' này?');"
@@ -158,7 +153,6 @@
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
 
-                                <!-- Edit User Modal -->
                                 <div class="modal fade text-start" th:id="'editUserModal_' + ${u.id}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content rounded-4 border-0 shadow">
@@ -230,7 +224,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Reset Password Modal for this user -->
                                 <div class="modal fade text-start" th:id="'resetPwdModal_' + ${u.id}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content rounded-4 border-0 shadow">
@@ -269,7 +262,6 @@
     </div>
 </div>
 
-<!-- Add User Modal -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">

@@ -16,7 +16,6 @@ public class DashboardStatsDTO {
     private long soKienNghiChoXuLy;
     private long soSinhVienCanhBao;
 
-    // Charts data
     private Map<String, Long> hocBongTheoKhoa;
     private Map<String, BigDecimal> kinhPhiTheoKhoa;
     private Map<String, Long> phanBoLoaiHocBong;

@@ -110,7 +110,6 @@ public class SinhVienController {
         return ResponseEntity.ok(ApiResponse.ok(dotXetHocBongService.getHoSoByMssv(sv.getMssv())));
     }
 
-    // Minh chứng rèn luyện (UC11)
     @GetMapping("/minh-chung")
     public ResponseEntity<ApiResponse<List<MinhChungRenLuyenDTO>>> getMyMinhChung(@AuthenticationPrincipal UserDetails userDetails) {
         SinhVienDTO sv = sinhVienService.getStudentByUsername(userDetails.getUsername(), null);
@@ -131,7 +130,6 @@ public class SinhVienController {
         }
     }
 
-    // Kiến nghị / Khiếu nại (UC08)
     @GetMapping("/kien-nghi")
     public ResponseEntity<ApiResponse<List<KienNghiDTO>>> getMyKienNghi(@AuthenticationPrincipal UserDetails userDetails) {
         SinhVienDTO sv = sinhVienService.getStudentByUsername(userDetails.getUsername(), null);

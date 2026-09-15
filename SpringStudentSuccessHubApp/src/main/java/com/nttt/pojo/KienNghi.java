@@ -18,7 +18,7 @@ public class KienNghi {
     private String tepMinhChung;
 
     @Column(name = "trangThai", length = 50)
-    private String trangThai; // CHO_XU_LY, DA_CHAP_NHAN, DA_TU_CHOI
+    private String trangThai;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "maDotXetHbKhoa", nullable = false)
@@ -88,6 +88,10 @@ public class KienNghi {
 
     public LocalDate getNgayGui() { return ngayGui; }
     public void setNgayGui(LocalDate ngayGui) { this.ngayGui = ngayGui; }
+
+    public SinhVien getSinhVien() {
+        return hoSoHocBong != null ? hoSoHocBong.getSinhVien() : null;
+    }
 
     public static Builder builder() { return new Builder(); }
 

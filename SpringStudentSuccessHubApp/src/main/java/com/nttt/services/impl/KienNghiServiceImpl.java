@@ -4,11 +4,14 @@ import com.nttt.dto.KienNghiDTO;
 import com.nttt.pojo.*;
 import com.nttt.repositories.*;
 import com.nttt.services.KienNghiService;
+import com.nttt.services.SinhVienService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,17 +22,26 @@ public class KienNghiServiceImpl implements KienNghiService {
     private final DotXetHbKhoaRepository dotXetHbKhoaRepository;
     private final HoSoHocBongRepository hoSoHocBongRepository;
     private final NhanVienRepository nhanVienRepository;
+    private final KetQuaRenLuyenRepository ketQuaRenLuyenRepository;
+    private final KetQuaHocTapRepository ketQuaHocTapRepository;
+    private final SinhVienService sinhVienService;
 
     public KienNghiServiceImpl(
             KienNghiRepository kienNghiRepository,
             DotXetHbKhoaRepository dotXetHbKhoaRepository,
             HoSoHocBongRepository hoSoHocBongRepository,
-            NhanVienRepository nhanVienRepository
+            NhanVienRepository nhanVienRepository,
+            KetQuaRenLuyenRepository ketQuaRenLuyenRepository,
+            KetQuaHocTapRepository ketQuaHocTapRepository,
+            SinhVienService sinhVienService
     ) {
         this.kienNghiRepository = kienNghiRepository;
         this.dotXetHbKhoaRepository = dotXetHbKhoaRepository;
         this.hoSoHocBongRepository = hoSoHocBongRepository;
         this.nhanVienRepository = nhanVienRepository;
+        this.ketQuaRenLuyenRepository = ketQuaRenLuyenRepository;
+        this.ketQuaHocTapRepository = ketQuaHocTapRepository;
+        this.sinhVienService = sinhVienService;
     }
 
     @Override
@@ -89,6 +101,12 @@ public class KienNghiServiceImpl implements KienNghiService {
     @Override
     @Transactional
     public KienNghiDTO resolveKienNghi(String maKienNghi, String usernameNhanVien, boolean accept, String phanHoi) {
+        return resolveKienNghi(maKienNghi, usernameNhanVien, accept, phanHoi, null);
+    }
+
+    @Override
+    @Transactional
+    public KienNghiDTO resolveKienNghi(String maKienNghi, String usernameNhanVien, boolean accept, String phanHoi, BigDecimal diemRenLuyenMoi) {
         KienNghi kn = kienNghiRepository.findById(maKienNghi)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy kiến nghị: " + maKienNghi));
 
@@ -96,6 +114,40 @@ public class KienNghiServiceImpl implements KienNghiService {
         kn.setNhanVienXuLy(nv);
         kn.setPhanHoi(phanHoi);
         kn.setTrangThai(accept ? "DA_CHAP_NHAN" : "DA_TU_CHOI");
+
+        if (accept && diemRenLuyenMoi != null) {
+            SinhVien sv = kn.getHoSoHocBong() != null ? kn.getHoSoHocBong().getSinhVien() : null;
+            DotXetHbKhoa dk = kn.getDotXetHbKhoa();
+            HocKy hk = (dk != null && dk.getDotXetHocBong() != null) ? dk.getDotXetHocBong().getHocKy() : null;
+            String maHocKy = (hk != null) ? hk.getMaHocKy() : "HK1_2025_2026";
+
+            if (sv != null) {
+                sinhVienService.updateTrainingScore(sv.getMssv(), maHocKy, diemRenLuyenMoi, phanHoi);
+            }
+
+            HoSoHocBong hs = kn.getHoSoHocBong();
+            if (hs != null) {
+                BigDecimal gpa = hs.getDiemXet();
+                if (gpa == null && sv != null) {
+                    Optional<KetQuaHocTap> kq = ketQuaHocTapRepository.findBySinhVien_MssvAndHocKy_MaHocKy(sv.getMssv(), maHocKy);
+                    if (kq.isPresent()) gpa = kq.get().getDiemTrungBinh();
+                }
+
+                if (gpa != null) {
+                    if (gpa.compareTo(BigDecimal.valueOf(3.60)) >= 0 && diemRenLuyenMoi.compareTo(BigDecimal.valueOf(90.0)) >= 0) {
+                        hs.setLoaiHocBong("XUAT_SAC");
+                        hs.setTrangThai("CHINH_THUC");
+                    } else if (gpa.compareTo(BigDecimal.valueOf(3.20)) >= 0 && diemRenLuyenMoi.compareTo(BigDecimal.valueOf(80.0)) >= 0) {
+                        hs.setLoaiHocBong("GIOI");
+                        hs.setTrangThai("CHINH_THUC");
+                    } else if (gpa.compareTo(BigDecimal.valueOf(2.50)) >= 0 && diemRenLuyenMoi.compareTo(BigDecimal.valueOf(65.0)) >= 0) {
+                        hs.setLoaiHocBong("KHA");
+                        hs.setTrangThai("CHINH_THUC");
+                    }
+                    hoSoHocBongRepository.save(hs);
+                }
+            }
+        }
 
         return mapToDTO(kienNghiRepository.save(kn));
     }
@@ -114,10 +166,15 @@ public class KienNghiServiceImpl implements KienNghiService {
                 .phanHoi(kn.getPhanHoi())
                 .ngayGui(kn.getNgayGui());
 
+        String maHocKy = null;
         if (kn.getDotXetHbKhoa() != null) {
             b.maDotXetHbKhoa(kn.getDotXetHbKhoa().getMaDotXetHbKhoa());
             if (kn.getDotXetHbKhoa().getDotXetHocBong() != null) {
                 b.tenDot(kn.getDotXetHbKhoa().getDotXetHocBong().getTenDot());
+                if (kn.getDotXetHbKhoa().getDotXetHocBong().getHocKy() != null) {
+                    maHocKy = kn.getDotXetHbKhoa().getDotXetHocBong().getHocKy().getMaHocKy();
+                    b.maHocKy(maHocKy);
+                }
             }
             if (kn.getDotXetHbKhoa().getKhoa() != null) {
                 b.maKhoa(kn.getDotXetHbKhoa().getKhoa().getMaKhoa());
@@ -127,6 +184,7 @@ public class KienNghiServiceImpl implements KienNghiService {
 
         if (kn.getHoSoHocBong() != null) {
             b.maHoSo(kn.getHoSoHocBong().getMaHoSo());
+            b.loaiHocBongHienTai(kn.getHoSoHocBong().getLoaiHocBong());
             SinhVien sv = kn.getHoSoHocBong().getSinhVien();
             if (sv != null) {
                 b.mssv(sv.getMssv());
@@ -135,6 +193,18 @@ public class KienNghiServiceImpl implements KienNghiService {
                 }
                 if (sv.getLopSinhHoat() != null) {
                     b.maLop(sv.getLopSinhHoat().getMaLop());
+                }
+
+                if (maHocKy != null) {
+                    ketQuaRenLuyenRepository.findBySinhVien_MssvAndHocKy_MaHocKy(sv.getMssv(), maHocKy)
+                            .ifPresent(d -> b.diemRenLuyenHienTai(d.getDiemRenLuyen()));
+                    ketQuaHocTapRepository.findBySinhVien_MssvAndHocKy_MaHocKy(sv.getMssv(), maHocKy)
+                            .ifPresent(g -> b.diemTrungBinhHienTai(g.getDiemTrungBinh()));
+                } else {
+                    ketQuaRenLuyenRepository.findBySinhVien_Mssv(sv.getMssv()).stream().findFirst()
+                            .ifPresent(d -> b.diemRenLuyenHienTai(d.getDiemRenLuyen()));
+                    ketQuaHocTapRepository.findBySinhVien_Mssv(sv.getMssv()).stream().findFirst()
+                            .ifPresent(g -> b.diemTrungBinhHienTai(g.getDiemTrungBinh()));
                 }
             }
         }

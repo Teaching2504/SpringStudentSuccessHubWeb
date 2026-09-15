@@ -12,7 +12,7 @@ public class DotXetHocBongDTO {
     private String maHocKy;
     private String namHoc;
     private String tenHocKy;
-    private String trangThai; // DANG_MO, DANG_XET_DUYET, DA_CONG_BO, DONG
+    private String trangThai;
 
     private QuyTacHocBongDTO quyTacHienHanh;
     private List<DotXetHbKhoaDTO> danhSachKhoa;
