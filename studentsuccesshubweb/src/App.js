@@ -26,7 +26,6 @@ import EvidenceReview from './pages/khoa/EvidenceReview';
 import KhoaCampaignDetail from './pages/khoa/KhoaCampaignDetail';
 import KhoaAppeals from './pages/khoa/KhoaAppeals';
 
-
 import SinhVienDashboard from './pages/sinhvien/SinhVienDashboard';
 import SinhVienGrades from './pages/sinhvien/SinhVienGrades';
 import SinhVienCurriculum from './pages/sinhvien/SinhVienCurriculum';
@@ -99,12 +98,10 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Authenticated Layout */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<RoleRedirect />} />
             <Route path="/profile" element={<ProfilePage />} />
 
-            {/* Admin Routes */}
             <Route element={<RoleRoute allowedRoles={['ROLE_ADMIN']} />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<UserManagement />} />
@@ -112,7 +109,6 @@ function App() {
               <Route path="/admin/students" element={<StudentManagement />} />
             </Route>
 
-            {/* Cấp Trường Routes */}
             <Route element={<RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_CAN_BO_TRUONG']} />}>
               <Route path="/truong" element={<TruongDashboard />} />
               <Route path="/truong/campaigns" element={<CampaignManagement />} />
@@ -120,7 +116,6 @@ function App() {
               <Route path="/truong/stats" element={<TruongStats />} />
             </Route>
 
-            {/* Cấp Khoa Routes */}
             <Route element={<RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_CAN_BO_KHOA']} />}>
               <Route path="/khoa" element={<KhoaDashboard />} />
               <Route path="/khoa/scholarships" element={<FacultyScholarshipList />} />
@@ -130,7 +125,6 @@ function App() {
               <Route path="/khoa/appeals" element={<KhoaAppeals />} />
             </Route>
 
-            {/* Sinh Viên Routes */}
             <Route element={<RoleRoute allowedRoles={['ROLE_ADMIN', 'ROLE_SINH_VIEN']} />}>
               <Route path="/sinh-vien" element={<SinhVienDashboard />} />
               <Route path="/sinh-vien/grades" element={<SinhVienGrades />} />

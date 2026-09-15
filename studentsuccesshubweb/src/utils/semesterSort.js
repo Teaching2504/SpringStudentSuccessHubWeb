@@ -1,4 +1,3 @@
-
 export const getSemesterOrderKey = (hk) => {
   if (!hk) return 0;
   const str = (typeof hk === 'string' ? hk : (hk.maHocKy || hk.tenHocKy || '')).toUpperCase();
@@ -27,4 +26,3 @@ export const sortSemesters = (list) => {
 };
 
 export const sortSemestersAsc = sortSemesters;
-

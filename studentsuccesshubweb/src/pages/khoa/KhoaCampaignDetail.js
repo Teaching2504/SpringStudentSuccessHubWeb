@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
-import { Play, Send, CheckCircle, ArrowLeft, Download, AlertTriangle, Clock, RefreshCw, MessageSquare, BookOpen, FileSpreadsheet, Eye, X, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
+import { Play, Send, CheckCircle, ArrowLeft, AlertTriangle, RefreshCw, MessageSquare, BookOpen, TrendingUp } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import Modal from '../../components/common/Modal';
+import { formatCurrency } from '../../utils/formatters';
 
 const KhoaCampaignDetail = () => {
   const { id } = useParams();
@@ -15,16 +16,13 @@ const KhoaCampaignDetail = () => {
   const [loadingGrades, setLoadingGrades] = useState(false);
   const [showGradesModal, setShowGradesModal] = useState(false);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [selectedKhoaHoc, setSelectedKhoaHoc] = useState('ALL');
   const [selectedNganh, setSelectedNganh] = useState('ALL');
   const [selectedHeDaoTao, setSelectedHeDaoTao] = useState('ALL');
   const [selectedLoaiHb, setSelectedLoaiHb] = useState('ALL');
 
-  useEffect(() => {
-    fetchData();
-  }, [id]);
+  useEffect(() => { fetchData(); }, [id]);
 
   const fetchData = async () => {
     try {
@@ -33,12 +31,11 @@ const KhoaCampaignDetail = () => {
         axiosClient.get(`/api/khoa/campaigns/${id}`),
         axiosClient.get(`/api/khoa/campaigns/${id}/dossiers`)
       ]);
-
       if (rSub.data.success) setSubCamp(rSub.data.data);
       if (rDossiers.data.success) setDossiers(rDossiers.data.data);
-      setLoading(false);
     } catch (err) {
       console.error(err);
+    } finally {
       setLoading(false);
     }
   };
@@ -47,37 +44,25 @@ const KhoaCampaignDetail = () => {
     try {
       setRunningEngine(true);
       const res = await axiosClient.post(`/api/khoa/campaigns/${id}/run-ranking`);
-      setRunningEngine(false);
       if (res.data.success) {
         alert('Dynamic Rule Engine đã tính toán và xếp hạng sinh viên thành công!');
         fetchData();
       }
     } catch (err) {
-      setRunningEngine(false);
       alert(err.response?.data?.message || 'Lỗi khi thực thi Rule Engine');
+    } finally {
+      setRunningEngine(false);
     }
   };
 
-  const handlePublishDuKien = async () => {
-    if (window.confirm('Xác nhận CÔNG BỐ DỰ KIẾN? Sinh viên sẽ có thể xem kết quả xếp hạng và nộp kiến nghị/khiếu nại nếu có sai sót.')) {
+  const handleAction = async (endpoint, confirmMsg, successMsg) => {
+    if (window.confirm(confirmMsg)) {
       try {
-        const res = await axiosClient.post(`/api/khoa/campaigns/${id}/publish-du-kien`);
-        alert(res.data.message);
+        const res = await axiosClient.post(`/api/khoa/campaigns/${id}/${endpoint}`);
+        alert(res.data.message || successMsg);
         fetchData();
       } catch (err) {
-        alert(err.response?.data?.message || 'Lỗi công bố dự kiến');
-      }
-    }
-  };
-
-  const handleChotDanhSach = async () => {
-    if (window.confirm('Xác nhận CHỐT DANH SÁCH & GỬI LÊN CẤP TRƯỜNG? Hãy chắc chắn rằng bạn đã xử lý hết các kiến nghị của sinh viên.')) {
-      try {
-        const res = await axiosClient.post(`/api/khoa/campaigns/${id}/chot-danh-sach`);
-        alert(res.data.message);
-        fetchData();
-      } catch (err) {
-        alert(err.response?.data?.message || 'Lỗi chốt danh sách');
+        alert(err.response?.data?.message || 'Có lỗi xảy ra');
       }
     }
   };
@@ -96,71 +81,31 @@ const KhoaCampaignDetail = () => {
     }
   };
 
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
-  };
+  const uniqueKhoaHoc = Array.from(new Set(dossiers.map(d => d.khoaHoc).filter(Boolean)));
+  const uniqueNganh = Array.from(new Set(dossiers.map(d => d.tenNganh).filter(Boolean)));
 
-  const getStatusBadge = (st) => {
-    switch (st) {
-      case 'CHUA_XET':
-        return <Badge variant="slate">Chưa xét duyệt</Badge>;
-      case 'DA_CONG_BO_DU_KIEN':
-        return <Badge variant="blue">Đã công bố dự kiến</Badge>;
-      case 'DA_CHOT_GUI_TRUONG':
-        return <Badge variant="purple">Đã chốt gửi cấp trường</Badge>;
-      case 'DA_PHE_DUYET':
-        return <Badge variant="emerald">Trường đã phê duyệt</Badge>;
-      case 'BI_TRA_VE':
-        return <Badge variant="rose">Bị trả về yêu cầu sửa</Badge>;
-      default:
-        return <Badge>{st}</Badge>;
-    }
-  };
-
-  // Unique Filter Options
-  const uniqueKhoaHoc = Array.from(new Set(dossiers.map((d) => d.khoaHoc).filter(Boolean)));
-  const uniqueNganh = Array.from(new Set(dossiers.map((d) => d.tenNganh).filter(Boolean)));
-
-  // Filtered Dossiers
-  const filteredDossiers = dossiers.filter((d) => {
-    const matchSearch =
-      !search ||
-      (d.mssv && d.mssv.toLowerCase().includes(search.toLowerCase())) ||
-      (d.hoTen && d.hoTen.toLowerCase().includes(search.toLowerCase())) ||
-      (d.maLop && d.maLop.toLowerCase().includes(search.toLowerCase()));
-
+  const filteredDossiers = dossiers.filter(d => {
+    const s = search.toLowerCase();
+    const matchSearch = !search || d.mssv?.toLowerCase().includes(s) || d.hoTen?.toLowerCase().includes(s) || d.maLop?.toLowerCase().includes(s);
     const matchKhoaHoc = selectedKhoaHoc === 'ALL' || d.khoaHoc === selectedKhoaHoc;
     const matchNganh = selectedNganh === 'ALL' || d.tenNganh === selectedNganh;
-    const matchHeDaoTao =
-      selectedHeDaoTao === 'ALL' ||
+    const matchHeDaoTao = selectedHeDaoTao === 'ALL' ||
       (selectedHeDaoTao === 'CHUAN' && (!d.heDaoTao || d.heDaoTao === 'CHUAN')) ||
       (selectedHeDaoTao === 'DAC_BIET' && (d.heDaoTao === 'DAC_BIET' || d.heDaoTao === 'CHAT_LUONG_CAO'));
-
     const matchLoaiHb = selectedLoaiHb === 'ALL' || d.loaiHocBong === selectedLoaiHb;
-
     return matchSearch && matchKhoaHoc && matchNganh && matchHeDaoTao && matchLoaiHb;
   });
 
-
-  const countXuatSac = dossiers.filter((d) => d.loaiHocBong === 'XUAT_SAC' && d.mucHocBong > 0).length;
-  const countGioi = dossiers.filter((d) => d.loaiHocBong === 'GIOI' && d.mucHocBong > 0).length;
-  const countKha = dossiers.filter((d) => d.loaiHocBong === 'KHA' && d.mucHocBong > 0).length;
+  const countXuatSac = dossiers.filter(d => d.loaiHocBong === 'XUAT_SAC' && d.mucHocBong > 0).length;
+  const countGioi = dossiers.filter(d => d.loaiHocBong === 'GIOI' && d.mucHocBong > 0).length;
+  const countKha = dossiers.filter(d => d.loaiHocBong === 'KHA' && d.mucHocBong > 0).length;
   const totalAllocated = dossiers.reduce((acc, cur) => acc + (parseFloat(cur.mucHocBong) || 0), 0);
 
   const cohortMajorGroups = Object.values(
     dossiers.reduce((acc, d) => {
       const key = `${d.tenNganh || 'Ngành khác'} - ${d.khoaHoc || 'Khóa khác'}`;
       if (!acc[key]) {
-        acc[key] = {
-          key,
-          tenNganh: d.tenNganh || 'Ngành khác',
-          khoaHoc: d.khoaHoc || 'Khóa khác',
-          heDaoTao: d.heDaoTao || 'CHUAN',
-          totalSV: 0,
-          totalTuition: 0,
-          awardedCount: 0,
-          totalAwarded: 0,
-        };
+        acc[key] = { key, tenNganh: d.tenNganh || 'Ngành khác', khoaHoc: d.khoaHoc || 'Khóa khác', totalSV: 0, totalTuition: 0, awardedCount: 0, totalAwarded: 0 };
       }
       acc[key].totalSV += 1;
       acc[key].totalTuition += Number(d.tongHocPhiKy) || 0;
@@ -190,39 +135,32 @@ const KhoaCampaignDetail = () => {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleRunRuleEngine}
-            disabled={runningEngine || subCamp?.trangThai === 'DA_CHOT_GUI_TRUONG' || subCamp?.trangThai === 'DA_PHE_DUYET'}
+            disabled={runningEngine || ['DA_CHOT_GUI_TRUONG', 'DA_PHE_DUYET'].includes(subCamp?.trangThai)}
             className="px-4 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-semibold text-xs rounded-xl shadow-md shadow-purple-700/20 transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
           >
-            {runningEngine ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <Play className="w-4 h-4" />
-            )}
+            {runningEngine ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
             Chạy Dynamic Rule Engine
           </button>
-
           {subCamp?.trangThai === 'CHUA_XET' && (
             <button
-              onClick={handlePublishDuKien}
+              onClick={() => handleAction('publish-du-kien', 'Xác nhận CÔNG BỐ DỰ KIẾN? Sinh viên sẽ có thể xem kết quả xếp hạng và nộp kiến nghị/khiếu nại nếu có sai sót.')}
               disabled={dossiers.length === 0}
               className="px-4 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-xs rounded-xl shadow-md shadow-blue-700/20 transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
             >
               <Send className="w-4 h-4" /> Công bố Dự kiến
             </button>
           )}
-
           {subCamp?.trangThai === 'DA_CONG_BO_DU_KIEN' && (
             <button
-              onClick={handleChotDanhSach}
+              onClick={() => handleAction('chot-danh-sach', 'Xác nhận CHỐT DANH SÁCH & GỬI LÊN CẤP TRƯỜNG? Hãy chắc chắn rằng bạn đã xử lý hết các kiến nghị của sinh viên.')}
               className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs rounded-xl shadow-md shadow-emerald-700/20 transition cursor-pointer flex items-center gap-2"
             >
               <CheckCircle className="w-4 h-4" /> Chốt Danh sách Gửi Trường
             </button>
           )}
-
           {subCamp?.trangThai === 'BI_TRA_VE' && (
             <button
-              onClick={handleChotDanhSach}
+              onClick={() => handleAction('chot-danh-sach', 'Xác nhận GỬI LẠI CẤP TRƯỜNG sau khi đã điều chỉnh?')}
               className="px-4 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs rounded-xl shadow-md shadow-amber-700/20 transition cursor-pointer flex items-center gap-2"
             >
               <CheckCircle className="w-4 h-4" /> Gửi lại Cấp trường sau điều chỉnh
@@ -234,30 +172,20 @@ const KhoaCampaignDetail = () => {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 grid grid-cols-2 sm:grid-cols-5 gap-4">
         <div>
           <span className="text-slate-400 text-xs block">Trạng thái đợt xét</span>
-          <div className="mt-1">{getStatusBadge(subCamp?.trangThai)}</div>
+          <div className="mt-1"><Badge status={subCamp?.trangThai} /></div>
         </div>
-
         <div>
           <span className="text-slate-400 text-xs block">Chỉ tiêu Khoa được cấp</span>
-          <span className="text-base font-bold text-slate-800 mt-1 block">
-            {subCamp?.chiTieu || 0} suất
-          </span>
+          <span className="text-base font-bold text-slate-800 mt-1 block">{subCamp?.chiTieu || 0} suất</span>
         </div>
-
         <div>
           <span className="text-slate-400 text-xs block">Hạn mức Ngân sách</span>
-          <span className="text-base font-bold text-emerald-700 mt-1 block">
-            {formatCurrency(subCamp?.nganSachKhoa)}
-          </span>
+          <span className="text-base font-bold text-emerald-700 mt-1 block">{formatCurrency(subCamp?.nganSachKhoa)}</span>
         </div>
-
         <div>
           <span className="text-slate-400 text-xs block">Đã cấp học bổng</span>
-          <span className="text-base font-bold text-blue-700 mt-1 block">
-            {formatCurrency(totalAllocated)}
-          </span>
+          <span className="text-base font-bold text-blue-700 mt-1 block">{formatCurrency(totalAllocated)}</span>
         </div>
-
         <div>
           <span className="text-slate-400 text-xs block">Kiến nghị chưa xử lý</span>
           <span className="text-base font-bold text-rose-700 mt-1 block flex items-center gap-1">
@@ -276,36 +204,21 @@ const KhoaCampaignDetail = () => {
         </div>
       )}
 
-      {/* Summary Cards by Tiers */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-        <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-emerald-800">Xuất sắc (100% HP)</span>
-            <div className="text-xl font-extrabold text-emerald-700 mt-0.5">{countXuatSac} sinh viên</div>
+        {[
+          { label: 'Xuất sắc (100% HP)', count: countXuatSac, pct: '100%', bg: 'bg-emerald-50/70 border-emerald-200/80 text-emerald-800', txt: 'text-emerald-700', tag: 'border-emerald-100 text-emerald-600' },
+          { label: 'Giỏi (70% HP)', count: countGioi, pct: '70%', bg: 'bg-blue-50/70 border-blue-200/80 text-blue-800', txt: 'text-blue-700', tag: 'border-blue-100 text-blue-600' },
+          { label: 'Khá (50% HP)', count: countKha, pct: '50%', bg: 'bg-amber-50/70 border-amber-200/80 text-amber-800', txt: 'text-amber-700', tag: 'border-amber-100 text-amber-600' },
+          { label: 'Tổng sinh viên xét', count: dossiers.length, pct: 'Khoa', bg: 'bg-slate-50 border-slate-200 text-slate-700', txt: 'text-slate-800', tag: 'border-slate-200 text-slate-600' },
+        ].map((c, i) => (
+          <div key={i} className={`p-4 border rounded-2xl flex items-center justify-between ${c.bg}`}>
+            <div>
+              <span className={`text-xs font-semibold ${c.bg.split(' ')[3]}`}>{c.label}</span>
+              <div className={`text-xl font-extrabold mt-0.5 ${c.txt}`}>{c.count} sinh viên</div>
+            </div>
+            <span className={`text-xs font-bold bg-white px-2.5 py-1 rounded-lg border ${c.tag}`}>{c.pct}</span>
           </div>
-          <span className="text-xs font-bold text-emerald-600 bg-white px-2.5 py-1 rounded-lg border border-emerald-100">100%</span>
-        </div>
-        <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-blue-800">Giỏi (70% HP)</span>
-            <div className="text-xl font-extrabold text-blue-700 mt-0.5">{countGioi} sinh viên</div>
-          </div>
-          <span className="text-xs font-bold text-blue-600 bg-white px-2.5 py-1 rounded-lg border border-blue-100">70%</span>
-        </div>
-        <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-amber-800">Khá (50% HP)</span>
-            <div className="text-xl font-extrabold text-amber-700 mt-0.5">{countKha} sinh viên</div>
-          </div>
-          <span className="text-xs font-bold text-amber-600 bg-white px-2.5 py-1 rounded-lg border border-amber-100">50%</span>
-        </div>
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-slate-700">Tổng sinh viên xét</span>
-            <div className="text-xl font-extrabold text-slate-800 mt-0.5">{dossiers.length} sinh viên</div>
-          </div>
-          <span className="text-xs font-bold text-slate-600 bg-white px-2.5 py-1 rounded-lg border border-slate-200">Khoa</span>
-        </div>
+        ))}
       </div>
 
       {cohortMajorGroups.length > 0 && (
@@ -319,50 +232,37 @@ const KhoaCampaignDetail = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {cohortMajorGroups.map((g) => {
-              const fund8 = g.totalTuition * 0.08;
-              return (
-                <div key={g.key} className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-800 text-xs">{g.tenNganh}</span>
-                    <span className="text-[11px] font-bold px-2 py-0.5 bg-primary-100 text-primary-800 rounded-md">
-                      {g.khoaHoc}
-                    </span>
+            {cohortMajorGroups.map(g => (
+              <div key={g.key} className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 text-xs">{g.tenNganh}</span>
+                  <span className="text-[11px] font-bold px-2 py-0.5 bg-primary-100 text-primary-800 rounded-md">{g.khoaHoc}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/60">
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Tổng học phí thu:</span>
+                    <span className="font-semibold text-slate-800">{formatCurrency(g.totalTuition)}</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/60">
-                    <div>
-                      <span className="text-slate-500 block text-[11px]">Tổng học phí thu:</span>
-                      <span className="font-semibold text-slate-800">{formatCurrency(g.totalTuition)}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 block text-[11px]">Quỹ 8% học bổng:</span>
-                      <span className="font-black text-emerald-700">{formatCurrency(fund8)}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-xs pt-1">
-                    <span className="text-slate-500">Đã cấp: <strong>{g.awardedCount} / {g.totalSV} SV</strong></span>
-                    <span className="font-bold text-emerald-700">{formatCurrency(g.totalAwarded)}</span>
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Quỹ 8% học bổng:</span>
+                    <span className="font-black text-emerald-700">{formatCurrency(g.totalTuition * 0.08)}</span>
                   </div>
                 </div>
-              );
-            })}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className="text-slate-500">Đã cấp: <strong>{g.awardedCount} / {g.totalSV} SV</strong></span>
+                  <span className="font-bold text-emerald-700">{formatCurrency(g.totalAwarded)}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-            Bộ lọc xét duyệt theo Khóa học, Ngành đào tạo & Chương trình
-          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Bộ lọc xét duyệt</span>
           <button
-            onClick={() => {
-              setSearch('');
-              setSelectedKhoaHoc('ALL');
-              setSelectedNganh('ALL');
-              setSelectedHeDaoTao('ALL');
-              setSelectedLoaiHb('ALL');
-            }}
+            onClick={() => { setSearch(''); setSelectedKhoaHoc('ALL'); setSelectedNganh('ALL'); setSelectedHeDaoTao('ALL'); setSelectedLoaiHb('ALL'); }}
             className="text-xs text-primary-600 hover:text-primary-700 font-semibold cursor-pointer"
           >
             Đặt lại bộ lọc
@@ -380,59 +280,31 @@ const KhoaCampaignDetail = () => {
               className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
-
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Khóa học</label>
-            <select
-              value={selectedKhoaHoc}
-              onChange={(e) => setSelectedKhoaHoc(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
+            <select value={selectedKhoaHoc} onChange={(e) => setSelectedKhoaHoc(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="ALL">-- Tất cả Khóa học --</option>
-              {uniqueKhoaHoc.map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
+              {uniqueKhoaHoc.map(k => <option key={k} value={k}>{k}</option>)}
             </select>
           </div>
-
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Ngành học</label>
-            <select
-              value={selectedNganh}
-              onChange={(e) => setSelectedNganh(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
+            <select value={selectedNganh} onChange={(e) => setSelectedNganh(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="ALL">-- Tất cả Ngành học --</option>
-              {uniqueNganh.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
+              {uniqueNganh.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
-
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Chương trình Đào tạo</label>
-            <select
-              value={selectedHeDaoTao}
-              onChange={(e) => setSelectedHeDaoTao(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
+            <select value={selectedHeDaoTao} onChange={(e) => setSelectedHeDaoTao(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="ALL">-- Tất cả Chương trình --</option>
               <option value="CHUAN">Chương trình Chuẩn (Đại trà)</option>
               <option value="DAC_BIET">Chương trình Đặc biệt (CLC)</option>
             </select>
           </div>
-
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Phân loại Học bổng</label>
-            <select
-              value={selectedLoaiHb}
-              onChange={(e) => setSelectedLoaiHb(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
+            <select value={selectedLoaiHb} onChange={(e) => setSelectedLoaiHb(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="ALL">-- Tất cả Phân loại --</option>
               <option value="XUAT_SAC">Xuất sắc (100% HP)</option>
               <option value="GIOI">Giỏi (70% HP)</option>
@@ -446,17 +318,10 @@ const KhoaCampaignDetail = () => {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="font-bold text-slate-800 text-sm">
-              Danh sách kết quả tính điểm & xếp hạng sinh viên
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Hiển thị <strong>{filteredDossiers.length}</strong> / <strong>{dossiers.length}</strong> sinh viên theo bộ lọc
-            </p>
+            <h3 className="font-bold text-slate-800 text-sm">Danh sách kết quả tính điểm & xếp hạng sinh viên</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Hiển thị <strong>{filteredDossiers.length}</strong> / <strong>{dossiers.length}</strong> sinh viên theo bộ lọc</p>
           </div>
-
-          <div className="text-xs font-medium text-slate-500">
-            * Cấp từ thứ hạng 1 xuống dưới đến khi hết Quỹ học bổng khoa
-          </div>
+          <div className="text-xs font-medium text-slate-500">* Cấp từ thứ hạng 1 xuống dưới đến khi hết Quỹ học bổng khoa</div>
         </div>
 
         <div className="overflow-x-auto">
@@ -492,22 +357,13 @@ const KhoaCampaignDetail = () => {
                 filteredDossiers.map((hs) => {
                   const isAwarded = hs.mucHocBong && parseFloat(hs.mucHocBong) > 0;
                   return (
-                    <tr
-                      key={hs.maHoSo}
-                      className={`hover:bg-slate-50/80 transition-colors ${isAwarded ? 'bg-emerald-50/30' : ''}`}
-                    >
+                    <tr key={hs.maHoSo} className={`hover:bg-slate-50/80 transition-colors ${isAwarded ? 'bg-emerald-50/30' : ''}`}>
                       <td className="px-4 py-3 text-center font-bold text-slate-800">
                         {hs.thuHang != null ? (
-                          <span
-                            className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                              isAwarded ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'
-                            }`}
-                          >
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${isAwarded ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'}`}>
                             {hs.thuHang}
                           </span>
-                        ) : (
-                          '-'
-                        )}
+                        ) : '-'}
                       </td>
                       <td className="px-4 py-3 font-mono font-bold text-primary-700">{hs.mssv}</td>
                       <td className="px-4 py-3 font-medium text-slate-800">{hs.hoTen}</td>
@@ -518,47 +374,26 @@ const KhoaCampaignDetail = () => {
                       <td className="px-4 py-3 text-xs">
                         <div className="font-semibold text-slate-800">{hs.tenNganh || '-'}</div>
                         <div className="mt-0.5">
-                          {hs.heDaoTao === 'DAC_BIET' || hs.heDaoTao === 'CHAT_LUONG_CAO' ? (
-                            <span className="inline-block px-1.5 py-0.5 bg-purple-100 text-purple-800 font-bold rounded text-[10px]">
-                              Đặc biệt (CLC)
-                            </span>
+                          {['DAC_BIET', 'CHAT_LUONG_CAO'].includes(hs.heDaoTao) ? (
+                            <span className="inline-block px-1.5 py-0.5 bg-purple-100 text-purple-800 font-bold rounded text-[10px]">Đặc biệt (CLC)</span>
                           ) : (
-                            <span className="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-700 font-semibold rounded text-[10px]">
-                              Chuẩn (Đại trà)
-                            </span>
+                            <span className="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-700 font-semibold rounded text-[10px]">Chuẩn (Đại trà)</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center font-bold text-slate-800">
-                        {hs.diemTrungBinh != null ? hs.diemTrungBinh.toFixed(2) : '-'}
-                      </td>
-                      <td className="px-4 py-3 text-center font-bold text-slate-800">
-                        {hs.diemRenLuyen != null ? hs.diemRenLuyen : '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        {hs.loaiHocBong === 'XUAT_SAC' && <Badge variant="emerald">Xuất sắc (100%)</Badge>}
-                        {hs.loaiHocBong === 'GIOI' && <Badge variant="blue">Giỏi (70%)</Badge>}
-                        {hs.loaiHocBong === 'KHA' && <Badge variant="amber">Khá (50%)</Badge>}
-                        {hs.loaiHocBong === 'KHONG_DAT' && <Badge variant="slate">Không đạt</Badge>}
-                      </td>
-                      <td className="px-4 py-3 text-right font-bold text-emerald-700">
-                        {formatCurrency(hs.mucHocBong)}
-                      </td>
+                      <td className="px-4 py-3 text-center font-bold text-slate-800">{hs.diemTrungBinh != null ? hs.diemTrungBinh.toFixed(2) : '-'}</td>
+                      <td className="px-4 py-3 text-center font-bold text-slate-800">{hs.diemRenLuyen != null ? hs.diemRenLuyen : '-'}</td>
+                      <td className="px-4 py-3"><Badge status={hs.loaiHocBong} /></td>
+                      <td className="px-4 py-3 text-right font-bold text-emerald-700">{formatCurrency(hs.mucHocBong)}</td>
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => handleViewGrades(hs.mssv)}
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors cursor-pointer"
-                          title="Xem bảng điểm chi tiết các môn"
                         >
-                          <BookOpen className="w-3.5 h-3.5" />
-                          Xem điểm
+                          <BookOpen className="w-3.5 h-3.5" /> Xem điểm
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        {hs.trangThai === 'CHINH_THUC' && <Badge variant="emerald">Chính thức</Badge>}
-                        {hs.trangThai === 'DU_KIEN' && <Badge variant="blue">Dự kiến</Badge>}
-                        {hs.trangThai === 'KHONG_DAT' && <Badge variant="slate">Không đạt</Badge>}
-                      </td>
+                      <td className="px-4 py-3 text-center"><Badge status={hs.trangThai} /></td>
                     </tr>
                   );
                 })
@@ -568,43 +403,22 @@ const KhoaCampaignDetail = () => {
         </div>
       </div>
 
-      <Modal
-        isOpen={showGradesModal}
-        onClose={() => {
-          setShowGradesModal(false);
-          setStudentGrades(null);
-        }}
-        title="Bảng điểm Học phần & Học phí Chi tiết"
-        maxWidth="max-w-4xl"
-      >
+      <Modal isOpen={showGradesModal} onClose={() => { setShowGradesModal(false); setStudentGrades(null); }} title="Bảng điểm Học phần & Học phí Chi tiết" maxWidth="max-w-4xl">
         {loadingGrades ? (
           <div className="py-12 flex items-center justify-center">
             <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : !studentGrades || !studentGrades.danhSachDiemMonHoc || studentGrades.danhSachDiemMonHoc.length === 0 ? (
+        ) : !studentGrades || !studentGrades.danhSachDiemMonHoc?.length ? (
           <div className="py-8 text-center text-slate-500">
             <p className="font-semibold">Chưa có bảng điểm chi tiết môn học trong kỳ của sinh viên này.</p>
           </div>
         ) : (
           <div className="space-y-4">
-
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div>
-                <span className="text-slate-500 block font-semibold">Sinh viên:</span>
-                <span className="font-bold text-slate-800 text-sm">{studentGrades.hoTen}</span>
-              </div>
-              <div>
-                <span className="text-slate-500 block font-semibold">MSSV / Lớp:</span>
-                <span className="font-mono font-bold text-primary-700">{studentGrades.mssv}</span> - {studentGrades.tenLop}
-              </div>
-              <div>
-                <span className="text-slate-500 block font-semibold">Tổng tín chỉ:</span>
-                <span className="font-bold text-slate-800 text-sm">{studentGrades.tongSoTinChi} TC</span>
-              </div>
-              <div>
-                <span className="text-slate-500 block font-semibold">Tổng học phí kỳ:</span>
-                <span className="font-bold text-emerald-700 text-sm">{formatCurrency(studentGrades.tongHocPhiHocKy)}</span>
-              </div>
+              <div><span className="text-slate-500 block font-semibold">Sinh viên:</span><span className="font-bold text-slate-800 text-sm">{studentGrades.hoTen}</span></div>
+              <div><span className="text-slate-500 block font-semibold">MSSV / Lớp:</span><span className="font-mono font-bold text-primary-700">{studentGrades.mssv}</span> - {studentGrades.tenLop}</div>
+              <div><span className="text-slate-500 block font-semibold">Tổng tín chỉ:</span><span className="font-bold text-slate-800 text-sm">{studentGrades.tongSoTinChi} TC</span></div>
+              <div><span className="text-slate-500 block font-semibold">Tổng học phí kỳ:</span><span className="font-bold text-emerald-700 text-sm">{formatCurrency(studentGrades.tongHocPhiHocKy)}</span></div>
             </div>
             <div className="overflow-x-auto border border-slate-200 rounded-xl">
               <table className="w-full text-left text-xs">
@@ -637,23 +451,17 @@ const KhoaCampaignDetail = () => {
                       <td className="py-2.5 px-2 text-center font-black text-amber-700 bg-amber-50">{m.diemHe4 != null ? Number(m.diemHe4).toFixed(2) : '-'}</td>
                       <td className="py-2.5 px-2 text-center font-bold">{m.diemChu}</td>
                       <td className="py-2.5 px-3 text-center">
-                        {m.dat ? (
-                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Đạt</span>
-                        ) : (
-                          <span className="text-[11px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">Rớt</span>
-                        )}
+                        <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${m.dat ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50'}`}>
+                          {m.dat ? 'Đạt' : 'Rớt'}
+                        </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
             <div className="flex justify-end pt-2">
-              <button
-                onClick={() => setShowGradesModal(false)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl cursor-pointer"
-              >
+              <button onClick={() => setShowGradesModal(false)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl cursor-pointer">
                 Đóng
               </button>
             </div>

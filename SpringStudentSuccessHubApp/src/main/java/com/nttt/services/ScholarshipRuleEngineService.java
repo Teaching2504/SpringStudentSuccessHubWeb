@@ -316,12 +316,11 @@ public class ScholarshipRuleEngineService {
                     remainingBudget = remainingBudget.subtract(c.mucTien);
                     rank++;
                 } else if (c.eligible && remainingBudget.compareTo(BigDecimal.ZERO) > 0) {
-                    // Nếu ngân sách còn dư một khoản (ví dụ 1 triệu), chỉ cấp DUY NHẤT cho 1 sinh viên xếp liền sau
                     hoSo.setThuHang(rank);
                     hoSo.setLoaiHocBong(c.loaiHb);
-                    hoSo.setMucHocBong(remainingBudget); // Cấp đúng số tiền còn dư
+                    hoSo.setMucHocBong(remainingBudget);
                     hoSo.setTrangThai("DU_KIEN");
-                    remainingBudget = BigDecimal.ZERO;   // Hết ngân sách ngay lập tức
+                    remainingBudget = BigDecimal.ZERO;
                     rank++;
                 } else if (c.eligible) {
                     hoSo.setThuHang(rank);

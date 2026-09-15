@@ -47,7 +47,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-8">
-      {/* Brand Header */}
+      
       <div className="text-center mb-8 max-w-lg flex flex-col items-center">
         <div className="bg-white p-2.5 rounded-2xl shadow-md mb-3 border border-slate-200">
           <img

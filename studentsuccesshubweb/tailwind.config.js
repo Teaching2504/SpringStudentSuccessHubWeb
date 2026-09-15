@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -22,8 +21,8 @@ export default {
           400: '#60a5fa',
           500: '#3b82f6',
           600: '#2563eb',
-          700: '#1e3a8a', // Deep OU Navy
-          800: '#172554', // Dark OU Navy
+          700: '#1e3a8a',
+          800: '#172554',
           900: '#0f172a',
         },
       },

@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
-import { 
-  FolderTree, 
-  BookOpen, 
-  GraduationCap, 
-  Layers, 
-  CreditCard, 
-  CheckCircle2, 
-  Info,
-  Calendar
-} from 'lucide-react';
+import { GraduationCap, Info } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatters';
 
 export const SinhVienCurriculum = () => {
   const [curriculum, setCurriculum] = useState([]);
@@ -18,31 +10,17 @@ export const SinhVienCurriculum = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchInitialData();
-  }, []);
-
-  const fetchInitialData = async () => {
-    try {
-      setLoading(true);
-      const [rMajors, rCurr] = await Promise.all([
-        axiosClient.get('/api/common/danh-muc/nganh'),
-        axiosClient.get('/api/sinhvien/curriculum')
-      ]);
-
+    Promise.all([
+      axiosClient.get('/api/common/danh-muc/nganh'),
+      axiosClient.get('/api/sinhvien/curriculum')
+    ]).then(([rMajors, rCurr]) => {
       const majorList = rMajors.data.data || rMajors.data || [];
-      setMajors(majorList);
-
       const currList = rCurr.data.data || rCurr.data || [];
+      setMajors(majorList);
       setCurriculum(currList);
-      if (currList.length > 0 && currList[0].maNganh) {
-        setSelectedMajor(currList[0].maNganh);
-      }
-    } catch (err) {
-      console.error('Lỗi tải CTĐT:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (currList.length > 0 && currList[0].maNganh) setSelectedMajor(currList[0].maNganh);
+    }).catch(console.error).finally(() => setLoading(false));
+  }, []);
 
   const handleSelectMajor = async (maNganh) => {
     setSelectedMajor(maNganh);
@@ -51,15 +29,10 @@ export const SinhVienCurriculum = () => {
       const res = await axiosClient.get(`/api/sinhvien/curriculum?maNganh=${maNganh}`);
       setCurriculum(res.data.data || res.data || []);
     } catch (err) {
-      console.error('Lỗi tải CTĐT ngành:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatCurrency = (val) => {
-    if (!val) return '0 VNĐ';
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
   };
 
   const groupedBySemester = curriculum.reduce((acc, item) => {
@@ -70,11 +43,10 @@ export const SinhVienCurriculum = () => {
   }, {});
 
   const totalCredits = curriculum.reduce((sum, item) => sum + (item.soTinChi || 0), 0);
-  const totalTuition = curriculum.reduce((sum, item) => sum + (Number(item.hocPhiDuKien) || 0), 0);
   const currentMajorObj = majors.find(m => m.maNganh === selectedMajor);
   const majorName = curriculum[0]?.tenNganh || currentMajorObj?.tenNganh || 'Khoa học Máy tính';
   const programType = (curriculum[0]?.heDaoTao === 'CHAT_LUONG_CAO' || currentMajorObj?.heDaoTao === 'CHAT_LUONG_CAO')
-    ? 'Chương trình Đặc biệt (Chất lượng cao)' 
+    ? 'Chương trình Đặc biệt (Chất lượng cao)'
     : 'Chương trình Chuẩn (Đại trà)';
 
   return (
@@ -105,10 +77,7 @@ export const SinhVienCurriculum = () => {
             )}
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-blue-950">
-            Ngành: {majorName}
-          </h1>
-
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-blue-950">Ngành: {majorName}</h1>
           <p className="text-slate-600 text-sm max-w-2xl leading-relaxed">
             Hệ đào tạo: <span className="font-bold text-slate-900">{programType}</span>. Khung chương trình chuẩn bị lộ trình tích lũy đủ các khối kiến thức đại cương, cơ sở ngành và chuyên ngành.
           </p>
@@ -124,9 +93,7 @@ export const SinhVienCurriculum = () => {
             </div>
             <div className="bg-white/90 backdrop-blur-md p-3.5 rounded-2xl border border-blue-100/90 shadow-xs col-span-2">
               <span className="text-[11px] text-blue-700 block uppercase font-bold tracking-wider">Đơn giá 1 Tín chỉ</span>
-              <span className="text-lg font-black text-emerald-600">
-                {curriculum[0]?.donGiaTinChi ? formatCurrency(curriculum[0].donGiaTinChi) : '650.000 VNĐ'}
-              </span>
+              <span className="text-lg font-black text-emerald-600">{formatCurrency(curriculum[0]?.donGiaTinChi || 650000)}</span>
             </div>
           </div>
         </div>
@@ -153,15 +120,10 @@ export const SinhVienCurriculum = () => {
               <div key={hkNum} className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-7 h-7 bg-primary-700 text-white rounded-lg flex items-center justify-center text-xs font-black">
-                      {hkNum}
-                    </span>
+                    <span className="w-7 h-7 bg-primary-700 text-white rounded-lg flex items-center justify-center text-xs font-black">{hkNum}</span>
                     <h2 className="font-bold text-slate-800 text-base">Học kỳ {hkNum} (Đề xuất)</h2>
-                    <span className="text-xs px-2.5 py-0.5 bg-primary-50 text-primary-700 font-bold rounded-full">
-                      {subjects.length} môn học
-                    </span>
+                    <span className="text-xs px-2.5 py-0.5 bg-primary-50 text-primary-700 font-bold rounded-full">{subjects.length} môn học</span>
                   </div>
-
                   <div className="flex items-center gap-4 text-xs font-semibold text-slate-600">
                     <span>Tổng số: <strong className="text-slate-900">{semCredits} tín chỉ</strong></span>
                     <span>•</span>

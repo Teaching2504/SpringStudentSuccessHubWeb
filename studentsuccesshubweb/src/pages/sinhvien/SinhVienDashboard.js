@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axiosClient from '../../api/axiosClient';
-import { Award, BookOpen, CheckSquare, MessageSquare, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Upload, Calendar, Filter, Layers, Camera } from 'lucide-react';
+import { Award, BookOpen, CheckSquare, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Upload, Calendar, Filter, Layers, Camera } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import { sortSemesters } from '../../utils/semesterSort';
+import { formatCurrency } from '../../utils/formatters';
 
 const SinhVienDashboard = () => {
   const { user, refreshUser } = useAuth();
@@ -13,7 +14,6 @@ const SinhVienDashboard = () => {
   const [scholarships, setScholarships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSemester, setSelectedSemester] = useState('ALL');
-
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarMsg, setAvatarMsg] = useState('');
   const [avatarErr, setAvatarErr] = useState('');
@@ -35,24 +35,55 @@ const SinhVienDashboard = () => {
       if (rProf.data.success) setProfile(rProf.data.data);
       if (rAcad.data.success) {
         const d = rAcad.data.data;
-        if (d && d.ketQuaHocTap) {
+        if (d?.ketQuaHocTap) {
           d.ketQuaHocTap = sortSemesters(d.ketQuaHocTap.map(k => ({ ...k, maHocKy: k.hocKy?.maHocKy, namHoc: k.hocKy?.namHoc, tenHocKy: k.hocKy?.tenHocKy })));
         }
-        if (d && d.bangDiemChiTiet) {
+        if (d?.bangDiemChiTiet) {
           d.bangDiemChiTiet = sortSemesters(d.bangDiemChiTiet);
         }
         setAcademicData(d);
       }
       if (rHb.data.success) setScholarships(rHb.data.data);
-      setLoading(false);
     } catch (err) {
       console.error(err);
+    } finally {
       setLoading(false);
     }
   };
 
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn một tệp hình ảnh hợp lệ (PNG, JPG, JPEG)!');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Dung lượng ảnh không được vượt quá 5MB!');
+      return;
+    }
+
+    try {
+      setUploadingAvatar(true);
+      setAvatarMsg('');
+      setAvatarErr('');
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await axiosClient.post('/api/auth/avatar', formData);
+      if (res.data?.success) {
+        setAvatarMsg('Cập nhật ảnh đại diện thành công!');
+        const newAvatar = res.data?.data?.avatar;
+        if (newAvatar) setProfile(prev => prev ? ({ ...prev, avatar: newAvatar }) : prev);
+        await refreshUser();
+        setTimeout(() => setAvatarMsg(''), 4000);
+      } else {
+        setAvatarErr(res.data?.message || 'Không thể cập nhật ảnh đại diện');
+      }
+    } catch (err) {
+      setAvatarErr(err.response?.data?.message || 'Lỗi khi tải ảnh đại diện lên');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   if (loading) {
@@ -64,79 +95,23 @@ const SinhVienDashboard = () => {
   }
 
   const isWarned = profile?.canhBao && profile?.canhBao !== 'Bình thường';
-
   const allSemesters = academicData?.bangDiemChiTiet || [];
   const displayedSemesters = selectedSemester === 'ALL'
     ? allSemesters
     : allSemesters.filter(s => s.maHocKy === selectedSemester || s.tenHocKy === selectedSemester);
 
-  const handlePrevSemester = () => {
+  const navigateSemester = (direction) => {
     if (allSemesters.length === 0) return;
     if (selectedSemester === 'ALL') {
-      setSelectedSemester(allSemesters[allSemesters.length - 1].maHocKy);
+      setSelectedSemester(direction === -1 ? allSemesters[allSemesters.length - 1].maHocKy : allSemesters[0].maHocKy);
       return;
     }
     const idx = allSemesters.findIndex(s => s.maHocKy === selectedSemester || s.tenHocKy === selectedSemester);
-    if (idx > 0) {
-      setSelectedSemester(allSemesters[idx - 1].maHocKy);
+    const targetIdx = idx + direction;
+    if (targetIdx >= 0 && targetIdx < allSemesters.length) {
+      setSelectedSemester(allSemesters[targetIdx].maHocKy);
     } else {
       setSelectedSemester('ALL');
-    }
-  };
-
-  const handleNextSemester = () => {
-    if (allSemesters.length === 0) return;
-    if (selectedSemester === 'ALL') {
-      setSelectedSemester(allSemesters[0].maHocKy);
-      return;
-    }
-    const idx = allSemesters.findIndex(s => s.maHocKy === selectedSemester || s.tenHocKy === selectedSemester);
-    if (idx >= 0 && idx < allSemesters.length - 1) {
-      setSelectedSemester(allSemesters[idx + 1].maHocKy);
-    } else {
-      setSelectedSemester('ALL');
-    }
-  };
-
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn một tệp hình ảnh hợp lệ (PNG, JPG, JPEG)!');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Dung lượng ảnh không được vượt quá 5MB!');
-      return;
-    }
-
-    try {
-      setUploadingAvatar(true);
-      setAvatarMsg('');
-      setAvatarErr('');
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await axiosClient.post('/api/auth/avatar', formData);
-      setUploadingAvatar(false);
-
-      if (res.data?.success) {
-        setAvatarMsg('Cập nhật ảnh đại diện thành công!');
-        const newAvatar = res.data?.data?.avatar;
-        if (newAvatar) {
-          setProfile(prev => prev ? ({ ...prev, avatar: newAvatar }) : prev);
-        }
-        await refreshUser();
-        setTimeout(() => setAvatarMsg(''), 4000);
-      } else {
-        setAvatarErr(res.data?.message || 'Không thể cập nhật ảnh đại diện');
-      }
-    } catch (err) {
-      setUploadingAvatar(false);
-      setAvatarErr(err.response?.data?.message || 'Lỗi khi tải ảnh đại diện lên');
     }
   };
 
@@ -144,40 +119,25 @@ const SinhVienDashboard = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div 
-            className="relative group cursor-pointer shrink-0" 
-            onClick={() => fileInputRef.current?.click()} 
+          <div
+            className="relative group cursor-pointer shrink-0"
+            onClick={() => fileInputRef.current?.click()}
             title="Nhấp để tải lên / thay đổi ảnh đại diện"
           >
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleAvatarChange}
-              accept="image/*"
-              className="hidden"
-            />
+            <input type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/*" className="hidden" />
             {profile?.avatar || user?.avatar ? (
-              <img
-                src={profile?.avatar || user?.avatar}
-                alt="Avatar"
-                className="w-16 h-16 rounded-2xl object-cover shadow-sm border border-slate-200 group-hover:opacity-90 transition"
-              />
+              <img src={profile?.avatar || user?.avatar} alt="Avatar" className="w-16 h-16 rounded-2xl object-cover shadow-sm border border-slate-200 group-hover:opacity-90 transition" />
             ) : (
               <div className="w-16 h-16 rounded-2xl bg-primary-100 text-primary-700 font-bold text-2xl flex items-center justify-center shadow-inner group-hover:bg-primary-200 transition">
                 {profile?.hoTen?.charAt(0) || 'S'}
               </div>
             )}
-
-            {/* Hover / Camera overlay */}
             <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-xs">
               <Camera className="w-6 h-6 text-white" />
             </div>
-
-            {/* Small camera badge icon at bottom corner */}
             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full shadow-md border border-slate-200 flex items-center justify-center text-slate-700 group-hover:bg-primary-600 group-hover:text-white transition">
               <Camera className="w-3.5 h-3.5" />
             </div>
-
             {uploadingAvatar && (
               <div className="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center">
                 <div className="w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
@@ -212,57 +172,24 @@ const SinhVienDashboard = () => {
           )}
         </div>
       </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 bg-blue-50 text-blue-600 rounded-xl">
-            <BookOpen className="w-6 h-6" />
+        {[
+          { label: 'Điểm GPA Học kỳ', val: `${profile?.diemTrungBinh != null ? profile.diemTrungBinh.toFixed(2) : '-'} / 4.0`, icon: <BookOpen className="w-6 h-6" />, color: 'bg-blue-50 text-blue-600' },
+          { label: 'Điểm Rèn luyện (ĐRL)', val: `${profile?.diemRenLuyen != null ? profile.diemRenLuyen : '-'} đ`, icon: <CheckSquare className="w-6 h-6" />, color: 'bg-purple-50 text-purple-600' },
+          { label: 'Số Tín chỉ đăng ký', val: `${profile?.soTinChi || 0} TC`, icon: <Calendar className="w-6 h-6" />, color: 'bg-amber-50 text-amber-600' },
+          { label: 'Học bổng đã đạt', val: `${scholarships.filter(s => ['CHINH_THUC', 'DU_KIEN'].includes(s.trangThai)).length} đợt`, icon: <Award className="w-6 h-6" />, color: 'bg-emerald-50 text-emerald-600', valClass: 'text-emerald-700' },
+        ].map((c, i) => (
+          <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div className={`p-3.5 rounded-xl ${c.color}`}>{c.icon}</div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{c.label}</p>
+              <h3 className={`text-2xl font-bold text-slate-800 mt-0.5 ${c.valClass || ''}`}>{c.val}</h3>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Điểm GPA Học kỳ</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-0.5">
-              {profile?.diemTrungBinh != null ? profile.diemTrungBinh.toFixed(2) : '-'} / 4.0
-            </h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 bg-purple-50 text-purple-600 rounded-xl">
-            <CheckSquare className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Điểm Rèn luyện (ĐRL)</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-0.5">
-              {profile?.diemRenLuyen != null ? profile.diemRenLuyen : '-'} đ
-            </h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 bg-amber-50 text-amber-600 rounded-xl">
-            <Calendar className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Số Tín chỉ đăng ký</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-0.5">
-              {profile?.soTinChi || 0} TC
-            </h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl">
-            <Award className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Học bổng đã đạt</p>
-            <h3 className="text-xl font-bold text-emerald-700 mt-0.5">
-              {scholarships.filter(s => s.trangThai === 'CHINH_THUC' || s.trangThai === 'DU_KIEN').length} đợt
-            </h3>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Action shortcuts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           to="/sinh-vien/scholarships"
@@ -273,12 +200,8 @@ const SinhVienDashboard = () => {
               <Award className="w-6 h-6" />
             </div>
             <div className="space-y-0.5">
-              <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-900 transition-colors">
-                Tra cứu Kết quả Học bổng & Khiếu nại
-              </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Xem danh sách dự kiến / chính thức và nộp đơn kiến nghị nếu có thắc mắc
-              </p>
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-900 transition-colors">Tra cứu Kết quả Học bổng & Khiếu nại</h3>
+              <p className="text-xs text-slate-500 font-medium">Xem danh sách dự kiến / chính thức và nộp đơn kiến nghị nếu có thắc mắc</p>
             </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-white/80 border border-blue-200 flex items-center justify-center text-blue-700 group-hover:bg-blue-700 group-hover:text-white group-hover:border-blue-700 transition-all shrink-0 ml-2">
@@ -295,12 +218,8 @@ const SinhVienDashboard = () => {
               <Upload className="w-6 h-6" />
             </div>
             <div className="space-y-0.5">
-              <h3 className="text-base font-bold text-slate-800 group-hover:text-amber-950 transition-colors">
-                Nộp Minh chứng Hoạt động Rèn luyện
-              </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Gửi chứng chỉ ngoại khóa, NCKH, tình nguyện để được cộng điểm ĐRL
-              </p>
+              <h3 className="text-base font-bold text-slate-800 group-hover:text-amber-950 transition-colors">Nộp Minh chứng Hoạt động Rèn luyện</h3>
+              <p className="text-xs text-slate-500 font-medium">Gửi chứng chỉ ngoại khóa, NCKH, tình nguyện để được cộng điểm ĐRL</p>
             </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600 transition-all shrink-0 ml-2">
@@ -310,11 +229,9 @@ const SinhVienDashboard = () => {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
-          <div>
-            <h2 className="text-lg font-bold text-slate-800">Lịch sử Kết quả Học tập & Rèn luyện</h2>
-            <p className="text-xs text-slate-500">Tổng hợp điểm trung bình GPA và điểm rèn luyện ĐRL qua các học kỳ</p>
-          </div>
+        <div className="border-b border-slate-100 pb-4">
+          <h2 className="text-lg font-bold text-slate-800">Lịch sử Kết quả Học tập & Rèn luyện</h2>
+          <p className="text-xs text-slate-500">Tổng hợp điểm trung bình GPA và điểm rèn luyện ĐRL qua các học kỳ</p>
         </div>
 
         <div className="overflow-x-auto">
@@ -334,26 +251,16 @@ const SinhVienDashboard = () => {
                 const drl = academicData.ketQuaRenLuyen?.find(d => d.hocKy?.maHocKy === kq.hocKy?.maHocKy);
                 return (
                   <tr key={kq.id} className="hover:bg-slate-50/80">
-                    <td className="px-5 py-3.5 font-bold text-slate-800">
-                      {kq.hocKy?.tenHocKy || kq.hocKy?.maHocKy}
-                    </td>
-                    <td className="px-5 py-3.5 text-center font-bold text-primary-700">
-                      {kq.diemTrungBinh != null ? kq.diemTrungBinh.toFixed(2) : '-'}
-                    </td>
+                    <td className="px-5 py-3.5 font-bold text-slate-800">{kq.hocKy?.tenHocKy || kq.hocKy?.maHocKy}</td>
+                    <td className="px-5 py-3.5 text-center font-bold text-primary-700">{kq.diemTrungBinh != null ? kq.diemTrungBinh.toFixed(2) : '-'}</td>
                     <td className="px-5 py-3.5 text-center">{kq.soTinChi || 0}</td>
                     <td className="px-5 py-3.5 text-center">
-                      {kq.coHocPhanRot ? (
-                        <span className="text-rose-600 font-semibold text-xs">Có rớt môn</span>
-                      ) : (
-                        <span className="text-emerald-600 font-semibold text-xs">Không</span>
-                      )}
+                      <span className={`font-semibold text-xs ${kq.coHocPhanRot ? 'text-rose-600' : 'text-emerald-600'}`}>
+                        {kq.coHocPhanRot ? 'Có rớt môn' : 'Không'}
+                      </span>
                     </td>
-                    <td className="px-5 py-3.5 text-center font-bold text-slate-800">
-                      {drl?.diemRenLuyen != null ? drl.diemRenLuyen : '-'}
-                    </td>
-                    <td className="px-5 py-3.5 text-xs font-semibold text-slate-600">
-                      {drl?.xepLoai || '-'}
-                    </td>
+                    <td className="px-5 py-3.5 text-center font-bold text-slate-800">{drl?.diemRenLuyen != null ? drl.diemRenLuyen : '-'}</td>
+                    <td className="px-5 py-3.5 text-xs font-semibold text-slate-600">{drl?.xepLoai || '-'}</td>
                   </tr>
                 );
               })}
@@ -362,7 +269,6 @@ const SinhVienDashboard = () => {
         </div>
       </div>
 
-      {/* Detailed Course Breakdown from Official Curriculum */}
       {allSemesters.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -371,17 +277,14 @@ const SinhVienDashboard = () => {
                 <BookOpen className="w-5 h-5 text-primary-600" />
                 <h2 className="text-lg font-bold text-slate-800">Bảng điểm Chi tiết các Học phần (CTĐT Chuẩn)</h2>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Theo Chương trình đào tạo Quyết định 561/QĐ-ĐHM - Khoa Công nghệ Thông tin
-              </p>
+              <p className="text-xs text-slate-500 mt-1">Theo Chương trình đào tạo Quyết định 561/QĐ-ĐHM - Khoa Công nghệ Thông tin</p>
             </div>
 
-            {/* Bộ điều hướng & Lọc học kỳ */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
                 <button
                   type="button"
-                  onClick={handlePrevSemester}
+                  onClick={() => navigateSemester(-1)}
                   title="Học kỳ trước"
                   className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-white hover:shadow-xs transition flex items-center gap-1 cursor-pointer"
                 >
@@ -391,7 +294,7 @@ const SinhVienDashboard = () => {
                 <div className="h-4 w-px bg-slate-300 mx-1"></div>
                 <button
                   type="button"
-                  onClick={handleNextSemester}
+                  onClick={() => navigateSemester(1)}
                   title="Học kỳ sau"
                   className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-white hover:shadow-xs transition flex items-center gap-1 cursor-pointer"
                 >
@@ -423,9 +326,7 @@ const SinhVienDashboard = () => {
               type="button"
               onClick={() => setSelectedSemester('ALL')}
               className={`px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                selectedSemester === 'ALL'
-                  ? 'bg-primary-700 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                selectedSemester === 'ALL' ? 'bg-primary-700 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               <Layers className="w-3.5 h-3.5" /> Tất cả ({allSemesters.length} kỳ)
@@ -438,17 +339,11 @@ const SinhVienDashboard = () => {
                   type="button"
                   onClick={() => setSelectedSemester(hk.maHocKy)}
                   className={`px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                    isSelected
-                      ? 'bg-primary-700 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    isSelected ? 'bg-primary-700 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
                   <span>{hk.tenHocKy || hk.maHocKy}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                    isSelected
-                      ? 'bg-primary-800 text-white'
-                      : 'bg-slate-200 text-slate-700'
-                  }`}>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${isSelected ? 'bg-primary-800 text-white' : 'bg-slate-200 text-slate-700'}`}>
                     {hk.gpaHe4 != null ? Number(hk.gpaHe4).toFixed(2) : '-'}
                   </span>
                 </button>
@@ -460,9 +355,7 @@ const SinhVienDashboard = () => {
             <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
               <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-800 text-sm">
-                    {hkScore.tenHocKy || hkScore.maHocKy}
-                  </span>
+                  <span className="font-bold text-slate-800 text-sm">{hkScore.tenHocKy || hkScore.maHocKy}</span>
                   <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary-100 text-primary-800 font-semibold">
                     {hkScore.heDaoTao === 'CHAT_LUONG_CAO' ? 'Chất lượng cao' : 'Chương trình Chuẩn'}
                   </span>
@@ -500,35 +393,22 @@ const SinhVienDashboard = () => {
                         <td className="px-4 py-2.5 text-center">{mon.diemChuyenCan != null ? Number(mon.diemChuyenCan).toFixed(1) : '-'}</td>
                         <td className="px-4 py-2.5 text-center">{mon.diemGiuaKy != null ? Number(mon.diemGiuaKy).toFixed(1) : '-'}</td>
                         <td className="px-4 py-2.5 text-center">{mon.diemCuoiKy != null ? Number(mon.diemCuoiKy).toFixed(1) : '-'}</td>
-                        <td className="px-4 py-2.5 text-center font-bold text-slate-900">
-                          {mon.diemTongKet10 != null ? Number(mon.diemTongKet10).toFixed(1) : '-'}
-                        </td>
-                        <td className="px-4 py-2.5 text-center font-bold text-primary-700">
-                          {mon.diemHe4 != null ? Number(mon.diemHe4).toFixed(2) : '-'}
-                        </td>
+                        <td className="px-4 py-2.5 text-center font-bold text-slate-900">{mon.diemTongKet10 != null ? Number(mon.diemTongKet10).toFixed(1) : '-'}</td>
+                        <td className="px-4 py-2.5 text-center font-bold text-primary-700">{mon.diemHe4 != null ? Number(mon.diemHe4).toFixed(2) : '-'}</td>
                         <td className="px-4 py-2.5 text-center">
                           <span className={`px-2 py-0.5 rounded font-bold text-xs ${
-                            mon.diemChu === 'A+' || mon.diemChu === 'A' ? 'bg-emerald-100 text-emerald-800' :
-                            mon.diemChu === 'B+' || mon.diemChu === 'B' ? 'bg-blue-100 text-blue-800' :
-                            mon.diemChu === 'C+' || mon.diemChu === 'C' ? 'bg-amber-100 text-amber-800' :
-                            'bg-rose-100 text-rose-800'
+                            ['A+', 'A'].includes(mon.diemChu) ? 'bg-emerald-100 text-emerald-800' :
+                            ['B+', 'B'].includes(mon.diemChu) ? 'bg-blue-100 text-blue-800' :
+                            ['C+', 'C'].includes(mon.diemChu) ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
                           }`}>
                             {mon.diemChu || '-'}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5 text-right font-mono text-slate-600">
-                          {formatCurrency(mon.hocPhiMon)}
-                        </td>
+                        <td className="px-4 py-2.5 text-right font-mono text-slate-600">{formatCurrency(mon.hocPhiMon)}</td>
                         <td className="px-4 py-2.5 text-center">
-                          {mon.dat ? (
-                            <span className="text-emerald-600 font-semibold flex items-center justify-center gap-1">
-                              <CheckCircle className="w-3.5 h-3.5" /> Đạt
-                            </span>
-                          ) : (
-                            <span className="text-rose-600 font-semibold flex items-center justify-center gap-1">
-                              <AlertTriangle className="w-3.5 h-3.5" /> Học lại
-                            </span>
-                          )}
+                          <span className={`font-semibold flex items-center justify-center gap-1 ${mon.dat ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {mon.dat ? <><CheckCircle className="w-3.5 h-3.5" /> Đạt</> : <><AlertTriangle className="w-3.5 h-3.5" /> Học lại</>}
+                          </span>
                         </td>
                       </tr>
                     ))}

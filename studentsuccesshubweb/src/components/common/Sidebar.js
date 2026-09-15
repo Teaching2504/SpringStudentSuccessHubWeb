@@ -81,11 +81,6 @@ export const Sidebar = () => {
           );
         })}
       </div>
-
-      <div className="p-3 bg-blue-50/80 border border-blue-200/80 rounded-2xl">
-        <p className="text-xs font-bold text-primary-800 leading-snug">2351010216 - Nguyễn Thị Tuyết Trinh</p>
-        <p className="text-[11px] text-primary-600 font-medium mt-0.5">Đồ án tốt nghiệp</p>
-      </div>
     </aside>
   );
 };

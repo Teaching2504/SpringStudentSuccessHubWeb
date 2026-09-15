@@ -1,48 +1,33 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
-import { BarChart3, PieChart, DollarSign, Award, Users, TrendingUp } from 'lucide-react';
+import { BarChart3, PieChart, TrendingUp } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatters';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const TruongStats = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
+    axiosClient.get('/api/truong/stats')
+      .then(res => { if (res.data.success) setStats(res.data.data); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-      const res = await axiosClient.get('/api/truong/stats');
-      if (res.data.success) {
-        setStats(res.data.data);
-      }
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
-  };
+  if (loading) return <LoadingSpinner text="Đang tải báo cáo thống kê..." />;
 
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const types = [
+    { type: 'Xuất sắc (10,000,000 đ)', count: stats?.phanBoLoaiHocBong?.XUAT_SAC || 0, req: 'GPA ≥ 3.60 | ĐRL ≥ 90', bg: 'bg-emerald-50/60 border-emerald-200', text: 'text-emerald-800', num: 'text-emerald-700', sub: 'text-emerald-600' },
+    { type: 'Giỏi (7,000,000 đ)', count: stats?.phanBoLoaiHocBong?.GIOI || 0, req: 'GPA ≥ 3.20 | ĐRL ≥ 80', bg: 'bg-blue-50/60 border-blue-200', text: 'text-blue-800', num: 'text-blue-700', sub: 'text-blue-600' },
+    { type: 'Khá (5,000,000 đ)', count: stats?.phanBoLoaiHocBong?.KHA || 0, req: 'GPA ≥ 2.50 | ĐRL ≥ 65', bg: 'bg-amber-50/60 border-amber-200', text: 'text-amber-800', num: 'text-amber-700', sub: 'text-amber-600' },
+  ];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Báo cáo & Thống kê Học bổng Toàn trường</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Tổng hợp số liệu giải ngân quỹ học bổng, cơ cấu xếp loại và phân bổ theo từng đơn vị Khoa
-        </p>
+        <p className="text-sm text-slate-500 mt-1">Tổng hợp số liệu giải ngân quỹ học bổng, cơ cấu xếp loại và phân bổ theo từng đơn vị Khoa</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -75,7 +60,6 @@ const TruongStats = () => {
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-primary-600" /> Bảng Phân bổ Ngân sách & Số lượng theo Khoa
         </h2>
-
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-700">
             <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase text-slate-500">
@@ -87,57 +71,35 @@ const TruongStats = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-normal">
-              {stats?.hocBongTheoKhoa &&
-                Object.entries(stats.hocBongTheoKhoa).map(([khoa, count]) => {
-                  const money = stats?.kinhPhiTheoKhoa?.[khoa] || 0;
-                  const ratio = stats?.tongKinhPhiHocBong && stats.tongKinhPhiHocBong > 0
-                    ? ((money / stats.tongKinhPhiHocBong) * 100).toFixed(1)
-                    : 0;
-
-                  return (
-                    <tr key={khoa} className="hover:bg-slate-50/80">
-                      <td className="px-5 py-3.5 font-bold text-slate-800">{khoa}</td>
-                      <td className="px-5 py-3.5 text-center font-bold text-primary-700">{count} suất</td>
-                      <td className="px-5 py-3.5 text-right font-bold text-emerald-700">{formatCurrency(money)}</td>
-                      <td className="px-5 py-3.5 text-right font-semibold text-slate-600">{ratio}%</td>
-                    </tr>
-                  );
-                })}
+              {stats?.hocBongTheoKhoa && Object.entries(stats.hocBongTheoKhoa).map(([khoa, count]) => {
+                const money = stats?.kinhPhiTheoKhoa?.[khoa] || 0;
+                const ratio = stats?.tongKinhPhiHocBong && stats.tongKinhPhiHocBong > 0 ? ((money / stats.tongKinhPhiHocBong) * 100).toFixed(1) : 0;
+                return (
+                  <tr key={khoa} className="hover:bg-slate-50/80">
+                    <td className="px-5 py-3.5 font-bold text-slate-800">{khoa}</td>
+                    <td className="px-5 py-3.5 text-center font-bold text-primary-700">{count} suất</td>
+                    <td className="px-5 py-3.5 text-right font-bold text-emerald-700">{formatCurrency(money)}</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-slate-600">{ratio}%</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Scholarship Types Distribution */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <PieChart className="w-5 h-5 text-primary-600" /> Cơ cấu phân loại Học bổng Toàn trường
         </h2>
-
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 bg-emerald-50/60 border border-emerald-200 rounded-2xl text-center">
-            <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Xuất sắc (10,000,000 đ)</span>
-            <h3 className="text-3xl font-extrabold text-emerald-700 mt-2">
-              {stats?.phanBoLoaiHocBong?.XUAT_SAC || 0}
-            </h3>
-            <p className="text-xs text-emerald-600 mt-1">GPA &ge; 3.60 | ĐRL &ge; 90</p>
-          </div>
-
-          <div className="p-5 bg-blue-50/60 border border-blue-200 rounded-2xl text-center">
-            <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Giỏi (7,000,000 đ)</span>
-            <h3 className="text-3xl font-extrabold text-blue-700 mt-2">
-              {stats?.phanBoLoaiHocBong?.GIOI || 0}
-            </h3>
-            <p className="text-xs text-blue-600 mt-1">GPA &ge; 3.20 | ĐRL &ge; 80</p>
-          </div>
-
-          <div className="p-5 bg-amber-50/60 border border-amber-200 rounded-2xl text-center">
-            <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">Khá (5,000,000 đ)</span>
-            <h3 className="text-3xl font-extrabold text-amber-700 mt-2">
-              {stats?.phanBoLoaiHocBong?.KHA || 0}
-            </h3>
-            <p className="text-xs text-amber-600 mt-1">GPA &ge; 2.50 | ĐRL &ge; 65</p>
-          </div>
+          {types.map((t, i) => (
+            <div key={i} className={`p-5 border rounded-2xl text-center ${t.bg}`}>
+              <span className={`text-xs font-bold uppercase tracking-wider ${t.text}`}>{t.type}</span>
+              <h3 className={`text-3xl font-extrabold mt-2 ${t.num}`}>{t.count}</h3>
+              <p className={`text-xs mt-1 ${t.sub}`}>{t.req}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
