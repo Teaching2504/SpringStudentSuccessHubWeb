@@ -59,8 +59,10 @@ const LoginPage = () => {
         <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight whitespace-nowrap">
           TRƯỜNG ĐẠI HỌC MỞ TP. HỒ CHÍ MINH
         </h2>
-        <p className="text-primary-700 font-semibold text-xs sm:text-sm md:text-base mt-1.5 uppercase max-w-xl">
-          Hệ thống quản lý kết quả học tập và rèn luyện hỗ trợ xét học bổng sinh viên
+        <p className="text-primary-700 font-semibold text-xs sm:text-sm md:text-base mt-1.5 uppercase leading-relaxed">
+          Hệ thống quản lý kết quả học tập và rèn luyện
+          <br />
+          hỗ trợ xét học bổng cho sinh viên
         </p>
       </div>
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200/90 p-8">
