@@ -48,7 +48,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-8">
       
-      <div className="text-center mb-8 max-w-lg flex flex-col items-center">
+      <div className="text-center mb-8 max-w-2xl flex flex-col items-center px-2">
         <div className="bg-white p-2.5 rounded-2xl shadow-md mb-3 border border-slate-200">
           <img
             src="/logo.png"
@@ -56,10 +56,10 @@ const LoginPage = () => {
             className="h-24 w-auto object-contain"
           />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight whitespace-nowrap">
           TRƯỜNG ĐẠI HỌC MỞ TP. HỒ CHÍ MINH
-        </h1>
-        <p className="text-primary-700 font-semibold text-sm sm:text-base mt-1 uppercase">
+        </h2>
+        <p className="text-primary-700 font-semibold text-xs sm:text-sm md:text-base mt-1.5 uppercase max-w-xl">
           Hệ thống quản lý kết quả học tập và rèn luyện hỗ trợ xét học bổng sinh viên
         </p>
       </div>
