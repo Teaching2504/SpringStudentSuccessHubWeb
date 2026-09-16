@@ -1,5 +1,4 @@
-# OU-SSH Hub: He Thong Quan Ly Ket Qua Hoc Tap & Ren Luyen Ho Tro Xet Hoc Bong Sinh Vien
-
+# OU-SSH Hub: HỆ THỐNG QUẢN LÝ KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN HỖ TRỢ XÉT HỌC BỔNG SINH VIÊN
 Trường Đại học Mở Thành phố Hồ Chí Minh  
 Khoa Công nghệ Thông tin  
 Đồ án Ngành Công nghệ Thông tin
