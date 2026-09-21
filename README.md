@@ -1,4 +1,4 @@
-# OU-SSH Hub: HỆ THỐNG QUẢN LÝ KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN HỖ TRỢ XÉT HỌC BỔNG SINH VIÊN
+# OU-SSH: HỆ THỐNG QUẢN LÝ KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN HỖ TRỢ XÉT HỌC BỔNG SINH VIÊN
 Trường Đại học Mở Thành phố Hồ Chí Minh  
 Khoa Công nghệ Thông tin  
 Đồ án Ngành Công nghệ Thông tin
@@ -12,7 +12,7 @@ Khoa Công nghệ Thông tin
 
 ## 1. Giới thiệu tổng quan
 
-Hệ thống **OU-SSH Hub (Student Success Hub)** được xây dựng nhằm tin học hóa và tự động hóa công tác quản lý học vụ tại Trường Đại học Mở TP.HCM, tập trung vào hai mảng trọng tâm:
+Hệ thống **OU-SSH (Student Success Hub)** được xây dựng nhằm tin học hóa và tự động hóa công tác quản lý học vụ tại Trường Đại học Mở TP.HCM, tập trung vào hai mảng trọng tâm:
 1. **Quản lý kết quả học tập và rèn luyện**: Theo dõi điểm trung bình học kỳ (GPA), điểm rèn luyện (ĐRL), cảnh báo học vụ, lưu trữ và thẩm định minh chứng hoạt động phong trào trực tuyến.
 2. **Tự động hóa quy trình xét học bổng Khuyến khích học tập (HB KKHT)**: Áp dụng công cụ xếp hạng (Rule Engine) phân bổ theo quỹ 8% học phí, xếp hạng sinh viên từ trên xuống, tiếp nhận và xử lý khiếu nại trước khi phê duyệt danh sách chính thức.
 
