@@ -22,12 +22,16 @@ const SinhVienScholarships = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [rHb, rKn] = await Promise.all([
+      const [rHb, rKn] = await Promise.allSettled([
         axiosClient.get('/api/sinhvien/my-scholarship-results'),
         axiosClient.get('/api/sinhvien/kien-nghi')
       ]);
-      if (rHb.data.success) setScholarships(rHb.data.data);
-      if (rKn.data.success) setMyAppeals(rKn.data.data);
+      if (rHb.status === 'fulfilled' && rHb.value.data?.success) {
+        setScholarships(rHb.value.data.data || []);
+      }
+      if (rKn.status === 'fulfilled' && rKn.value.data?.success) {
+        setMyAppeals(rKn.value.data.data || []);
+      }
     } catch (err) {
       console.error(err);
     } finally {

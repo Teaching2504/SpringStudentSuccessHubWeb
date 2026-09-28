@@ -28,7 +28,7 @@ export const Navbar = () => {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-base font-extrabold text-white tracking-tight leading-tight">OU-SSH HUB</h1>
+            <h1 className="text-base font-extrabold text-white tracking-tight leading-tight">OU-SSH</h1>
             <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-white/20 text-white rounded border border-white/25">
               Đại học Mở TP.HCM
             </span>

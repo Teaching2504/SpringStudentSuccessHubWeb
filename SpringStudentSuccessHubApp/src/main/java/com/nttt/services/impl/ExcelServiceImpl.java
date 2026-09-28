@@ -362,7 +362,7 @@ public class ExcelServiceImpl implements ExcelService {
 
             Row guideTitleRow = guideSheet.createRow(0);
             Cell guideTitleCell = guideTitleRow.createCell(0);
-            guideTitleCell.setCellValue("HƯỚNG DẪN ĐIỀN DỮ LIỆU NHẬP SINH VIÊN VÀ ĐIỂM (OU-SSH HUB)");
+            guideTitleCell.setCellValue("HƯỚNG DẪN ĐIỀN DỮ LIỆU NHẬP SINH VIÊN VÀ ĐIỂM (OU-SSH)");
             guideTitleCell.setCellStyle(guideTitleStyle);
 
             String[][] guideDetails = {

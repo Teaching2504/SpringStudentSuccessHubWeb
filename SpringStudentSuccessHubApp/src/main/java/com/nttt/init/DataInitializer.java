@@ -332,8 +332,8 @@ public class DataInitializer implements CommandLineRunner {
         createCanBoKhoa("cbk_spe", "ThS. Hoàng Diễm My", "cbk.spe@ou.edu.vn", "0987654312", spe, "NV_KHOA_SPE", "Trợ lý Giáo vụ & CTSV Khoa Đào tạo Đặc biệt", "DH23CS01C, DH24CS01C, DH25CS01C, DH23BA01C, DH23AC01C");
 
         SinhVien svTrinh = createStudentWithFullHistory("2351010216", "092305006276", "Nguyễn Thị Tuyết Trinh", "2351010216trinh@ou.edu.vn", "0934112233", "Nữ", lopCs23, hocKyList,
-                new double[]{3.20, 3.45, 3.50, 3.55, 3.65, 3.50, 3.60, 3.70, 0.00},
-                new double[]{80, 84, 85, 86, 82, 80, 84, 88, 0.00});
+                new double[]{3.85, 3.90, 3.80, 3.92, 3.88, 4.00, 3.95, 3.91, 3.94},
+                new double[]{92, 94, 90, 95, 93, 91, 96, 95, 94});
 
         SinhVien svAn = createStudentWithFullHistory("2351010001", "079205001111", "Trần Bảo An", "2351010001an@ou.edu.vn", "0934112234", "Nam", lopCs23, hocKyList,
                 new double[]{3.60, 3.65, 3.60, 3.70, 3.72, 3.65, 3.70, 3.75, 3.68},
@@ -741,12 +741,23 @@ public class DataInitializer implements CommandLineRunner {
         DotXetHbKhoa dotKhoa1_it = saveDotKhoa(dot1, it, "HB_HK1_2024_IT", 9, BigDecimal.valueOf(105300000), "DA_PHE_DUYET");
         DotXetHbKhoa dotKhoa2_it = saveDotKhoa(dot2, it, "HB_HK2_2024_IT", 9, BigDecimal.valueOf(105300000), "DA_PHE_DUYET");
 
+        HoSoHocBong hsTrinh_hk1 = hoSoHocBongRepository.save(HoSoHocBong.builder()
+                .maHoSo("HS_HB_HK1_2024_IT_2351010216")
+                .sinhVien(svTrinh)
+                .dotXetHbKhoa(dotKhoa1_it)
+                .diemXet(BigDecimal.valueOf(3.55))
+                .thuHang(4)
+                .loaiHocBong("GIOI")
+                .mucHocBong(BigDecimal.valueOf(7735000))
+                .trangThai("CHINH_THUC")
+                .build());
+
         HoSoHocBong hsAn = hoSoHocBongRepository.save(HoSoHocBong.builder()
                 .maHoSo("HS_HB_HK2_2024_IT_2351010001")
                 .sinhVien(svAn)
                 .dotXetHbKhoa(dotKhoa2_it)
-                .diemXet(BigDecimal.valueOf(3.72))
-                .thuHang(1)
+                .diemXet(BigDecimal.valueOf(3.70))
+                .thuHang(2)
                 .loaiHocBong("XUAT_SAC")
                 .mucHocBong(BigDecimal.valueOf(11700000))
                 .trangThai("CHINH_THUC")
@@ -756,8 +767,8 @@ public class DataInitializer implements CommandLineRunner {
                 .maHoSo("HS_HB_HK2_2024_IT_2351010011")
                 .sinhVien(svPhuc)
                 .dotXetHbKhoa(dotKhoa2_it)
-                .diemXet(BigDecimal.valueOf(3.35))
-                .thuHang(2)
+                .diemXet(BigDecimal.valueOf(3.45))
+                .thuHang(4)
                 .loaiHocBong("GIOI")
                 .mucHocBong(BigDecimal.valueOf(8190000))
                 .trangThai("CHINH_THUC")
@@ -768,7 +779,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sinhVien(svTrinh)
                 .dotXetHbKhoa(dotKhoa2_it)
                 .diemXet(BigDecimal.valueOf(3.65))
-                .thuHang(3)
+                .thuHang(5)
                 .loaiHocBong("GIOI")
                 .mucHocBong(BigDecimal.valueOf(8190000))
                 .trangThai("CHINH_THUC")
@@ -779,7 +790,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sinhVien(svKhoi)
                 .dotXetHbKhoa(dotKhoa2_it)
                 .diemXet(BigDecimal.valueOf(2.85))
-                .thuHang(4)
+                .thuHang(7)
                 .loaiHocBong("KHA")
                 .mucHocBong(BigDecimal.valueOf(5850000))
                 .trangThai("CHINH_THUC")
@@ -790,7 +801,7 @@ public class DataInitializer implements CommandLineRunner {
                 .sinhVien(svDang23)
                 .dotXetHbKhoa(dotKhoa2_it)
                 .diemXet(BigDecimal.valueOf(2.90))
-                .thuHang(5)
+                .thuHang(8)
                 .loaiHocBong("KHA")
                 .mucHocBong(BigDecimal.valueOf(5850000))
                 .trangThai("CHINH_THUC")
@@ -807,10 +818,24 @@ public class DataInitializer implements CommandLineRunner {
                 .trangThai("CHINH_THUC")
                 .build());
 
+        NhanVien nvCbkIt = nhanVienRepository.findById("NV_KHOA_IT").orElse(null);
+
         kienNghiRepository.save(new KienNghi(
                 "KN_2351010216_01",
+                "Kính gửi Ban Chủ nhiệm Khoa CNTT và Phòng CTSV: Trong đợt xét học bổng Học kỳ 1 (2024-2025), em kính đề nghị quý Thầy Cô xem xét rà soát bổ sung điểm rèn luyện hoạt động NCKH của em để xét nâng mức học bổng từ Khá lên Giỏi. Em xin chân thành cảm ơn!",
+                "https://drive.google.com/minhchung_nckh_2351010216.pdf",
+                "DA_XU_LY",
+                dotKhoa1_it,
+                hsTrinh_hk1,
+                nvCbkIt,
+                "Khoa đã tiếp nhận và cập nhật điểm rèn luyện cho sinh viên theo đúng quy chế.",
+                LocalDate.of(2024, 10, 15)
+        ));
+
+        kienNghiRepository.save(new KienNghi(
+                "KN_2351010216_02",
                 "Kính gửi Ban Chủ nhiệm Khoa CNTT và Phòng CTSV: Trong đợt xét học bổng Học kỳ 2 (2024-2025), điểm trung bình học tập GPA của em đạt 3.65 (đủ điều kiện mức Xuất sắc). Tuy nhiên điểm rèn luyện của em mới được ghi nhận 82 điểm (loại Tốt) do chưa cập nhật hoạt động 'Chiến dịch Xuân tình nguyện' (+10 điểm ĐRL), nên kết quả xét học bổng của em bị xếp loại Giỏi (70% học phí). Kính mong quý Thầy Cô rà soát và cập nhật lại điểm rèn luyện lên 92 điểm để cả điểm học tập và điểm rèn luyện của em đều đạt loại Xuất sắc (100% học phí) ạ. Em xin chân thành cảm ơn!",
-                "",
+                "https://drive.google.com/minhchung_xuan_tinh_nguyen_2351010216.pdf",
                 "CHO_XU_LY",
                 dotKhoa2_it,
                 hsTrinh,
@@ -819,17 +844,31 @@ public class DataInitializer implements CommandLineRunner {
                 LocalDate.now().minusDays(2)
         ));
 
-        HocKy hk3_2526 = hocKyList.get(8);
+        minhChungRenLuyenRepository.save(new MinhChungRenLuyen(
+                "MC_2351010216_01",
+                "Tham gia chiến dịch Xuân tình nguyện 2025",
+                BigDecimal.valueOf(10.0),
+                "https://drive.google.com/minhchung_xuan_tinh_nguyen_2351010216.pdf",
+                "Tham gia đội hình hỗ trợ các gia đình chính sách và trẻ em có hoàn cảnh khó khăn dịp Tết Nguyên Đán 2025.",
+                "DA_DUYET",
+                null,
+                svTrinh,
+                hocKyList.get(4),
+                nvCbkIt,
+                "Đã xác minh minh chứng hợp lệ, cộng 10 điểm ĐRL.",
+                LocalDate.of(2025, 2, 15)
+        ));
+
         minhChungRenLuyenRepository.save(new MinhChungRenLuyen(
                 "MC_2351010216_HK3_01",
                 "Hiến tóc cho bệnh nhân ung thư - Mạng lưới Ung thư vú Việt Nam (BCNV)",
                 BigDecimal.valueOf(10.0),
-                "",
+                "https://drive.google.com/minhchung_hientoc_2351010216.pdf",
                 "Tham gia hiến 25cm tóc tự nhiên hỗ trợ chế tác tóc giả cho bệnh nhân ung thư theo chương trình Thư viện Tóc của BCNV. Minh chứng gồm giấy chứng nhận tiếp nhận tóc hiến.",
                 "CHO_DUYET",
                 null,
                 svTrinh,
-                hk3_2526,
+                hocKyList.get(5),
                 null,
                 null,
                 LocalDate.now()

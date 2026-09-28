@@ -58,6 +58,7 @@ public class SinhVienServiceImpl implements SinhVienService {
     @Override
     public SinhVienDTO getStudentByUsername(String username, String maHocKy) {
         SinhVien sv = sinhVienRepository.findByNguoiDung_TenDangNhap(username)
+                .or(() -> sinhVienRepository.findById(username))
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin sinh viên cho tài khoản: " + username));
         return mapToDTO(sv, maHocKy);
     }

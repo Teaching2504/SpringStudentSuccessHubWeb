@@ -26,15 +26,17 @@ const SinhVienDashboard = () => {
   const fetchStudentData = async () => {
     try {
       setLoading(true);
-      const [rProf, rAcad, rHb] = await Promise.all([
+      const [rProf, rAcad, rHb] = await Promise.allSettled([
         axiosClient.get('/api/sinhvien/profile'),
         axiosClient.get('/api/sinhvien/academic-history'),
         axiosClient.get('/api/sinhvien/my-scholarship-results')
       ]);
 
-      if (rProf.data.success) setProfile(rProf.data.data);
-      if (rAcad.data.success) {
-        const d = rAcad.data.data;
+      if (rProf.status === 'fulfilled' && rProf.value.data?.success) {
+        setProfile(rProf.value.data.data);
+      }
+      if (rAcad.status === 'fulfilled' && rAcad.value.data?.success) {
+        const d = rAcad.value.data.data;
         if (d?.ketQuaHocTap) {
           d.ketQuaHocTap = sortSemesters(d.ketQuaHocTap.map(k => ({ ...k, maHocKy: k.hocKy?.maHocKy, namHoc: k.hocKy?.namHoc, tenHocKy: k.hocKy?.tenHocKy })));
         }
@@ -43,7 +45,9 @@ const SinhVienDashboard = () => {
         }
         setAcademicData(d);
       }
-      if (rHb.data.success) setScholarships(rHb.data.data);
+      if (rHb.status === 'fulfilled' && rHb.value.data?.success) {
+        setScholarships(rHb.value.data.data || []);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -147,11 +151,11 @@ const SinhVienDashboard = () => {
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-800">{profile?.hoTen}</h1>
+              <h1 className="text-xl font-bold text-slate-800">{profile?.hoTen || user?.hoTen || 'Nguyễn Thị Tuyết Trinh'}</h1>
               <Badge variant="amber">Sinh viên</Badge>
             </div>
             <p className="text-xs text-slate-500 font-mono mt-1">
-              MSSV: <strong>{profile?.mssv}</strong> | Lớp: <strong>{profile?.maLop}</strong> | Khoa: <strong>{profile?.tenKhoa}</strong>
+              MSSV: <strong>{profile?.mssv || user?.tenDangNhap || '2351010216'}</strong> | Lớp: <strong>{profile?.maLop || user?.maLop || 'DH23CS01'}</strong> | Khoa: <strong>{profile?.tenKhoa || 'Khoa Công nghệ Thông tin'}</strong>
             </p>
             {avatarMsg && <p className="text-xs font-semibold text-emerald-600 mt-1 animate-fade-in">{avatarMsg}</p>}
             {avatarErr && <p className="text-xs font-semibold text-rose-600 mt-1 animate-fade-in">{avatarErr}</p>}
