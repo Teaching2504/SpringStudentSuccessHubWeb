@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-# OU-SSH: Hệ Thống Quản Lý Kết Quả Học Tập & Rèn Luyện Hỗ Trợ Xét Học Bổng Sinh Viên
 
-=======
 # OU-SSH: HỆ THỐNG QUẢN LÝ KẾT QUẢ HỌC TẬP VÀ RÈN LUYỆN HỖ TRỢ XÉT HỌC BỔNG SINH VIÊN
->>>>>>> 276de9e82cb71c71f5daa3e5c9a62202e05f3082
 Trường Đại học Mở Thành phố Hồ Chí Minh  
 Khoa Công nghệ Thông tin  
 Đồ án Ngành Công nghệ Thông tin
